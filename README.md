@@ -1,4 +1,4 @@
-# DLH utils
+# DLH_utils
 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 [![PyPi Version](https://img.shields.io/pypi/v/dlh_utils.svg)](https://pypi.python.org/pypi/dlh_utils/)
@@ -8,8 +8,8 @@ A Python package produced by the linkage development team from the Data Linkage 
 
 It's key features include:
 * it's scalability to large datasets, using `spark` as a big-data backend
+* * profiling and flagging functions used to describe and highlight issues in data
 * standardisation and cleaning functions to make data comparable ahead of linkage
-* profiling and flagging functions used to describe and highlight issues in data
 * linkage functions to derive linkage variables and join data together efficiently
 
 Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology that have contributed towards this repository.
