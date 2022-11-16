@@ -4,21 +4,21 @@
 [![PyPi Version](https://img.shields.io/pypi/v/dlh_utils.svg)](https://pypi.python.org/pypi/dlh_utils/)
 [![PyPi Python Versions](https://img.shields.io/pypi/pyversions/dlh-utils.svg)](https://pypi.python.org/pypi/dlh-utils/)
 
-A Python package produced by the linkage development team from the Data Linkage Hub, containing a set of functions used to expedite and streamline the data linkage process. 
+A Python package produced by the Linkage Development team from the Data Linkage Hub at Office for National Statistics (ONS) containing a set of functions used to expedite and streamline the data linkage process.
 
 It's key features include:
 * it's scalability to large datasets, using `spark` as a big-data backend
-* * profiling and flagging functions used to describe and highlight issues in data
+* profiling and flagging functions used to describe and highlight issues in data
 * standardisation and cleaning functions to make data comparable ahead of linkage
 * linkage functions to derive linkage variables and join data together efficiently
-
-Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology that have contributed towards this repository.
 
 Please log an issue on the issue board or contact any of the active contributors with any issues or suggestions for improvements you have.
 
 ## Installation steps
 DLH_utils supports Python 3.6+. To install the latest version, simply run:
-`pip install dlh_utils`
+```sh
+pip install dlh_utils
+```
 
 ## Using the cluster function
 
@@ -31,4 +31,11 @@ If outside of ONS and this dependency doesn't work, you will need to submit grap
 
 https://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/graphframes-0.6.0-spark2.3-s_2.11.jar
 
-Once downloaded, this can be submitted to your spark context via: `spark.conf.set('spark.jars', path_to_jar_file)`
+Once downloaded, this can be submitted to your spark context via: 
+```sh
+spark.conf.set('spark.jars', path_to_jar_file)
+```
+
+## Thanks
+
+Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology at ONS that have contributed towards this repository.
