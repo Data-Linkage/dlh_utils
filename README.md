@@ -1,22 +1,24 @@
 # DLH utils
 
-A package produced by the linkage development team from the Data Linkage Hub, containing a set of functions used to expedite and streamline the data linkage process.
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![PyPi Version](https://img.shields.io/pypi/v/dlh_utils.svg)](https://pypi.python.org/pypi/dlh_utils/)
+[![PyPi Python Versions](https://img.shields.io/pypi/pyversions/dlh-utils.svg)](https://pypi.python.org/pypi/dlh-utils/)
+
+A Python package produced by the linkage development team from the Data Linkage Hub, containing a set of functions used to expedite and streamline the data linkage process. 
+
+It's key features include:
+* it's scalability to large datasets, using `spark` as a big-data backend
+* standardisation and cleaning functions to make data comparable ahead of linkage
+* profiling and flagging functions used to describe and highlight issues in data
+* linkage functions to derive linkage variables and join data together efficiently
 
 Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology that have contributed towards this repository.
 
 Please log an issue on the issue board or contact any of the active contributors with any issues or suggestions for improvements you have.
 
 ## Installation steps
-
-* click the 'clone' button on the project homepage and copy the project's HTTP address
-* open a terminal session within CDSW and run `git clone [http_address]`
-* the project files will now be moved to your local file structure, within a folder called "dlh_utils"
-* you can now install the package, typically by running either `!pip3 install '/home/cdsw/dlh_utils'` in a workbench/jupyter notebook session, or `pip3 install '/home/cdsw/dlh_utils'` in terminal. 
-
-**Note: the filepath shown in this example may differ depending on where you have cloned the project.**
-* all finished! You can now import modules from the dlh_utils package like any other Python library
-
-*This package is a work in progress!* We will notify you of significant changes to the package. If you want to upgrade to the latest version, clone the project from GitLab again and run either `!pip3 install -U '[path_to_dlh_utils]'` in workbench, or `pip3 install -U '[path_to_dlh_utils]'` in terminal, to upgrade your package installation.
+DLH_utils supports Python 3.6+. To install the latest version, simply run:
+`pip install dlh_utils`
 
 ## Using the cluster function
 
