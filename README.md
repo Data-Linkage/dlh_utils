@@ -31,7 +31,8 @@ If outside of ONS and this dependency doesn't work, you will need to submit grap
 
 https://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/graphframes-0.6.0-spark2.3-s_2.11.jar
 
-Once downloaded, this can be submitted to your spark context via: 
+Once downloaded, this can be submitted to your spark context by adding this parameter to your SparkSession config: 
+
 ```sh
 spark.conf.set('spark.jars', path_to_jar_file)
 ```
