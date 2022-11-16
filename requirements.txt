@@ -1,7 +1,0 @@
-de_utils
-graphframes==0.6
-graphframes-wrapper
-jellyfish==0.9.0
-pandas
-pyyaml==6.0
-pydoop

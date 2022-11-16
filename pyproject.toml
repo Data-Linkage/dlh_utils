@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "dlh_utils"
+version = "0.2.0"
+description = "A PySpark package used to expedite and standardise the data linkage process"
+authors = ["Anthony Edwards <anthonygedwards93@gmail.com>", "Jenna Hart", "David Cobbledick", "Madalina Iova", "Dean Jathoonia"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "dlh_utils"}]
+homepage = "https://github.com/Data-Linkage/dlh_utils"
+repository = "https://github.com/Data-Linkage/dlh_utils"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+graphframes = "^0.6"
+graphframes-wrapper = "^0.6"
+jellyfish = "^0.9"
+pandas = "^0.20.1"
+
+[tool.poetry.group.dev.dependencies]
+pyspark = "^2.4.0"
+py4j = "^0.10.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
