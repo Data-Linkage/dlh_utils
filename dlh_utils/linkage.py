@@ -62,7 +62,7 @@ def alpha_name(df, input_col, output_col):
     df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
            .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
            .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
-           .drop('name_array', 'sorted_name_array')
+           .drop('name_array', 'sorted_name_array') 
     return df
 
 ###############################################################################
@@ -806,117 +806,6 @@ def matchkey_dataframe(mks):
 
     return mk_df
 
-###############################################################################
-
-
-def mk_transpose(mk_components, transpose_1, transpose_2):
-    '''allow dictionary input for multiple transpose??'''
-
-    arg_components = deepcopy(mk_components)
-
-    transpose_dict = {transpose_1: transpose_2,
-                      transpose_2: transpose_1}
-
-    mks = []
-
-    for mk in arg_components:
-
-        join_conditions = []
-
-        for i in mk:
-
-            if i[1] in list(transpose_dict):
-                i[1] = transpose_dict[i[1]]
-
-            join_conditions.append(i)
-
-        mks.append(join_conditions)
-
-    return mks
-
-
-def mk_transpose_left(mk_components, transpose_1, transpose_2):
-
-    arg_components = deepcopy(mk_components)
-
-    mks = []
-
-    for mk in arg_components:
-
-        join_conditions = []
-
-        for i in mk:
-
-            if i[0] == transpose_1:
-                i[0] = transpose_2
-
-            join_conditions.append(i)
-
-        mks.append(join_conditions)
-
-    return mks
-
-
-def mk_transpose_right(mk_components, transpose_1, transpose_2):
-
-    arg_components = deepcopy(mk_components)
-
-    mks = []
-
-    for mk in arg_components:
-
-        join_conditions = []
-
-        for i in mk:
-
-            if i[1] == transpose_1:
-                i[1] = transpose_2
-
-            join_conditions.append(i)
-
-        mks.append(join_conditions)
-
-    return mks
-
-###############################################################################
-
-
-def to_drop(mk_components, force_drop):
-
-    if type(force_drop) != list:
-        force_drop = [force_drop]
-
-    arg_components = deepcopy(mk_components)
-
-    return [x for x in arg_components if
-            (x[0][0] not in force_drop
-             or x[0][1] not in force_drop)]
-
-
-###############################################################################
-
-def to_full(mk_components, force_full):
-
-    if type(force_full) != list:
-        force_full = [force_full]
-
-    arg_components = deepcopy(mk_components)
-
-    out = []
-
-    for c in arg_components:
-
-        if c[0][0] in force_full or c[0][1] in force_full:
-
-            c = [x for x in c if x[2] == 'full']
-
-            out.append(c)
-
-        else:
-
-            out.append(c)
-
-    return out
 
 ###############################################################################
 
@@ -932,8 +821,8 @@ def assert_unique_matches(linked_ids, *identifier_col):
     ---------- 
     linked_ids : dataframe
       linked dataframe that includes unique identifier columns
-    identifier_col: string
-      column names of unique identifiers in linked data
+    identifier_col: string or multiple strings
+      column name(s) of unique identifiers in linked data
 
     """
 
