@@ -53,21 +53,6 @@ def getOrCreateSparkSession(appName='DE_DL',
         '.'+str(os.environ['CDSW_DOMAIN'])
     spark_ui = display(HTML('<a href=http://%s>Spark UI</a>' % url))
 
-    try:
-      
-      # get graphframes jar path to configure session with
-      graphframes_path = graphframes.__file__
-      graphframes_path = graphframes_path.rsplit('/', 1)[0]
-
-      for file in os.listdir(graphframes_path):
-          if file.endswith(".jar"):
-              # Get the latest jar file
-              jar_path = os.path.join(graphframes_path, file)
-              
-    except FileNotFoundError:
-      print("graphframes wrapper package not found. Please install this to use the cluster_number() function.")
-      jar_path = None
-      
     if size == 'small':
 
         """
@@ -97,7 +82,6 @@ def getOrCreateSparkSession(appName='DE_DL',
             .config("spark.dynamicAllocation.enabled", "true")
             .config("spark.dynamicAllocation.maxExecutors", 3)
             .config("spark.sql.shuffle.partitions", 12)
-            .config("spark.jars", jar_path)
             .config("spark.shuffle.service.enabled", "true")
             .config("spark.sql.repl.eagerEval.enabled", "true")
             .config("spark.ui.showConsoleProgress", showConsoleProgress)
@@ -138,7 +122,6 @@ def getOrCreateSparkSession(appName='DE_DL',
             .config("spark.dynamicAllocation.enabled", "true")
             .config("spark.dynamicAllocation.maxExecutors", 3)
             .config("spark.sql.shuffle.partitions", 18)
-            .config("spark.jars", jar_path)
             .config("spark.shuffle.service.enabled", "true")
             .config("spark.sql.repl.eagerEval.enabled", "true")
             .config("spark.ui.showConsoleProgress", showConsoleProgress)
@@ -177,7 +160,6 @@ def getOrCreateSparkSession(appName='DE_DL',
             .config("spark.executor.cores", 5)
             .config("spark.dynamicAllocation.enabled", "true")
             .config("spark.dynamicAllocation.maxExecutors", 5)
-            .config("spark.jars", jar_path)
             .config("spark.sql.repl.eagerEval.enabled", "true")
             .config("spark.shuffle.service.enabled", "true")
             .config("spark.ui.showConsoleProgress", showConsoleProgress)
@@ -220,7 +202,6 @@ def getOrCreateSparkSession(appName='DE_DL',
             .config("spark.executor.cores", 5)
             .config("spark.dynamicAllocation.enabled", "true")
             .config("spark.dynamicAllocation.maxExecutors", 12)
-            .config("spark.jars", jar_path)
             .config("spark.sql.repl.eagerEval.enabled", "true")
             .config("spark.shuffle.service.enabled", "true")
             .config("spark.ui.showConsoleProgress", showConsoleProgress)
@@ -243,7 +224,6 @@ def getOrCreateSparkSession(appName='DE_DL',
             .config("spark.sql.shuffle.partitions", shufflePartitions)
             .config("spark.default.parallelism", defaultParallelism)
             .config('spark.ui.showConsoleProgress', showConsoleProgress)
-            .config("spark.jars", jar_path)
             .config("spark.sql.repl.eagerEval.enabled", "true")
             .config("spark.shuffle.service.enabled", "true")
             .config("spark.dynamicAllocation.enabled", "true")
