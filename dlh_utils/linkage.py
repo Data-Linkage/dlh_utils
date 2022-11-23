@@ -13,6 +13,7 @@ from pyspark.sql.types import StringType, FloatType
 from graphframes import *
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
+from functools import reduce
 
 # phonetic encoders
 
@@ -254,7 +255,7 @@ def jaro(string1, string2):
     --------
 
     for a pre-joined dataset:
-    
+
     >df.show()    
     +---+--------+----------+
     | ID|Forename|Forename_2|
@@ -449,17 +450,6 @@ def cluster_number(df, id_1, id_2):
     Takes dataframe of matches with two id columns (id_1 and id_2) and assigns
     a cluster number to the dataframe based on the unique id pairings.
 
-    PLEASE NOTE: this function relies on a sparksession that has been initiated with
-    external graphframes JAR dependencies added to the session. Without this, you may
-    encounter this exception when calling the function:
-
-    java.lang.ClassNotFoundException: org.graphframes.GraphFramePythonAPI
-
-    This can either be fixed by starting a sparksession from the `sessions` module of
-    this package, or by adding the JAR files from within the graphframes-wrapper 
-    package to your spark session, by setting the "spark.jars" spark config parameter
-    equal to the path to these JAR files.
-
     Parameters
     ----------
     df: DataFrame
@@ -483,74 +473,64 @@ def cluster_number(df, id_1, id_2):
     -------
     >df.show()
 
-    +---+---+
-    |id1|id2|
-    +---+---+
-    | 1a| 2b|
-    | 3a| 3b|
-    | 2a| 1b|
-    | 3a| 7b|
-    | 1a| 8b|
-    | 2a| 9b|
-    +---+---+
+    +----+---+
+    |  id|id2|
+    +----+---+
+    |   1|  5|
+    |   2|  5|
+    |   3|  6|
+    |   3|  7|
+    |   4|  8|
+    |null|  9|
+    +----+---+
 
-    >linkage.cluster_number(df = df, id_1 = 'id1', id_2 = 'id2').show()
+    >linkage.cluster_number(df = df, id_1 = 'id', id_2 = 'id2').show()
 
-    +---+---+--------------+
-    |id1|id2|Cluster_Number|
-    +---+---+--------------+
-    | 2a| 1b|             1|
-    | 2a| 9b|             1|
-    | 1a| 2b|             2|
-    | 1a| 8b|             2|
-    | 3a| 7b|             3|
-    | 3a| 3b|             3|
-    +---+---+--------------+     
+    +--------------+----+---+
+    |cluster_number|  id|id2|
+    +--------------+----+---+
+    |             1|   2|  5|
+    |             1|   1|  5|
+    |             2|   3|  6|
+    |             2|   3|  7|
+    |             3|   4|  8|
+    |             4|null|  9|
+    +--------------+----+---+
+    
     """
-    # Check variable types
-    if not ((isinstance(df.schema[id_1].dataType, StringType)) and (isinstance(df.schema[id_2].dataType, StringType))):
-        raise TypeError('ID variables must be strings')
+    if not isinstance(df.schema[id_1].dataType, StringType) and isinstance(df.schema[id_2].dataType, StringType):
+       raise TypeError('ID variables must be strings')
 
-    # Set up spark checkpoint settings
-    spark = SparkSession.builder.getOrCreate()
-    username = os.getenv("HADOOP_USER_NAME")
-    checkpoint_path = f"/user/{username}/checkpoints"
-    spark.sparkContext.setCheckpointDir(checkpoint_path)
+    df = df.withColumn("order", F.lit("A"))
 
-    # Stack all unique IDs datasets into one column called 'id'
-    ids = df.select(id_1).union(df.select(id_2))
-    ids = ids.select(id_1).distinct().withColumnRenamed(id_1, 'id')
+    w = Window().partitionBy('order').orderBy(F.lit('A'))
+    df = df.withColumn("rownum", F.row_number().over(w)).drop("order")
 
-    # Rename matched data columns ready for clustering
-    matches = df.select(id_1, id_2).withColumnRenamed(
-        id_1, 'src').withColumnRenamed(id_2, 'dst')
+    edges = reduce(
+        lambda x, y: x.union(y),
+        [df.alias('t1')
+           .join(df.alias('t2'), c)
+           .filter('t1.rownum < t2.rownum')
+           .selectExpr('t1.rownum src', 't2.rownum dst', "'same_%s' relationship" % c) for c in [id_1, id_2]
+         ]
+    )
 
-    # Create graph & get connected components / clusters
-    try:
-      graph = GraphFrame(ids, matches)
-      
-      cluster = graph.connectedComponents()
+    connect = edges.select(
+        F.array_sort(F.array('src', 'dst')).alias('arr')
+    ).distinct().union(
+        df.join(edges, (df.rownum == edges.src) | (df.rownum ==
+                edges.dst), 'left_anti').select(F.array('rownum'))
+    ).withColumn(
+        'cluster_number',
+        F.row_number().over(Window.orderBy('arr'))
+    ).select(F.explode('arr').alias('rownum'), 'cluster_number')
 
-      # Update cluster numbers to be consecutive (1,2,3,4,... instead of 1,2,3,1000,1001...)
-      lookup = cluster.select('component').dropDuplicates(['component']).withColumn(
-          'Cluster_Number', F.rank().over(Window.orderBy("component"))).sort('component')
-      cluster = cluster.join(lookup, on='component',
-                             how='left').withColumnRenamed('id', id_1)
+    df = connect.join(df, on='rownum', how='inner').drop(
+        'rownum').sort(F.asc('cluster_number'))
 
-      # Join new cluster number onto matched pairs
-      df = df.join(cluster, on=id_1, how='left').sort(
-          'Cluster_Number').drop('component')
+    return df
 
-      return df
-  
-    except py4j.protocol.Py4JJavaError:
-      print("""WARNING: A graphframes wrapper package installation has not been found! If you have not already done so,
-      you will need to submit graphframes' JAR file dependency to your spark context. This can be found here:
-      \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/graphframes-0.6.0-spark2.3-s_2.11.jar
-      \nOnce downloaded, this can be submitted to your spark context via: spark.conf.set('spark.jars', path_to_jar_file)
-      """)
 ###############################################################################
-
 
 def extract_mk_variables(df, mk):
     '''
@@ -1244,6 +1224,7 @@ def matchkeys_drop_duplicates(mks):
 
 ############################################################################
 
+
 def deduplicate(df, record_id, mks):
     """
     Filters out duplicate records from a supplied dataframe.
@@ -1297,13 +1278,14 @@ def deduplicate(df, record_id, mks):
         else:
 
             unique = unique.dropDuplicates(MK)
-    
-    duplicates = df.join(unique, on = record_id, how = 'left_anti').dropDuplicates([record_id])
 
+    duplicates = df.join(unique, on=record_id,
+                         how='left_anti').dropDuplicates([record_id])
 
     return unique, duplicates
 
 ############################################################################
+
 
 def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     '''
