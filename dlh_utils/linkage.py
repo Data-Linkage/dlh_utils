@@ -1291,7 +1291,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
 
         if index == 1:
             # writes first matchkey to parquet
-            ut.writeFormat(matchkey_join(
+            ut.write_format(matchkey_join(
                 df_l, df_r, id_l, id_r, matchkey, index),
                 'parquet',
                 f"{out_dir}/linked_identifiers",
@@ -1300,7 +1300,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
         else:
             # reads previous matches
             # used in left anti join to ignore matched records
-            matches = ut.readFormat('parquet',
+            matches = ut.read_format('parquet',
                                     f"{out_dir}/linked_identifiers")
 
             last_count = count
@@ -1313,7 +1313,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             print("right residual: ", df_r_count-count)
 
             # appends subsequent matches to initial parquet
-            ut.writeFormat(matchkey_join(
+            ut.write_format(matchkey_join(
                 df_l.join(matches, id_l, 'left_anti'),
                 df_r.join(matches, id_r, 'left_anti'),
                 id_l, id_r, matchkey, index),
@@ -1322,7 +1322,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
                 mode='append')
 
     # reads and returns final matches
-    matches = ut.readFormat('parquet',
+    matches = ut.read_format('parquet',
                             f"{out_dir}/linked_identifiers")
 
     last_count = count
