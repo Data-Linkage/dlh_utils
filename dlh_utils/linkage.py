@@ -1228,9 +1228,7 @@ def deduplicate(df, record_id, mks):
     """
     Filters out duplicate records from a supplied dataframe, returning the unique
     dataframe and a dataframe of the identified duplicates. 
-    
-
-    
+        
     Parameters
     ---------- 
     df : dataframe
@@ -1291,7 +1289,7 @@ def deduplicate(df, record_id, mks):
             duplicates = duplicates.union(df.join(copy, [F.col(left) == F.col(right) for (left, right) in zip(MK, MK_copy)],
                      how='inner').withColumn('matchkey', F.lit(count)))
                                           
-    duplicates = duplicates.filter(f"{record_id} != {record_id}_2")
+    duplicates = duplicates.filter(f"{record_id} != {record_id}_2").dropDuplicates([record_id, f"{record_id}_2"])
             
     return unique, duplicates
 
