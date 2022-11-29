@@ -1226,8 +1226,11 @@ def matchkeys_drop_duplicates(mks):
 
 def deduplicate(df, record_id, mks):
     """
-    Filters out duplicate records from a supplied dataframe.
+    Filters out duplicate records from a supplied dataframe, returning the unique
+    dataframe and a dataframe of the identified duplicates. 
+    
 
+    
     Parameters
     ---------- 
     df : dataframe
@@ -1268,19 +1271,28 @@ def deduplicate(df, record_id, mks):
     if any(isinstance(MK, list) for MK in mks) == False:
         mks = [mks]
 
+    copy = da.suffix_columns(df, suffix = '_2')
+          
     for count, MK in enumerate(mks, 1):
+
+        MK_copy = [column + '_2' for column in MK]
 
         if count == 1:
 
             unique = df.dropDuplicates(MK)
-
+                      
+            duplicates = df.join(copy, [F.col(left) == F.col(right) for (left, right) in zip(MK, MK_copy)],
+                     how='inner').withColumn('matchkey', F.lit(count))
+                          
         else:
 
             unique = unique.dropDuplicates(MK)
 
-    duplicates = df.join(unique, on=record_id,
-                         how='left_anti').dropDuplicates([record_id])
-
+            duplicates = duplicates.union(df.join(copy, [F.col(left) == F.col(right) for (left, right) in zip(MK, MK_copy)],
+                     how='inner').withColumn('matchkey', F.lit(count)))
+                                          
+    duplicates = duplicates.filter(f"{record_id} != {record_id}_2")
+            
     return unique, duplicates
 
 ############################################################################
@@ -1427,3 +1439,40 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     print("right residual: ", df_r_count-count)
 
     return matches
+  
+def hierarchical(df, record_id_l, record_id_r, matchkey_col):
+    """
+    Filters linked dataframe, returning matches made on the minimum matchkey number.
+    
+    Parameters
+    ---------- 
+    df : dataframe
+      Pre-linked dataframe
+    record_id_l : string
+      Unique record ID for the left dataframe that has been pre-linked
+    record_id_r : string
+      Unique record ID for the right dataframe that has been pre-linked
+    matchkey_col : string
+      Name of column containing the matchkey number matches have been made on
+
+    Returns
+    -------
+    df
+      A filtered dataframe, retaining only matches made on the minimum matchkey number
+
+    Raises
+    -------
+      None at present.
+
+    Example
+    -------
+
+    > 
+
+    """
+  
+    df = df.withColumn('minimum_matchkey', F.min(matchkey_col).over(Window.partitionBy(record_id_l, record_id_r)))
+
+    df = df.filter(df.matchkey_col == df.minimum_matchkey).drop('Minimum_matchkey')
+    
+    return df
