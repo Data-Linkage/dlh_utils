@@ -911,7 +911,7 @@ def drop_nulls(df, subset=None, val=None):
 
 def window(df, window, target, mode, alias=None, drop_na=False):
     """
-    Adds window column for count, countDistinct, min or max operations 
+    Adds window column for count, countDistinct, min, max, or sum operations 
     over window
 
     Parameters
@@ -948,16 +948,16 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
     > df.show()
 
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
-    +---+--------+----------+-------+----------+---+--------+
+    +---+--------+----------+-------+----------+---+--------+-----------------+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|
+    +---+--------+----------+-------+----------+---+--------+-----------------+
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|
+    +---+--------+----------+-------+----------+---+--------+-----------------+
 
     > window(df = df,
              window = 'ID',
@@ -966,17 +966,42 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              alias= 'forenames_per_ID',
              drop_na=False).show()
 
-    +---+--------+----------+-------+----------+---+--------+----------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|forenames_per_ID|
-    +---+--------+----------+-------+----------+---+--------+----------------+
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               2|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               2|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|               1|
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               1|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|               1|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               1|
-    +---+--------+----------+-------+----------+---+--------+----------------+
-    
+    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|forenames_per_ID|
+    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|               2|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|               2|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|               1|
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|               1|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|               1|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|               1|
+    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
+
+    > window(df = df,
+             window = 'ID',
+             target = 'Forename',
+             mode = 'countDistinct',
+             alias= 'distinct_forenames_per_ID',
+             drop_na=False).show()
+             
+    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
+    | ID|distinct_forenames_per_ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|
+    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
+    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
+    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
+    |  5|                        1|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|
+    |  1|                        1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|
+    |  4|                        1|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|
+    |  2|                        1|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|
+    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
+
+    > window(df = df,
+             window = 'Sex',
+             target = 'age_at_2022-12-06',
+             mode = 'max',
+             alias= 'oldest_family_member',
+             drop_na=False).show()
+             
     See Also
     --------
     standardisation.standardise_null()
