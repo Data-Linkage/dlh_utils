@@ -39,7 +39,7 @@ def create_table_statements(database, regex=None, output_mode='spark'):
   '''
     spark = SparkSession.builder.getOrCreate()
 
-    tables = ut.listTables(database)
+    tables = ut.list_tables(database)
 
     if regex is not None:
         tables = list(
@@ -449,7 +449,7 @@ def hive_variable_matrix(database, regex=None, output_mode='spark'):
 
     spark = SparkSession.builder.getOrCreate()
 
-    tables = ut.listTables(database)
+    tables = ut.list_tables(database)
 
     if regex is not None:
         tables = list(

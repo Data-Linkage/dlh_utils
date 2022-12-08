@@ -34,7 +34,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
       title ends with the string value.
 
     contains : string, default = None
-      This parameter takes a string value and selects 
+      This parameter takes a string value and selects
       columns from the dataframe if the column
       title contains the string value.
 
@@ -60,13 +60,13 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
     Example
     -------
 
-    data = [("1","Homer","Jay","Simpson","1983-05-12","M","ET74 2SP"),
-            ("2","Marge","Juliet","Simpson","1983-03-19","F","ET74 2SP"),
-            ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","ET74 2SP"),
-            ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","ET74 2SP"),
-            ("4","Lisa","Marie","Simpson","2014-05-09","F","ET74 2SP"),
-            ("5","Maggie",None,"Simpson","2021-01-12","F","ET74 2SP")]
-    df = spark.createDataFrame(data=data,schema=["ID","Forename","Middlename","Surname","DoB","Sex","Postcode"])
+    data = [("1","6","1","Simpson","1983-05-12","M","ET74 2SP"),
+            ("2","8","2","Simpson","1983-03-19","F","ET74 2SP"),
+            ("3","7","3","Simpson","2012-04-01","M","ET74 2SP"),
+            ("3","9","3","Simpson","2012-04-01","M","ET74 2SP"),
+            ("4","9","4","Simpson","2014-05-09","F","ET74 2SP"),
+            ("5","6",4,"Simpson","2021-01-12","F","ET74 2SP")]
+    df = spark.createDataFrame(data=data,schema=["ID","ID2","clust","ROWNUM","DoB","Sex","Postcode"])
 
     > df.show()
     +---+--------+----------+-------+----------+---+--------+

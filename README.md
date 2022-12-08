@@ -1,7 +1,7 @@
 # DLH_utils
 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
-[![PyPi Version](https://badge.fury.io/py/dlh-utils.svg)](https://pypi.org/project/dlh-utils/)
+[![PyPI version](https://badge.fury.io/py/dlh_utils.svg)](https://badge.fury.io/py/dlh_utils)
 [![PyPi Python Versions](https://img.shields.io/pypi/pyversions/dlh-utils.svg)](https://pypi.python.org/pypi/dlh-utils/)
 
 A Python package produced by the Linkage Development team from the Data Linkage Hub at Office for National Statistics (ONS) containing a set of functions used to expedite and streamline the data linkage process.
