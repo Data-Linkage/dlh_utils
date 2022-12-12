@@ -913,6 +913,8 @@ def window(df, window, target, mode, alias=None, drop_na=False):
     """
     Adds window column for count, countDistinct, min, max, or sum operations 
     over window
+    
+    Need to import the union_all function first.
 
     Parameters
     ----------
@@ -997,10 +999,57 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
     > window(df = df,
              window = 'Sex',
-             target = 'age_at_2022-12-06',
-             mode = 'max',
-             alias= 'oldest_family_member',
+             target = 'age_at_2022-12-09',
+             mode = 'min',
+             alias= 'youngest_per_sex',
              drop_na=False).show()
+             
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+    |Sex|youngest_per_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+    |  F|               1|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
+    |  F|               1|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
+    |  F|               1|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
+    |  M|              10|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+
+    > window(df = df,
+             window = 'Sex',
+             target = 'age_at_2022-12-09',
+             mode = 'max',
+             alias= 'oldest_per_sex',
+             drop_na=False).show()
+
+    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
+    |Sex|oldest_per_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
+    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
+    |  F|            39|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
+    |  F|            39|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
+    |  F|            39|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    |  M|            39|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
+
+    > window(df = df,
+             window = 'Sex',
+             target = 'age_at_2022-12-09',
+             mode = 'sum',
+             alias= 'total_age_by_sex',
+             drop_na=False).show()
+             
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+    |Sex|total_age_by_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+    |  F|              48|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
+    |  F|              48|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
+    |  F|              48|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
+    |  M|              59|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
+    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+  
              
     See Also
     --------
@@ -1160,7 +1209,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .select(window)
                     )
 
-            df = (union_all(df_1, df_2)
+            df = (union_all(df_1,df_2)
                   .select(window+[alias])
                   .dropDuplicates()
                   .join(df,
