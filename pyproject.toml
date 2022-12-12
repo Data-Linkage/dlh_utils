@@ -12,7 +12,7 @@ repository = "https://github.com/Data-Linkage/dlh_utils"
 [tool.poetry.dependencies]
 python = "^3.6"
 graphframes = "^0.6"
-graphframes-wrapper = "^0.5"
+graphframes-wrapper = "^0.6"
 jellyfish = "^0.9"
 pandas = "^0.20.1"
 importlib_metadata =  "^4.8.3"
