@@ -997,7 +997,7 @@ def trim(df, subset=None):
 ##########################################################################
 
 
-def add_leading_zeros(df, cols, n):
+def add_leading_zeros(df, subset, n):
     """
     Adds leading zeros to the numeric characters of a string, until the
     length of the string equals n. For example if a string is 1 and n
@@ -1007,9 +1007,9 @@ def add_leading_zeros(df, cols, n):
     ---------- 
     df : dataframe
       Dataframe to which the function is applied.
-    cols : string or list of strings
-      Can take either one single string that is a column header
-      or a list of strings that are column headers.
+    subset : string or list of strings, default = None
+      The subset is the column(s) on which the function is applied.
+      If None the function applies to the whole dataframe.
     n: int
       This is the length to which the string is adjusted.
 
@@ -1038,7 +1038,7 @@ def add_leading_zeros(df, cols, n):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > add_leading_zeros(df,cols = 'ID',n = 3).show()
+    > add_leading_zeros(df,subset = 'ID',n = 3).show()
 
     +---+--------+----------+-------+----------+---+--------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
@@ -1051,10 +1051,10 @@ def add_leading_zeros(df, cols, n):
     |005|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
     """
-    if type(cols) != list:
-        cols = [cols]
+    if type(subset) != list:
+        subset = [subset]
 
-    for col in cols:
+    for col in subset:
 
         df = (df
               .withColumn(col,
@@ -1067,7 +1067,7 @@ def add_leading_zeros(df, cols, n):
 ##############################################################################
 
 
-def replace(df, cols, replace_dict):
+def replace(df, subset, replace_dict):
     """
     Replaces specific string values in given column(s) with specified values.
 
@@ -1075,9 +1075,9 @@ def replace(df, cols, replace_dict):
     ---------- 
     df : dataframe
       Dataframe to which the function is applied.
-    cols : string or list of strings
-      Can take either one single string that is a column header
-      or a list of strings that are column headers.
+    subset : string or list of strings
+      The subset is the column(s) on which the function is applied.
+      If None the function applies to the whole dataframe.
     replace_dict: dictionary
       Dictionary given needs to be in the format of
       value_to_be_replaced:value_to_replace_with.
@@ -1106,7 +1106,7 @@ def replace(df, cols, replace_dict):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > replace(df,cols = 'Forename',replace_dict = {'Bart': 'Turbo man'}).show()
+    > replace(df,subset = 'Forename',replace_dict = {'Bart': 'Turbo man'}).show()
 
     +---+---------+----------+-------+----------+---+--------+
     | ID| Forename|Middlename|Surname|       DoB|Sex|Postcode|
@@ -1120,10 +1120,10 @@ def replace(df, cols, replace_dict):
     +---+---------+----------+-------+----------+---+--------+
     """
 
-    if type(cols) != list:
-        cols = [cols]
+    if type(subset) != list:
+        subset = [subset]
 
-    for col in cols:
+    for col in subset:
 
         for before, after in replace_dict.items():
             df = (df

@@ -302,7 +302,7 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
 ###############################################################################
 
 
-def concat(df, out_col, sep=' ', cols=[]):
+def concat(df, out_col, sep=' ', columns=[]):
     """
     Concatenates strings from specified columns into a single string and stores
     the new string value in a new column.
@@ -319,7 +319,7 @@ def concat(df, out_col, sep=' ', cols=[]):
       This is the value used to seperate the
       strings in the different columns when
       combinging them into a single string.
-    cols : list, default = []
+    columns : list, default = []
       The list of columns being concatenated into 
       one string
 
@@ -348,7 +348,7 @@ def concat(df, out_col, sep=' ', cols=[]):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > concat(df, out_col = 'Full Name', sep = ' ', cols = ['Forename','Middlename','Surname']).show()
+    > concat(df, out_col = 'Full Name', sep = ' ', columns = ['Forename','Middlename','Surname']).show()
     +---+--------+----------+-------+----------+---+--------+--------------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|           Full Name|
     +---+--------+----------+-------+----------+---+--------+--------------------+
@@ -364,7 +364,7 @@ def concat(df, out_col, sep=' ', cols=[]):
 
     df = (df
           .withColumn(out_col,
-                      F.concat_ws(sep, *[F.col(x) for x in cols]))
+                      F.concat_ws(sep, *[F.col(x) for x in columns]))
           )
 
     if sep != '':
@@ -383,7 +383,7 @@ def concat(df, out_col, sep=' ', cols=[]):
 #############################################################################
 
 
-def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
+def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     """
     Splits a string column on specified separator (default=" ") 
     and creates a new row for each element of the split string array
@@ -392,7 +392,7 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     Parameters
     ----------
     df: dataframe function is being applied to
-    col : string 
+    column : string 
       column to be exploded 
     on : string, default = ' ' 
       This argument takes a string or regex value
@@ -434,7 +434,7 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+----------------------+
 
     e.g, if you wanted to separate the record's appearance from their personality description:
-    > explode(df,col = 'Description',on = ' ',retain = False,drop_duplicates = True, flag = None).show()
+    > explode(df,column = 'Description',on = ' ',retain = False,drop_duplicates = True, flag = None).show()
     +---+--------+----------+-------+----------+---+--------+------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode| Description|
     +---+--------+----------+-------+----------+---+--------+------------+
@@ -451,7 +451,7 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+------------+
 
     if you wanted to also keep the original overall description:
-    > explode(df,col = 'Description',on = ' ',retain = True,drop_duplicates = True, flag = None).show()  
+    > explode(df,column = 'Description',on = ' ',retain = True,drop_duplicates = True, flag = None).show()  
     +---+--------+----------+-------+----------+---+--------+----------------------+
     |ID |Forename|Middlename|Surname|DoB       |Sex|Postcode|Description           |
     +---+--------+----------+-------+----------+---+--------+----------------------+
@@ -476,13 +476,13 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     if retain == False:
 
         df = (df
-              .where(F.col(col).rlike(on))
-              .select(*[x for x in df.columns if x != col],
-                      F.explode(F.split(F.col(col), on))
-                      .alias(col))
+              .where(F.col(column).rlike(on))
+              .select(*[x for x in df.columns if x != column],
+                      F.explode(F.split(F.col(column), on))
+                      .alias(column))
               .unionByName((df
-                           .where((F.col(col).rlike(on) == False)
-                                  | (F.col(col).rlike(on).isNull()))))
+                           .where((F.col(column).rlike(on) == False)
+                                  | (F.col(column).rlike(on).isNull()))))
               )
 
     if retain == True:
@@ -490,21 +490,21 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
         if flag is None:
 
             df = (df
-                  .where(F.col(col).rlike(on))
-                  .select(*[x for x in df.columns if x != col],
-                          F.explode(F.split(F.col(col), on))
-                          .alias(col))
+                  .where(F.col(column).rlike(on))
+                  .select(*[x for x in df.columns if x != column],
+                          F.explode(F.split(F.col(column), on))
+                          .alias(column))
                   .unionByName(df)
                   )
 
         else:
 
             df = (df
-                  .where(F.col(col).rlike(on))
+                  .where(F.col(column).rlike(on))
                   .withColumn(flag, F.lit(True))
-                  .select(*[x for x in df.columns+[flag] if x != col],
-                          F.explode(F.split(F.col(col), on))
-                          .alias(col))
+                  .select(*[x for x in df.columns+[flag] if x != column],
+                          F.explode(F.split(F.col(column), on))
+                          .alias(column))
                   .unionByName(df.withColumn(flag, F.lit(False)))
                   )
 

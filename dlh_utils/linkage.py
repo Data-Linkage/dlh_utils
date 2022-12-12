@@ -838,12 +838,12 @@ def assert_unique_matches(linked_ids, *identifier_col):
 ###############################################################################
 
 
-def assert_unique(df, col):
+def assert_unique(df, column):
 
-    if type(col) != list:
-        col = [col]
+    if type(column) != list:
+        column = [column]
 
-    assert df.count() == df.dropDuplicates(subset=col).count()
+    assert df.count() == df.dropDuplicates(subset=column).count()
 
 ###############################################################################
 
