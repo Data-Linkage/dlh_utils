@@ -39,7 +39,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
       title contains the string value.
 
     regex : string, default = None
-      This parameter takes a string value in 
+      This parameter takes a string value in
       regex format and selects columns from the 
       dataframe if the column title matches
       the conditions of the regex string.
@@ -66,7 +66,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
             ("3","9","3","Simpson","2012-04-01","M","ET74 2SP"),
             ("4","9","4","Simpson","2014-05-09","F","ET74 2SP"),
             ("5","6",4,"Simpson","2021-01-12","F","ET74 2SP")]
-    df = spark.createDataFrame(data=data,schema=["ID","ID2","clust","ROWNUM","DoB","Sex","Postcode"])
+    df=spark.createDataFrame(data=data,schema=["ID","ID2","clust","ROWNUM","DoB","Sex","Postcode"])
 
     > df.show()
     +---+--------+----------+-------+----------+---+--------+
@@ -160,7 +160,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
 def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
                 regex=None, drop_duplicates=True):
     """
-    drop_columns allows user to specify one or more columns 
+    drop_columns allows user to specify one or more columns
     to be dropped from the dataframe.
 
     Parameters
@@ -185,13 +185,13 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
       title ends with the string value.
 
     contains : string, default = None
-      This parameter takes a string value and drops 
+      This parameter takes a string value and drops
       columns from the dataframe if the column
       title contains the string value.
 
     regex : string, default = None
-      This parameter takes a string value in 
-      regex format and drops columns from the 
+      This parameter takes a string value in
+      regex format and drops columns from the
       dataframe if the column title matches
       the conditions of the regex string.
 
@@ -312,7 +312,7 @@ def concat(df, out_col, sep=' ', columns=[]):
     df : dataframe
       Dataframe to which the function is applied.
     out_col : string
-      The name, in string format, of the 
+      The name, in string format, of the
       output column for the new concatenated
       strings to be stored in.
     sep : string, default = ' '
@@ -320,7 +320,7 @@ def concat(df, out_col, sep=' ', columns=[]):
       strings in the different columns when
       combinging them into a single string.
     columns : list, default = []
-      The list of columns being concatenated into 
+      The list of columns being concatenated into
       one string
 
     Returns
@@ -331,7 +331,7 @@ def concat(df, out_col, sep=' ', columns=[]):
 
     Raises
     ------
-    None at present.  
+    None at present. 
 
     Example
     -------
@@ -348,7 +348,7 @@ def concat(df, out_col, sep=' ', columns=[]):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > concat(df, out_col = 'Full Name', sep = ' ', columns = ['Forename','Middlename','Surname']).show()
+    > concat(df,out_col = 'Full Name',sep = ' ',columns =['Forename','Middlename','Surname']).show()
     +---+--------+----------+-------+----------+---+--------+--------------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|           Full Name|
     +---+--------+----------+-------+----------+---+--------+--------------------+
@@ -385,18 +385,18 @@ def concat(df, out_col, sep=' ', columns=[]):
 
 def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     """
-    Splits a string column on specified separator (default=" ") 
+    Splits a string column on specified separator (default=" ")
     and creates a new row for each element of the split string array
-    maintaining values in all other columns. 
+    maintaining values in all other columns.
 
     Parameters
     ----------
     df: dataframe function is being applied to
-    column : string 
-      column to be exploded 
-    on : string, default = ' ' 
+    column : string
+      column to be exploded
+    on : string, default = ' '
       This argument takes a string or regex value
-      in string format and explodes the values where 
+      in string format and explodes the values where
       either the string or regex value matches.
     retain : bool, default = False
       option to retain original string values.
@@ -404,14 +404,14 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
       option to drop duplicate values
     flag: string, default = None
       name of flag column, that contains
-      False values for rows that are equal. 
-      For a flag column to be appended, 
-      retain needs to be True. 
+      False values for rows that are equal.
+      For a flag column to be appended,
+      retain needs to be True.
 
     Returns
     -------
     dataframe
-      dataframe with additional rows accomodating all elements 
+      dataframe with additional rows accomodating all elements
       of exploded string column.
 
     Raises
@@ -434,7 +434,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+----------------------+
 
     e.g, if you wanted to separate the record's appearance from their personality description:
-    > explode(df,column = 'Description',on = ' ',retain = False,drop_duplicates = True, flag = None).show()
+    > explode(df,column ='Description',on = ' ',retain =False,drop_duplicates=True,flag=None).show()
     +---+--------+----------+-------+----------+---+--------+------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode| Description|
     +---+--------+----------+-------+----------+---+--------+------------+
@@ -451,7 +451,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+------------+
 
     if you wanted to also keep the original overall description:
-    > explode(df,column = 'Description',on = ' ',retain = True,drop_duplicates = True, flag = None).show()  
+    > explode(df,column='Description',on=' ',retain=True,drop_duplicates=True,flag=None).show()  
     +---+--------+----------+-------+----------+---+--------+----------------------+
     |ID |Forename|Middlename|Surname|DoB       |Sex|Postcode|Description           |
     +---+--------+----------+-------+----------+---+--------+----------------------+
@@ -518,7 +518,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
 
 def rename_columns(df, rename_dict={}):
     """
-    Allows multiple columns to be renamed in one command from {before:after} 
+    Allows multiple columns to be renamed in one command from {before:after}
     replacement dictionary
 
     Parameters
@@ -582,12 +582,12 @@ def prefix_columns(df, prefix, exclude=[]):
     Parameters
     ----------
     df: dataframe
-    prefix : string 
+    prefix : string
       The prifix string that will be appended
-      to column names.  
+      to column names.
     exclude : string or list of strings, default = None
       This argument either takes a list of column names
-      or a string value that is a column name. 
+      or a string value that is a column name.
       These values are excluded from the renaming of
       columns.
 
@@ -602,45 +602,45 @@ def prefix_columns(df, prefix, exclude=[]):
 
     Example
     -------
-    e.g., you want to join the Simpsons df to the Flintstones df, 
+    e.g., you want to join the Simpsons df to the Flintstones df,
     suffixing or prefixing will allow you to identify which data set the columns
     relate to:
 
     > df.show()
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
-    +---+--------+----------+-------+----------+---+--------+
+    +---+--------+----------+-------+----------+---+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|
+    +---+--------+----------+-------+----------+---+
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|
+    +---+--------+----------+-------+----------+---+
 
     > prefix_columns(df,prefix='Simpsons_').show()
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
-    |Simpsons_ID|Simpsons_Forename|Simpsons_Middlename|Simpsons_Surname|Simpsons_DoB|Simpsons_Sex|Simpsons_Postcode|
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
-    |          1|            Homer|                Jay|         Simpson|  1983-05-12|           M|         ET74 2SP|
-    |          2|            Marge|             Juliet|         Simpson|  1983-03-19|           F|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          4|             Lisa|              Marie|         Simpson|  2014-05-09|           F|         ET74 2SP|
-    |          5|           Maggie|               null|         Simpson|  2021-01-12|           F|         ET74 2SP|
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
+    +-----------+-----------------+-------------------+----------------+------------+------------+
+    |Simpsons_ID|Simpsons_Forename|Simpsons_Middlename|Simpsons_Surname|Simpsons_DoB|Simpsons_Sex|
+    +-----------+-----------------+-------------------+----------------+------------+------------+
+    |          1|            Homer|                Jay|         Simpson|  1983-05-12|           M|
+    |          2|            Marge|             Juliet|         Simpson|  1983-03-19|           F|
+    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|
+    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|
+    |          4|             Lisa|              Marie|         Simpson|  2014-05-09|           F|
+    |          5|           Maggie|               null|         Simpson|  2021-01-12|           F|
+    +-----------+-----------------+-------------------+----------------+------------+------------+
 
     > prefix_columns(df,prefix='Simpsons_',exclude='Surname').show()
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
-    |Simpsons_ID|Simpsons_Forename|Simpsons_Middlename|Surname|Simpsons_DoB|Simpsons_Sex|Simpsons_Postcode|
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
-    |          1|            Homer|                Jay|Simpson|  1983-05-12|           M|         ET74 2SP|
-    |          2|            Marge|             Juliet|Simpson|  1983-03-19|           F|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          4|             Lisa|              Marie|Simpson|  2014-05-09|           F|         ET74 2SP|
-    |          5|           Maggie|               null|Simpson|  2021-01-12|           F|         ET74 2SP|
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
+    +-----------+-----------------+-------------------+-------+------------+------------+
+    |Simpsons_ID|Simpsons_Forename|Simpsons_Middlename|Surname|Simpsons_DoB|Simpsons_Sex|
+    +-----------+-----------------+-------------------+-------+------------+------------+
+    |          1|            Homer|                Jay|Simpson|  1983-05-12|           M|
+    |          2|            Marge|             Juliet|Simpson|  1983-03-19|           F|
+    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|
+    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|
+    |          4|             Lisa|              Marie|Simpson|  2014-05-09|           F|
+    |          5|           Maggie|               null|Simpson|  2021-01-12|           F|
+    +-----------+-----------------+-------------------+-------+------------+------------+
 
     """
 
@@ -667,12 +667,12 @@ def suffix_columns(df, suffix, exclude=[]):
     Parameters
     ----------
     df: dataframe
-    suffix : string 
+    suffix : string
       The suffix string that will be appended
-      to column names. 
+      to column names.
     exclude : string or list of strings
       This argument either takes a list of column names
-      or a string value that is a column name. 
+      or a string value that is a column name.
       These values are excluded from the renaming of
       columns.
 
@@ -689,40 +689,40 @@ def suffix_columns(df, suffix, exclude=[]):
     -------
 
     > df.show()
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
-    +---+--------+----------+-------+----------+---+--------+
+    +---+--------+----------+-------+----------+---+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|
+    +---+--------+----------+-------+----------+---+
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|
+    +---+--------+----------+-------+----------+---+
 
     > suffix_columns(df,suffix='_Simpsons').show()
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
-    |ID_Simpsons|Forename_Simpsons|Middlename_Simpsons|Surname_Simpsons|DoB_Simpsons|Sex_Simpsons|Postcode_Simpsons|
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
-    |          1|            Homer|                Jay|         Simpson|  1983-05-12|           M|         ET74 2SP|
-    |          2|            Marge|             Juliet|         Simpson|  1983-03-19|           F|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          4|             Lisa|              Marie|         Simpson|  2014-05-09|           F|         ET74 2SP|
-    |          5|           Maggie|               null|         Simpson|  2021-01-12|           F|         ET74 2SP|
-    +-----------+-----------------+-------------------+----------------+------------+------------+-----------------+
+    +-----------+-----------------+-------------------+----------------+------------+------------+
+    |ID_Simpsons|Forename_Simpsons|Middlename_Simpsons|Surname_Simpsons|DoB_Simpsons|Sex_Simpsons|
+    +-----------+-----------------+-------------------+----------------+------------+------------+
+    |          1|            Homer|                Jay|         Simpson|  1983-05-12|           M|
+    |          2|            Marge|             Juliet|         Simpson|  1983-03-19|           F|
+    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|
+    |          3|             Bart|              Jo-Jo|         Simpson|  2012-04-01|           M|
+    |          4|             Lisa|              Marie|         Simpson|  2014-05-09|           F|
+    |          5|           Maggie|               null|         Simpson|  2021-01-12|           F|
+    +-----------+-----------------+-------------------+----------------+------------+------------+
 
     > suffix_columns(df,suffix='_Simpsons',exclude='Surname').show()
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
-    |ID_Simpsons|Forename_Simpsons|Middlename_Simpsons|Surname|DoB_Simpsons|Sex_Simpsons|Postcode_Simpsons|
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
-    |          1|            Homer|                Jay|Simpson|  1983-05-12|           M|         ET74 2SP|
-    |          2|            Marge|             Juliet|Simpson|  1983-03-19|           F|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|         ET74 2SP|
-    |          4|             Lisa|              Marie|Simpson|  2014-05-09|           F|         ET74 2SP|
-    |          5|           Maggie|               null|Simpson|  2021-01-12|           F|         ET74 2SP|
-    +-----------+-----------------+-------------------+-------+------------+------------+-----------------+
+    +-----------+-----------------+-------------------+-------+------------+------------+
+    |ID_Simpsons|Forename_Simpsons|Middlename_Simpsons|Surname|DoB_Simpsons|Sex_Simpsons|
+    +-----------+-----------------+-------------------+-------+------------+------------+
+    |          1|            Homer|                Jay|Simpson|  1983-05-12|           M|
+    |          2|            Marge|             Juliet|Simpson|  1983-03-19|           F|
+    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|
+    |          3|             Bart|              Jo-Jo|Simpson|  2012-04-01|           M|
+    |          4|             Lisa|              Marie|Simpson|  2014-05-09|           F|
+    |          5|           Maggie|               null|Simpson|  2021-01-12|           F|
+    +-----------+-----------------+-------------------+-------+------------+------------+
 
     """
 
@@ -758,7 +758,7 @@ def union_all(*dfs, fill=None):
     Returns
     -------
     dataframe
-      Single unioned dataframe. 
+      Single unioned dataframe.
 
     Raises
     ------
@@ -844,7 +844,7 @@ def union_all(*dfs, fill=None):
 
 def drop_nulls(df, subset=None, val=None):
     """
-    drop_nulls can drop either rows with Null values or values that are 
+    drop_nulls can drop either rows with Null values or values that are
     specified.
 
     This drops rows containing nulls in any columns by default.
@@ -852,7 +852,7 @@ def drop_nulls(df, subset=None, val=None):
     Parameters
     ----------
     df : dataframe
-      The dataframe the function is applied to.  
+      The dataframe the function is applied to.
     subset : string or list of strings, default = None
       A list of columns to drop null values from
     val : string, default = None
@@ -866,7 +866,7 @@ def drop_nulls(df, subset=None, val=None):
 
     Raises
     ------
-    None at present. 
+    None at present.
 
     Example
     -------
@@ -911,9 +911,9 @@ def drop_nulls(df, subset=None, val=None):
 
 def window(df, window, target, mode, alias=None, drop_na=False):
     """
-    Adds window column for count, countDistinct, min, max, or sum operations 
+    Adds window column for count, countDistinct, min, max, or sum operations
     over window
-    
+
     Need to import the union_all function first.
 
     Parameters
@@ -923,7 +923,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
     window : string or list of strings
       List of columns defining the window.
     target : string
-      Name of target column for operations in 
+      Name of target column for operations in
       string format.
     mode : {'count','countDistinct','min','max','sum'}
       Operation performed on window.
@@ -931,7 +931,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
       Name of column for window function results.
     drop_na : bool, default = False
       drops Null/NA values from countDistinct
-      window function when performing the 
+      window function when performing the
       operation.
 
     Returns
@@ -950,16 +950,16 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
     > df.show()
 
-    +---+--------+----------+-------+----------+---+--------+-----------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|
-    +---+--------+----------+-------+----------+---+--------+-----------------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|
-    +---+--------+----------+-------+----------+---+--------+-----------------+
+    +---+--------+----------+-------+----------+---+-----------------+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|age_at_2022-12-06|
+    +---+--------+----------+-------+----------+---+-----------------+
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|               39|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|               39|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|                8|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|                1|
+    +---+--------+----------+-------+----------+---+-----------------+
 
     > window(df = df,
              window = 'ID',
@@ -968,16 +968,16 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              alias= 'forenames_per_ID',
              drop_na=False).show()
 
-    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|forenames_per_ID|
-    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|               2|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|               2|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|               1|
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|               1|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|               1|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|               1|
-    +---+--------+----------+-------+----------+---+--------+-----------------+----------------+
+    +---+--------+----------+-------+----------+---+-----------------+----------------+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|age_at_2022-12-06|forenames_per_ID|
+    +---+--------+----------+-------+----------+---+-----------------+----------------+
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|               2|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|               2|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|                1|               1|
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|               39|               1|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|                8|               1|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|               39|               1|
+    +---+--------+----------+-------+----------+---+-----------------+----------------+
 
     > window(df = df,
              window = 'ID',
@@ -985,17 +985,17 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              mode = 'countDistinct',
              alias= 'distinct_forenames_per_ID',
              drop_na=False).show()
-             
-    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
-    | ID|distinct_forenames_per_ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-12-06|
-    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
-    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
-    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|
-    |  5|                        1|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|
-    |  1|                        1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|
-    |  4|                        1|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|
-    |  2|                        1|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|
-    +---+-------------------------+--------+----------+-------+----------+---+--------+-----------------+
+
+    +---+-------------------------+--------+----------+-------+----------+---+-----------------+
+    | ID|distinct_forenames_per_ID|Forename|Middlename|Surname|       DoB|Sex|age_at_2022-12-06|
+    +---+-------------------------+--------+----------+-------+----------+---+-----------------+
+    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|
+    |  3|                        1|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|               10|
+    |  5|                        1|  Maggie|      null|Simpson|2021-01-12|  F|                1|
+    |  1|                        1|   Homer|       Jay|Simpson|1983-05-12|  M|               39|
+    |  4|                        1|    Lisa|     Marie|Simpson|2014-05-09|  F|                8|
+    |  2|                        1|   Marge|    Juliet|Simpson|1983-03-19|  F|               39|
+    +---+-------------------------+--------+----------+-------+----------+---+-----------------+
 
     > window(df = df,
              window = 'Sex',
@@ -1003,17 +1003,17 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              mode = 'min',
              alias= 'youngest_per_sex',
              drop_na=False).show()
-             
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
-    |Sex|youngest_per_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
-    |  F|               1|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
-    |  F|               1|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
-    |  F|               1|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
-    |  M|              10|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
-    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
+
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|youngest_per_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |  F|               1|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|               1|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|               1|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|              10|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
 
     > window(df = df,
              window = 'Sex',
@@ -1022,16 +1022,16 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              alias= 'oldest_per_sex',
              drop_na=False).show()
 
-    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
-    |Sex|oldest_per_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
-    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
-    |  F|            39|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
-    |  F|            39|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
-    |  F|            39|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
-    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    |  M|            39|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
-    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    +---+--------------+---+--------+----------+-------+----------+--------+-----------------+
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|oldest_per_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
+    |  F|            39|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|            39|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|            39|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|            39|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
 
     > window(df = df,
              window = 'Sex',
@@ -1039,18 +1039,18 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              mode = 'sum',
              alias= 'total_age_by_sex',
              drop_na=False).show()
-             
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
-    |Sex|total_age_by_sex| ID|Forename|Middlename|Surname|       DoB|Postcode|age_at_2022-12-09|
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+
-    |  F|              48|  2|   Marge|    Juliet|Simpson|1983-03-19|ET74 2SP|               39|
-    |  F|              48|  4|    Lisa|     Marie|Simpson|2014-05-09|ET74 2SP|                8|
-    |  F|              48|  5|  Maggie|      null|Simpson|2021-01-12|ET74 2SP|                1|
-    |  M|              59|  1|   Homer|       Jay|Simpson|1983-05-12|ET74 2SP|               39|
-    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|ET74 2SP|               10|
-    +---+----------------+---+--------+----------+-------+----------+--------+-----------------+  
-             
+
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|total_age_by_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |  F|              48|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|              48|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|              48|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|              59|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+
     See Also
     --------
     standardisation.standardise_null()
@@ -1319,7 +1319,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
 ###############################################################################
 def filter_window(df, filter_window, target, mode, value=None, condition=True):
-    """  
+    """ 
     Performs statistical operations such as count, countDistinct, min or max on a
     collection of rows and returns results for each row individually.
 
@@ -1398,7 +1398,7 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
     |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
     |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
-    
+
     >df.show()
     +---+---+----------+-------+----------+---+--------+
     |Age| ID|Middlename|Surname|       DoB|Sex|Postcode|
@@ -1410,7 +1410,7 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
     |  4|  3|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
     |  2|  1|       Jay|Simpson|1983-05-12|  M|ET74 2SP|
     +---+---+----------+-------+----------+---+--------+
-    
+
     > filter_window(df = df,
                     filter_window = 'ID',
                     target = 'Age',
@@ -1456,37 +1456,37 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
     if mode in ['min','max']:
 
-      if condition:
+        if condition:
 
-        df = window(df,filter_window,target,mode,alias='value')
+            df = window(df,filter_window,target,mode,alias='value')
 
-        df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
-        df = (df
-              .where(F.col(target)==F.col('value'))
-              .drop('value')
-             )
+            df = (df
+                  .where(F.col(target)==F.col('value'))
+                  .drop('value')
+                 )
 
-        df = (st.standardise_null(df = df,
-                                  replace = "^<<<>>>$",
-                                  subset = target)
-           )
+            df = (st.standardise_null(df = df,
+                                      replace = "^<<<>>>$",
+                                      subset = target)
+                 )
 
-      else:
+        else:
 
-        df = window(df,filter_window,target,mode,alias='value')
+            df = window(df,filter_window,target,mode,alias='value')
 
-        df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
-        df = (df
-              .where(F.col(target)!=F.col('value'))
-              .drop('value')
-             )
+            df = (df
+                  .where(F.col(target)!=F.col('value'))
+                  .drop('value')
+                 )
 
-        df = (st.standardise_null(df = df,
-                                  replace = "^<<<>>>$",
-                                  subset = target)
-           )
+            df = (st.standardise_null(df = df,
+                                      replace = "^<<<>>>$",
+                                      subset = target)
+                 )
 
     return df
 
@@ -1571,7 +1571,7 @@ def coalesced(df, subset=None, output_col="coalesced_col"):
     -------
     dataframe
       Dataframe with coalesced columns results
-      appended to original dataframe in the 
+      appended to original dataframe in the
       output_col arg column.
 
     Raises
@@ -1613,7 +1613,7 @@ def coalesced(df, subset=None, output_col="coalesced_col"):
 
 def split(df, col_in, col_out=None, split_on=' '):
     """
-    Splits a string column to array on specified separator. 
+    Splits a string column to array on specified separator.
     Option to return split column as new column or to split in place.
 
     Parameters
@@ -1623,7 +1623,7 @@ def split(df, col_in, col_out=None, split_on=' '):
     col_in : string
       column to be split to array
     col_out, string, default = None
-      output column for split strings, 
+      output column for split strings,
       default value makes the split happen in place,
     split_on : string, default = ' '
       string or regex separator for split
@@ -1754,7 +1754,7 @@ def clone_column(df, target, clone):
     clone : string
       Name of the new column.
 
-    Returns 
+    Returns
     -------
     dataframe
       Dataframe with column cloned.
@@ -1803,7 +1803,7 @@ def substring(df, out_col, target_col,
               start, length, from_end=False):
     """
     Creates a new column containing substring values
-    from another column. 
+    from another column.
 
     Can either be a substring starting from the first character
     in the string if 'from_end' is False, or from the last
@@ -1908,7 +1908,7 @@ def cut_off(df, threshold_column, val, mode):
     cut_off cuts off rows that do not meet certain thresholds.
 
     cut_off takes a df column and a cutoff value and returns the dataframe
-    with rows in which the mode and cutoff value condition is met.  
+    with rows in which the mode and cutoff value condition is met.
     cut_off will also work for date values if the threshold_column is a timestamp.
 
     Parameters
@@ -1918,7 +1918,7 @@ def cut_off(df, threshold_column, val, mode):
     threshold_column : string
       column to which the cutoff values are being applied.
     val : int or date or timestamp
-      Value against which the mode operation is checking 
+      Value against which the mode operation is checking
       threshold_column values.
     mode : string, {'<','<=','>','>='}
       Operation used to cutoff values that do not
@@ -1944,7 +1944,7 @@ def cut_off(df, threshold_column, val, mode):
     +---+---+
     |  1|  2|
     |100|200|
-    +---+---+  
+    +---+---+
 
     > dataframes.cut_off(df3, threshold_column = 'a', val = 5, mode = '>').show()
 
@@ -1998,14 +1998,14 @@ def date_diff(df, col_name1, col_name2, diff='Difference',
       will be represented in the 'diff' arg column.
     absolute : bool, default = True
       Bool toggle allowing user to display all values
-      as absolute or non-absolute values in the 
+      as absolute or non-absolute values in the
       'diff' arg column.
 
     Returns
     -------
     dataframe
       Dataframe with new column appended showing
-      the time difference between col_name1 and col_name2 
+      the time difference between col_name1 and col_name2
       columns in the units specified.
 
     Raises
