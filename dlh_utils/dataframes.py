@@ -40,7 +40,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
 
     regex : string, default = None
       This parameter takes a string value in
-      regex format and selects columns from the 
+      regex format and selects columns from the
       dataframe if the column title matches
       the conditions of the regex string.
 
@@ -331,7 +331,7 @@ def concat(df, out_col, sep=' ', columns=[]):
 
     Raises
     ------
-    None at present. 
+    None at present.
 
     Example
     -------
@@ -451,7 +451,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+------------+
 
     if you wanted to also keep the original overall description:
-    > explode(df,column='Description',on=' ',retain=True,drop_duplicates=True,flag=None).show()  
+    > explode(df,column='Description',on=' ',retain=True,drop_duplicates=True,flag=None).show()
     +---+--------+----------+-------+----------+---+--------+----------------------+
     |ID |Forename|Middlename|Surname|DoB       |Sex|Postcode|Description           |
     +---+--------+----------+-------+----------+---+--------+----------------------+
@@ -1319,7 +1319,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
 ###############################################################################
 def filter_window(df, filter_window, target, mode, value=None, condition=True):
-    """ 
+    """
     Performs statistical operations such as count, countDistinct, min or max on a
     collection of rows and returns results for each row individually.
 

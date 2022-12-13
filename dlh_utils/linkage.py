@@ -62,7 +62,7 @@ def alpha_name(df, input_col, output_col):
     df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
            .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
            .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
-           .drop('name_array', 'sorted_name_array') 
+           .drop('name_array', 'sorted_name_array')
     return df
 
 ###############################################################################
@@ -161,7 +161,7 @@ def soundex(df, input_col, output_col):
 
 def std_lev_score(string1, string2):
     """
-    Applies the standardised levenshtein string similarity function to two 
+    Applies the standardised levenshtein string similarity function to two
     strings to return a score between 0 and 1.
 
     This function works at the column level, and so needs to either be applied
@@ -218,8 +218,9 @@ def std_lev_score(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/some_path/links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen',
+                                          id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, out_dir = '/some_path/links')
     """
 
     return (1 - ((F.levenshtein(string1, string2)) /
@@ -254,8 +255,8 @@ def jaro(string1, string2):
     --------
 
     for a pre-joined dataset:
-    
-    >df.show()    
+
+    >df.show()
     +---+--------+----------+
     | ID|Forename|Forename_2|
     +---+--------+----------+
@@ -289,8 +290,9 @@ def jaro(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/some_path/links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen',
+                                          id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, out_dir = '/some_path/links')
     """
 
     return jellyfish.jaro_similarity(
@@ -355,8 +357,10 @@ def jaro_winkler(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/user/username/cen_ccs_links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen',
+                                          id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, 
+                                          out_dir = '/user/username/cen_ccs_links')
 
     """
 
@@ -368,7 +372,7 @@ def jaro_winkler(string1, string2):
 
 
 def blocking(df1, df2, blocks, id_vars):
-    """ 
+    """
     Combines two spark dataframes, based on a set of defined blocking criteria,
     to create a new dataframe of unique record pairs.
 
@@ -445,7 +449,7 @@ def blocking(df1, df2, blocks, id_vars):
 
 
 def cluster_number(df, id_1, id_2):
-    """ 
+    """
     Takes dataframe of matches with two id columns (id_1 and id_2) and assigns
     a cluster number to the dataframe based on the unique id pairings.
 
@@ -456,7 +460,7 @@ def cluster_number(df, id_1, id_2):
     java.lang.ClassNotFoundException: org.graphframes.GraphFramePythonAPI
 
     This can either be fixed by starting a sparksession from the `sessions` module of
-    this package, or by adding the JAR files from within the graphframes-wrapper 
+    this package, or by adding the JAR files from within the graphframes-wrapper
     package to your spark session, by setting the "spark.jars" spark config parameter
     equal to the path to these JAR files.
 
@@ -477,7 +481,7 @@ def cluster_number(df, id_1, id_2):
     Returns
     ------
     df: dataframe
-        dataframe with cluster number    
+        dataframe with cluster number
 
     Example
     -------
@@ -505,7 +509,7 @@ def cluster_number(df, id_1, id_2):
     | 1a| 8b|             2|
     | 3a| 7b|             3|
     | 3a| 3b|             3|
-    +---+---+--------------+     
+    +---+---+--------------+
     """
     # Check variable types
     if not ((isinstance(df.schema[id_1].dataType, StringType)) and (isinstance(df.schema[id_2].dataType, StringType))):
@@ -527,14 +531,14 @@ def cluster_number(df, id_1, id_2):
 
     # Create graph & get connected components / clusters
     try:
-      graph = GraphFrame(ids, matches)
+        graph = GraphFrame(ids, matches)
       
-      cluster = graph.connectedComponents()
+        cluster = graph.connectedComponents()
 
       # Update cluster numbers to be consecutive (1,2,3,4,... instead of 1,2,3,1000,1001...)
-      lookup = cluster.select('component').dropDuplicates(['component']).withColumn(
-          'Cluster_Number', F.rank().over(Window.orderBy("component"))).sort('component')
-      cluster = cluster.join(lookup, on='component',
+        lookup = cluster.select('component').dropDuplicates(['component']).withColumn(
+            'Cluster_Number', F.rank().over(Window.orderBy("component"))).sort('component')
+        cluster = cluster.join(lookup, on='component',
                              how='left').withColumnRenamed('id', id_1)
 
       # Join new cluster number onto matched pairs

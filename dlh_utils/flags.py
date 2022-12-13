@@ -282,7 +282,7 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
     this is quickly highlighted to the user.
 
     Option to produce flag summary
-    stats employing flag_summary(). Option to return full dataframe, only passes, 
+    stats employing flag_summary(). Option to return full dataframe, only passes,
     only fails, or passes and fails(residuals) as two separate dataframes.
 
     Parameters
