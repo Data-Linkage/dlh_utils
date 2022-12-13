@@ -14,12 +14,12 @@ def cast_type(df, subset=None, types='string'):
     specified by the user.
 
     Parameters
-    ----------  
+    ----------
     df : dataframe
       The dataframe to which the function is applied.
     subset: (default = None), {list, string}
       The subset of columns that are having their datatypes converted.
-      If this is left blank then it defaults to all columns. 
+      If this is left blank then it defaults to all columns.
     types: str, (default = string)
       The datatype that the column values will be converted into.
 
@@ -89,7 +89,7 @@ def standardise_white_space(df, subset=None, wsl='one', fill=None):
 
     This can be used to select specified
     columns within the dataframe and alter the number of
-    white space characters within the values of those 
+    white space characters within the values of those
     specified columns.
 
 
@@ -99,10 +99,10 @@ def standardise_white_space(df, subset=None, wsl='one', fill=None):
       The dataframe to which the function is applied.
     subset : str or list of str, (default = None)
       The subset of columns that are having their
-      white space characters changed. If this is left blank 
-      then it defaults to all columns.  
+      white space characters changed. If this is left blank
+      then it defaults to all columns.
     wsl : {'one','none'}, (default = 'one')
-      wsl stands for white space level, which is used to 
+      wsl stands for white space level, which is used to
       indicate what the user would like white space to be
       replaced with. 'one' replaces multiple whitespces with single
       whitespace. 'none' removes all whitespace
@@ -166,10 +166,10 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     Parameters
     ----------
     df : dataframe
-      The dataframe the function is applied to.   
+      The dataframe the function is applied to.
     first_name : string
       The title of the column containing first name or all forenames if
-      middle name variable is not included   
+      middle name variable is not included
     middle_name : string
       The title of the column containing middle names or previously created
       middle name null column if middle name variable is not included
@@ -233,7 +233,7 @@ def reg_replace(df, dic={}, subset=None):
       regex to be replaced.
     subset : str or list of str, default = None
       The subset is the list of columns in the dataframe
-      on which reg_replace is performing its actions. 
+      on which reg_replace is performing its actions.
       If no subset is entered the None default makes sure
       that all columns in the dataframe are in the subset.
 
@@ -265,7 +265,7 @@ def reg_replace(df, dic={}, subset=None):
 
 def clean_surname(df, subset):
     '''
-    Removes invalid surname response values from a column, as specified 
+    Removes invalid surname response values from a column, as specified
     by components list within function. Concatenates common surname prefixes
     to surname, as specified by prefixes list within function.
 
@@ -402,9 +402,9 @@ def group_single_characters(df, subset=None):
 
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
-      The dataframe to which the function is applied. 
+      The dataframe to which the function is applied.
     subset : str or list of str, default = None
       Subset of columns on which the function is applied.
       If left as None, the function applies to all
@@ -416,7 +416,7 @@ def group_single_characters(df, subset=None):
     -------
     dataframe
       Dataframe with the same columns but with the
-      group single characters function applied to 
+      group single characters function applied to
       the specified columns.
 
     Raises
@@ -452,9 +452,9 @@ def clean_hyphens(df, subset=None):
     the whitespace around the hyphens.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
-      Dataframe to which the function is applied. 
+      Dataframe to which the function is applied.
     subset : str or list of str, default = None
       Subset of columns on which the function is applied.
       If left as None, the function applies to all
@@ -500,13 +500,13 @@ def standardise_null(df, replace, subset=None, replace_with=None,
     """
     Casts values used as nulls to None type (true null).
 
-    If regex is True, this allows user to enter a regular expression that 
+    If regex is True, this allows user to enter a regular expression that
     captures all values to be treated as null and casts these to specified
     values. Otherwise, the exact values entered in replace are searched
     for and replaced in the data.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     replace: data-type, default = None
@@ -523,7 +523,7 @@ def standardise_null(df, replace, subset=None, replace_with=None,
       are converted to (by default None or true null)
     regex: {True,False}, default = True
       The regex argument is a boolean value.
-      Setting it to True ensures the replace value 
+      Setting it to True ensures the replace value
       is treated like a regex statement.
       Setting it to False makes sure the replacement
       value is not treated like a regex statement.
@@ -606,10 +606,10 @@ def max_white_space(df, limit, subset=None):
 
     Any whitespace above the limit e.g. 3 subsequent whitespaces
     when the limit is 2 will be changed to the limit value within
-    the string. 
+    the string.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     limit : int
@@ -691,7 +691,7 @@ def max_hyphen(df, limit, subset=None):
     limit is 2 will be changed to the limit value within the string.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     limit : int
@@ -775,7 +775,7 @@ def remove_punct(df, subset=None, keep=None):
     the keep argument.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     subset :  str or list of str, default = None
@@ -783,8 +783,8 @@ def remove_punct(df, subset=None, keep=None):
       If None the function applies to the whole dataframe.
     keep: str or list of str, default = None
       Can be set to a string with a symbol you want to keep, e.g.
-      if you want to keep the addition symbol set keep = '+' and 
-      it will refrain from removing the + symbol from the 
+      if you want to keep the addition symbol set keep = '+' and
+      it will refrain from removing the + symbol from the
       subset of columns.
 
     Returns
@@ -848,19 +848,19 @@ def remove_punct(df, subset=None, keep=None):
 def standardise_case(df, subset=None, val='upper'):
     """
     Converts the case of all specified variables in a dataframe into
-    one format. For example, using upper will set the case of all 
+    one format. For example, using upper will set the case of all
     specified variables to UPPER CASE.
 
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     subset :  str or list of str, default = None
       The subset is the column(s) on which the function is applied.
-      If None the function applies to the whole dataframe. 
+      If None the function applies to the whole dataframe.
     val: {'upper','lower','title'}, default = 'upper'
-      Takes three types of string values 
+      Takes three types of string values
       and changes the values in the subset columns to the 
       case type respectively.
 
@@ -928,7 +928,7 @@ def trim(df, subset=None):
     or selected string columns.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied..
     subset : default = None, string or list of strings
@@ -938,7 +938,7 @@ def trim(df, subset=None):
     Returns
     -------
     dataframe
-      Dataframe with leading and trailing whitespace removed 
+      Dataframe with leading and trailing whitespace removed
       from selected or all string columns in place.
 
     Raises
@@ -1004,7 +1004,7 @@ def add_leading_zeros(df, subset, n):
     is set to be 7, then the result would be 0000001.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     subset : string or list of strings, default = None
@@ -1072,7 +1072,7 @@ def replace(df, subset, replace_dict):
     Replaces specific string values in given column(s) with specified values.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     subset : string or list of strings
@@ -1142,9 +1142,9 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     Changes the date format of a specified date column.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
-      Dataframe to which the function is applied.   
+      Dataframe to which the function is applied.
     col_name: string
       The column in the dataframe to which the function is being
       applied.
@@ -1154,7 +1154,7 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
       up and dd,mm,yyyy to show date month and year respectively.
       e.g. 'dd-mm-yyyy' , 'dd/mm/yyyy', 'yyyy-mm-dd'.
     out_date_format: default = 'yyyy-mm-dd', string
-      This is the date format to which the column values will be 
+      This is the date format to which the column values will be
       changed.
       It uses hyphens or forward slashes to split the date
       up and dd,mm,yyyy to show date month and year respectively.
@@ -1211,7 +1211,7 @@ def fill_nulls(df, fill, subset=None):
     Fills null and NaN with specified value
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     fill: None or a string
@@ -1226,7 +1226,7 @@ def fill_nulls(df, fill, subset=None):
     Returns
     -------
     dataframe
-      Dataframe with null/NaN values replaced from 
+      Dataframe with null/NaN values replaced from
       the subset of columns.
 
     Raises
@@ -1283,18 +1283,18 @@ def fill_nulls(df, fill, subset=None):
 
 def cast_geography_null(df, target_col, regex, geo_cols=None):
     """
-    Casts a target geography variable value, and if specified corresponding values in 
-    additional geography variables, to null (None type) where target geography value 
+    Casts a target geography variable value, and if specified corresponding values in
+    additional geography variables, to null (None type) where target geography value
     meets regex.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     target_col : str
       The target reference column
    regex: str
-      The regex conditions defining null postcode (default postcodes beginning 
+      The regex conditions defining null postcode (default postcodes beginning
       zz999 case insensitive)
     geo_cols: str or list of str, default = None
       Additional geography variables to be cast to null.
@@ -1368,7 +1368,7 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
     Calculates individuals' ages at specified dates.
 
 
-    From a reference Date of Birth column, the function takes 
+    From a reference Date of Birth column, the function takes
     a list of dates, and for each date creates a new column
     specifying an individual's age at that date.
 
@@ -1376,11 +1376,11 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
 
 
     Parameters
-    ----------  
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     birth_date: string
-      The original date of birth column needed to calculate age. 
+      The original date of birth column needed to calculate age.
     in_date_format: default = 'yyyy-MM-dd',string
       The date format of the date of birth column.
       It uses hyphens or forward slashes to split the date
@@ -1388,7 +1388,7 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
       e.g. 'dd-MM-yyyy' , 'dd/MM/yyyy', 'yyyy-MM-dd'.
     *age_at_dates: list of strings
       The list of dates at which the user wants to calculate ages. Any
-      number of dates can be given. The dates need to be in the 
+      number of dates can be given. The dates need to be in the
       following format: 'yyyy-MM-dd'.
 
     Returns

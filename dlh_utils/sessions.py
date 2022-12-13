@@ -13,12 +13,12 @@ def getOrCreateSparkSession(appName='DE_DL',
                             cores=5,
                             maxExecutors=5):
     """
-    Starts spark session dependent on size category specified 
+    Starts spark session dependent on size category specified
     or starts custom session on specified parameters. Also generates
     Spark UI link in console for monitoring session progress/resource use.
 
     Parameters
-    ----------  
+    ----------
     appName : str
       The name of the spark session
     size: {'small','medium','large','extra_large','custom'},default = 'large'
@@ -54,20 +54,20 @@ def getOrCreateSparkSession(appName='DE_DL',
     spark_ui = display(HTML('<a href=http://%s>Spark UI</a>' % url))
 
     try:
-      
-      # get graphframes jar path to configure session with
-      graphframes_path = graphframes.__file__
-      graphframes_path = graphframes_path.rsplit('/', 1)[0]
 
-      for file in os.listdir(graphframes_path):
-          if file.endswith(".jar"):
-              # Get the latest jar file
-              jar_path = os.path.join(graphframes_path, file)
-              
+      # get graphframes jar path to configure session with
+        graphframes_path = graphframes.__file__
+        graphframes_path = graphframes_path.rsplit('/', 1)[0]
+
+        for file in os.listdir(graphframes_path):
+            if file.endswith(".jar"):
+                # Get the latest jar file
+                jar_path = os.path.join(graphframes_path, file)
+       
     except FileNotFoundError:
-      print("graphframes wrapper package not found. Please install this to use the cluster_number() function.")
-      jar_path = None
-      
+        print("graphframes wrapper package not found. Please install this to use the cluster_number function.")
+        jar_path = None
+
     if size == 'small':
 
         """

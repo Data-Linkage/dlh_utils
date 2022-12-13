@@ -24,11 +24,11 @@ def list_files(directory, walk=False):
 
 
     Parameters
-    ---------- 
+    ----------
     directory : str
       String path of directory
     walk : boolean {True, False}
-      Lists files only in immediate directory specified if walk = False. 
+      Lists files only in immediate directory specified if walk = False.
       Lists all files in immediate directory and all subfolders if Walk = True
 
     Returns
@@ -104,7 +104,7 @@ def list_checkpoints(checkpoint):
     Lists checkpoints in HDFS directory
 
     Parameters
-    ---------- 
+    ----------
     checkpoint : str
       String path of checkpoint directory
 
@@ -122,7 +122,7 @@ def list_checkpoints(checkpoint):
 
     > list_checkpoints(checkpoint = '/user/edwara5/checkpoints')
 
-    ['hdfs://prod1/user/edwara5/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
+['hdfs://prod1/user/edwara5/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
     """
 
     return list_files(
@@ -133,12 +133,12 @@ def list_checkpoints(checkpoint):
 
 def list_tables(database):
     """
-    Returns the tables in a database from hive, it takes an argument of the 
+    Returns the tables in a database from hive, it takes an argument of the
     database name as a string. It then returns a dataframe listing the tables
     within the database given.
 
     Parameters
-    ---------- 
+    ----------
     database : str
       String name of database
 
@@ -181,7 +181,7 @@ def most_recent(path, filetype, regex=None):
     csv/parquet file(s) in location or database.
 
     Parameters
-    ---------- 
+    ----------
     path : str
       The path or database which will be searched
     filetype : {csv, parquet, hive}
@@ -198,7 +198,7 @@ def most_recent(path, filetype, regex=None):
 
     Raises
     -------
-      FileNotFoundError if search query does not exist in HDFS. 
+      FileNotFoundError if search query does not exist in HDFS.
 
     Example
     -------
@@ -255,7 +255,8 @@ def most_recent(path, filetype, regex=None):
         # if filetype != hive
         else:
 
-            # return all files in dir recursively, sorted by modification date (ascending), decode from bytes-like to str
+            # return all files in dir recursively, sorted by modification date (ascending),
+            # decode from bytes-like to str
             files = subprocess.check_output(
                 ["hdfs", "dfs", "-ls", "-R", "-t", "-C", path]).decode()
 
@@ -332,13 +333,14 @@ def most_recent(path, filetype, regex=None):
 
             except:
 
-                raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                        " not found in this directory: " + path)
+                raise FileNotFoundError(filetype + " file, matching this regular expression: " + 
+                                        regex + " not found in this directory: " + path)
 
         # if filetype != hive
         else:
 
-            # return all files in dir recursively, sorted by modification date (ascending), decode from bytes-like to str
+            # return all files in dir recursively, sorted by modification date (ascending),
+            # decode from bytes-like to str
             files = subprocess.check_output(
                 ["hdfs", "dfs", "-ls", "-R", "-t", "-C", path]).decode()
 
@@ -363,8 +365,8 @@ def most_recent(path, filetype, regex=None):
 
                 except:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path)
+                    raise FileNotFoundError(filetype + " file, matching this regular expression: " 
+                                            + regex + " not found in this directory: " + path)
 
             elif filetype == 'parquet':
 
@@ -379,8 +381,8 @@ def most_recent(path, filetype, regex=None):
 
                 except:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path)
+                    raise FileNotFoundError(filetype + " file, matching this regular expression: " 
+                                            + regex + " not found in this directory: " + path)
 
     return most_recent_filepath, filetype
 
@@ -396,7 +398,7 @@ def write_format(df, write, path,
     format.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to be written
     write : {csv, parquet, hive}
@@ -404,7 +406,7 @@ def write_format(df, write, path,
     path : str
       The path or database to which dataframe is to be written
     file_name : str
-      The file or table name under which dataframe is to be saved. Note that if 
+      The file or table name under which dataframe is to be saved. Note that if
       None, function will write to the HDFS path specified in case of csv
       or parquet
     sep : str
@@ -453,17 +455,17 @@ def read_format(read, path=None, file_name=None,
     """
     Reads dataframe from specified format.
 
-    Can read from HDFS in csv or parquet format and from database hive table 
+    Can read from HDFS in csv or parquet format and from database hive table
     format.
 
     Parameters
-    ---------- 
+    ----------
     read : str {csv, parquet, hive}
       The format from which data is to be read
     path : str (default = None)
       The path or database from which dataframe is to be read
     file_name : str (default = None)
-      The file or table name from which dataframe is to be read. Note that if 
+      The file or table name from which dataframe is to be read. Note that if
       None, function will read from HDFS path specified in case of csv
       or parquet
     sep : str
@@ -473,7 +475,7 @@ def read_format(read, path=None, file_name=None,
     mode : {overwrite, append}, default = overwrite
       Choice to overwrite existing file or table or to append new data into it
     inferSchema : {"true", "false"}:
-      Boolean indicating whether data should be read with infered data types and 
+      Boolean indicating whether data should be read with infered data types and
       schema. If false, all data will read as string format.
 
     Returns
@@ -488,7 +490,7 @@ def read_format(read, path=None, file_name=None,
     Example
     -------
 
-    > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet', 
+    > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet',
                       file_name = None, header= "true", inferSchema = "True")
 
     > df.show()
@@ -709,7 +711,7 @@ def value_counts(df, limit=20, output_mode='pandas'):
     Returns
     -------
     None
-      A dataframe with original dataframe columns and a count of 
+      A dataframe with original dataframe columns and a count of
       their most common values.
 
     Raises
