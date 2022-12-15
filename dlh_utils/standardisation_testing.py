@@ -431,40 +431,6 @@ def test_mod_ethnic_group_5():
             .where(F.col('before') == F.col('after'))
             ).count() == 20
 
-##############################################################################
-
-
-def test_cutOff():
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "strings": [None, '2', '3', '4', '5'],
-            "ints": [None, 2, 3, 4, 5]
-        })))
-
-    # cutOff does not remove null values when the val is an Int type
-    assert (cutOff(df, threshold_column='ints', val=3, mode='>=').count() == 4)
-
-    # cutOff removes null values when the val is a string type
-    assert (cutOff(df, threshold_column='strings',
-            val='3', mode='>=').count() == 3)
-
-    assert (cutOff(df, threshold_column='strings',
-            val='3', mode='>').count() == 2)
-    assert (cutOff(df, threshold_column='strings',
-            val='2', mode='<=').count() == 1)
-    assert (cutOff(df, threshold_column='strings',
-            val='4', mode='<').count() == 2)
-
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "col1": [None, '15-05-1996', '16-04-1996', '17-06-1996', '18-05-1997']
-        })))
-    df2 = df.withColumn("col1", F.to_date("col1", 'dd-MM-yyyy'))
-
-    assert (cutOff(df2, 'col1', '1997-01-15', '>=').count() == 1)
-    assert (cutOff(df2, 'col1', '1997-01-15', '<=').count() == 3)
-    assert (cutOff(df2, 'col1', '1996-05-15', '<=').count() == 2)
 
 ##############################################################################
 

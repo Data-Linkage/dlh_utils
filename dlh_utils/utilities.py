@@ -3,14 +3,13 @@ Utility functions used to ease difficulty in querying databases and produce desc
 metrics about a dataframe
 '''
 import subprocess
+import os
+import re
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
 import pandas as pd
-import os
-import errno
-import re
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
 
@@ -430,7 +429,7 @@ def write_format(df, write, path,
                   mode = 'overwrite')
     """
     spark = SparkSession.builder.getOrCreate()
-    if file_name == None:
+    if file_name is None:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
                 mode).option('sep', sep).save(f'{path}')
@@ -449,7 +448,7 @@ def write_format(df, write, path,
 
 
 def read_format(read, path=None, file_name=None,
-               sep=",", header="true", inferSchema="True"):
+               sep=",", header="true", infer_schema="True"):
     """
     Reads dataframe from specified format.
 
@@ -472,7 +471,7 @@ def read_format(read, path=None, file_name=None,
       Boolean indicating whether or not data will be read to include a header
     mode : {overwrite, append}, default = overwrite
       Choice to overwrite existing file or table or to append new data into it
-    inferSchema : {"true", "false"}:
+    infer_schema : {"true", "false"}:
       Boolean indicating whether data should be read with infered data types and 
       schema. If false, all data will read as string format.
 
@@ -489,7 +488,7 @@ def read_format(read, path=None, file_name=None,
     -------
 
     > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet', 
-                      file_name = None, header= "true", inferSchema = "True")
+                      file_name = None, header= "true", infer_schema = "True")
 
     > df.show()
 
@@ -505,18 +504,18 @@ def read_format(read, path=None, file_name=None,
     +---+--------+----------+-------+----------+---+--------+
     """
     spark = SparkSession.builder.getOrCreate()
-    if file_name == None:
+    if file_name is None:
         if read == 'csv':
             df = (spark.read.format('csv')
                   .option('sep', sep)
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}")
                   )
         if read == 'parquet':
             df = (spark.read.format('parquet')
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}")
                   )
     else:
@@ -524,13 +523,13 @@ def read_format(read, path=None, file_name=None,
             df = (spark.read.format('csv')
                   .option('sep', sep)
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}/{file_name}")
                   )
         if read == 'parquet':
             df = (spark.read.format('parquet')
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}/{file_name}")
                   )
         if read == 'hive':
@@ -576,7 +575,7 @@ def search_files(path, string):
 
     for file in files_in_dir:
         count = 0
-        countList = []
+        count_list = []
 
         try:
             with open(f'{path}/{file}') as f:
@@ -586,11 +585,11 @@ def search_files(path, string):
                 count = count + 1
 
                 if string in line:
-                    countList.append(count)
+                    count_list.append(count)
 
-            if len(countList) != 0:
-                diction[file] = countList
-        except:
+            if len(count_list) != 0:
+                diction[file] = count_list
+        except Exception:
             continue
 
     return diction
@@ -927,16 +926,16 @@ def pandas_to_spark(pandas_df):
         if f == 'datetime64[ns]':
             return TimestampType()
 
-        elif f == 'int64':
+        if f == 'int64':
             return LongType()
 
-        elif f == 'int32':
+        if f == 'int32':
             return IntegerType()
 
-        elif f == 'float64':
+        if f == 'float64':
             return DoubleType()
 
-        elif f == 'float32':
+        if f == 'float32':
             return FloatType()
 
         else:
