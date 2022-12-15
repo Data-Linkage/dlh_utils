@@ -2,8 +2,6 @@ import pyspark.sql.functions as F
 from pyspark.sql.types import *
 from dlh_utils import dataframes as da
 
-###############################################################################
-
 
 def cast_type(df, subset=None, types='string'):
     """
@@ -72,7 +70,7 @@ def cast_type(df, subset=None, types='string'):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -124,12 +122,11 @@ def standardise_white_space(df, subset=None, wsl='one', fill=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
-        if fill != None:
-            wsl == None
+        if fill is not None:
             if df.select(col).dtypes[0][1] == 'string':
                 df = df.withColumn(col, F.trim(F.col(col)))
                 df = df.withColumn(col, F.regexp_replace(
@@ -192,7 +189,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     dataframes.concat()
     """
 
-    out = (df.where((F.col(first_name).contains(sep) == False)
+    out = (df.where((F.col(first_name).contains(sep) is False)
                     | (F.col(first_name).isNull())))
     df = df.where(F.col(first_name).contains(sep))
 
@@ -217,7 +214,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
 ##############################################################################
 
 
-def reg_replace(df, dic={}, subset=None):
+def reg_replace(df, replace_dict, subset=None):
     """
     Uses regular expressions to replace values within dataframe columns.
 
@@ -250,12 +247,12 @@ def reg_replace(df, dic={}, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
-    if subset != None:
+    if subset is not None:
         for col in subset:
-            for key, val in dic.items():
+            for key, val in replace_dict.items():
                 df = df.withColumn(col, F.regexp_replace(F.col(col), val, key))
 
     return df
@@ -323,7 +320,7 @@ def clean_surname(df, subset):
 
     surname_regex = surname_regex+"|"+surname_prefix_regex
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -377,7 +374,7 @@ def clean_forename(df, subset):
     forename_regex = "|".join([f"\\b{component}\\b"
                                for component in components])
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -427,7 +424,7 @@ def group_single_characters(df, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -477,7 +474,7 @@ def clean_hyphens(df, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -571,10 +568,10 @@ def standardise_null(df, replace, subset=None, replace_with=None,
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
-    if regex == True:
+    if regex is True:
 
         for column in subset:
 
@@ -585,7 +582,7 @@ def standardise_null(df, replace, subset=None, replace_with=None,
                               .otherwise(F.col(column)))
                   )
 
-    if regex == False:
+    if regex is False:
 
         for column in subset:
 
@@ -662,7 +659,7 @@ def max_white_space(df, limit, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -744,7 +741,7 @@ def max_hyphen(df, limit, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     number_hyphens = "-"*limit
@@ -829,10 +826,10 @@ def remove_punct(df, subset=None, keep=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
-    if keep != None:
+    if keep is not None:
         keep = "".join(keep)
         regex = f"[^A-Za-z0-9 {keep}]"
     else:
@@ -977,7 +974,7 @@ def trim(df, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     types = [x for x in df.dtypes
@@ -1051,7 +1048,7 @@ def add_leading_zeros(df, cols, n):
     |005|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
     """
-    if type(cols) != list:
+    if not isinstance(cols, list):
         cols = [cols]
 
     for col in cols:
@@ -1120,7 +1117,7 @@ def replace(df, cols, replace_dict):
     +---+---------+----------+-------+----------+---+--------+
     """
 
-    if type(cols) != list:
+    if not isinstance(cols, list):
         cols = [cols]
 
     for col in cols:
@@ -1265,7 +1262,7 @@ def fill_nulls(df, fill, subset=None):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -1294,7 +1291,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
     target_col : str
       The target reference column
    regex: str
-      The regex conditions defining null postcode (default postcodes beginning 
+      The regex conditions defining null postcode (default postcodes beginning
       zz999 case insensitive)
     geo_cols: str or list of str, default = None
       Additional geography variables to be cast to null.
@@ -1341,7 +1338,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
     """
     if geo_cols is not None:
 
-        if type(geo_cols) != list:
+        if not isinstance(geo_cols, list):
             geo_cols = [geo_cols]
 
         for col in geo_cols:
@@ -1368,7 +1365,7 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
     Calculates individuals' ages at specified dates.
 
 
-    From a reference Date of Birth column, the function takes 
+    From a reference Date of Birth column, the function takes
     a list of dates, and for each date creates a new column
     specifying an individual's age at that date.
 
@@ -1376,11 +1373,11 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
 
 
     Parameters
-    ----------  
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     birth_date: string
-      The original date of birth column needed to calculate age. 
+      The original date of birth column needed to calculate age.
     in_date_format: default = 'yyyy-MM-dd',string
       The date format of the date of birth column.
       It uses hyphens or forward slashes to split the date
@@ -1388,7 +1385,7 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
       e.g. 'dd-MM-yyyy' , 'dd/MM/yyyy', 'yyyy-MM-dd'.
     *age_at_dates: list of strings
       The list of dates at which the user wants to calculate ages. Any
-      number of dates can be given. The dates need to be in the 
+      number of dates can be given. The dates need to be in the
       following format: 'yyyy-MM-dd'.
 
     Returns
