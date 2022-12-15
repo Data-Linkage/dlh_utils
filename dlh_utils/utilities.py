@@ -9,9 +9,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
-import pandas as pd
 from dlh_utils import dataframes as da
-from dlh_utils import utilities as ut
 
 ###############################################################################
 
@@ -27,7 +25,7 @@ def list_files(directory, walk=False):
     directory : str
       String path of directory
     walk : boolean {True, False}
-      Lists files only in immediate directory specified if walk = False. 
+      Lists files only in immediate directory specified if walk = False.
       Lists all files in immediate directory and all subfolders if Walk = True
 
     Returns
@@ -67,19 +65,19 @@ def list_files(directory, walk=False):
     """
 
     URI = sc._gateway.jvm.java.net.URI
-    Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
-    FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
-    Configuration = sc._gateway.jvm.org.apache.hadoop.conf.Configuration
+    path = sc._gateway.jvm.org.apache.hadoop.fs.Path
+    file_system = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
+    config = sc._gateway.jvm.org.apache.hadoop.conf.Configuration
 
     host = 'user'
 
-    fs = FileSystem.get(URI(host), Configuration())
+    fs = file_system.get(URI(host), config())
 
-    status = fs.listStatus(Path(directory))
+    status = fs.listStatus(path(directory))
 
     files = [str(fileStatus.getPath()) for fileStatus in status]
 
-    if walk == False:
+    if walk is False:
 
         return files
 
@@ -103,7 +101,7 @@ def list_checkpoints(checkpoint):
     Lists checkpoints in HDFS directory
 
     Parameters
-    ---------- 
+    ----------
     checkpoint : str
       String path of checkpoint directory
 
@@ -121,7 +119,7 @@ def list_checkpoints(checkpoint):
 
     > list_checkpoints(checkpoint = '/user/edwara5/checkpoints')
 
-    ['hdfs://prod1/user/edwara5/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
+    ['hdfs://prod1/user/edwara5/checkpoints/connected-components-985ca288']
     """
 
     return list_files(
@@ -132,12 +130,12 @@ def list_checkpoints(checkpoint):
 
 def list_tables(database):
     """
-    Returns the tables in a database from hive, it takes an argument of the 
+    Returns the tables in a database from hive, it takes an argument of the
     database name as a string. It then returns a dataframe listing the tables
     within the database given.
 
     Parameters
-    ---------- 
+    ----------
     database : str
       String name of database
 
@@ -180,7 +178,7 @@ def most_recent(path, filetype, regex=None):
     csv/parquet file(s) in location or database.
 
     Parameters
-    ---------- 
+    ----------
     path : str
       The path or database which will be searched
     filetype : {csv, parquet, hive}
@@ -197,7 +195,7 @@ def most_recent(path, filetype, regex=None):
 
     Raises
     -------
-      FileNotFoundError if search query does not exist in HDFS. 
+      FileNotFoundError if search query does not exist in HDFS.
 
     Example
     -------
@@ -214,7 +212,7 @@ def most_recent(path, filetype, regex=None):
     # pass spark context to function
     spark = SparkSession.builder.getOrCreate()
 
-    if regex == None:
+    if regex is None:
 
         if filetype == 'hive':
 
@@ -232,24 +230,24 @@ def most_recent(path, filetype, regex=None):
                 filepaths = list(filepaths.select('path').toPandas()['path'])
 
                 # initialise empty dictionary
-                filepath_dict = dict()
+                filepath_dict = {}
 
                 # loop through paths, appending path and time to dictionary
-                for path in filepaths:
+                for filepath in filepaths:
 
                     time = spark.sql(
-                        f"SHOW tblproperties {path} ('transient_lastDdlTime')").collect()[0][0]
+                        f"SHOW tblproperties {filepath} ('transient_lastDdlTime')").collect()[0][0]
 
-                    filepath_dict.update({path: time})
+                    filepath_dict.update({filepath: time})
 
                 # sort by max time since epoch and return corresponding path
                 most_recent_filepath = max(
                     filepath_dict, key=filepath_dict.get)
 
-            except:
+            except Exception as exc:
 
                 raise FileNotFoundError(
-                    filetype + " file not found in this directory: " + path)
+                    filetype + " file not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
@@ -271,10 +269,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(
-                        filetype + " file not found in this directory: " + path)
+                        filetype + " file not found in this directory: " + path) from exc
 
             elif filetype == 'parquet':
 
@@ -286,10 +284,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(
-                        filetype + " file not found in this directory: " + path)
+                        filetype + " file not found in this directory: " + path) from exc
 
     # if regex argument specified:
     else:
@@ -315,24 +313,24 @@ def most_recent(path, filetype, regex=None):
                     filtered_filepaths.select('path').toPandas()['path'])
 
                 # initialise empty dictionary
-                filepath_dict = dict()
+                filepath_dict = {}
 
                 # loop through paths, appending path and time to dict
-                for path in filtered_filepaths:
+                for filepath in filtered_filepaths:
 
                     time = spark.sql(
-                        f"SHOW tblproperties {path} ('transient_lastDdlTime')").collect()[0][0]
+                        f"SHOW tblproperties {filepath} ('transient_lastDdlTime')").collect()[0][0]
 
-                    filepath_dict.update({path: time})
+                    filepath_dict.update({filepath: time})
 
                 # sort by max time since epoch and return corresponding path
                 most_recent_filepath = max(
                     filepath_dict, key=filepath_dict.get)
 
-            except:
+            except Exception as exc:
 
                 raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                        " not found in this directory: " + path)
+                                        " not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
@@ -360,10 +358,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path)
+                                            " not found in this directory: " + path) from exc
 
             elif filetype == 'parquet':
 
@@ -376,10 +374,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path)
+                                            " not found in this directory: " + path) from exc
 
     return most_recent_filepath, filetype
 
@@ -452,17 +450,17 @@ def read_format(read, path=None, file_name=None,
     """
     Reads dataframe from specified format.
 
-    Can read from HDFS in csv or parquet format and from database hive table 
+    Can read from HDFS in csv or parquet format and from database hive table
     format.
 
     Parameters
-    ---------- 
+    ----------
     read : str {csv, parquet, hive}
       The format from which data is to be read
     path : str (default = None)
       The path or database from which dataframe is to be read
     file_name : str (default = None)
-      The file or table name from which dataframe is to be read. Note that if 
+      The file or table name from which dataframe is to be read. Note that if
       None, function will read from HDFS path specified in case of csv
       or parquet
     sep : str
@@ -472,7 +470,7 @@ def read_format(read, path=None, file_name=None,
     mode : {overwrite, append}, default = overwrite
       Choice to overwrite existing file or table or to append new data into it
     infer_schema : {"true", "false"}:
-      Boolean indicating whether data should be read with infered data types and 
+      Boolean indicating whether data should be read with infered data types and
       schema. If false, all data will read as string format.
 
     Returns
@@ -487,7 +485,7 @@ def read_format(read, path=None, file_name=None,
     Example
     -------
 
-    > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet', 
+    > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet',
                       file_name = None, header= "true", infer_schema = "True")
 
     > df.show()
@@ -685,7 +683,7 @@ def describe_metrics(df, output_mode='pandas'):
     ]]
 
     if output_mode == 'spark':
-        decribe_df = ut.pandas_to_spark(decribe_df)
+        decribe_df = pandas_to_spark(decribe_df)
 
     return decribe_df
 
@@ -921,21 +919,21 @@ def pandas_to_spark(pandas_df):
     ------
     None at present.
     """
-    def equivalent_type(f):
+    def equivalent_type(_format):
 
-        if f == 'datetime64[ns]':
+        if _format == 'datetime64[ns]':
             return TimestampType()
 
-        if f == 'int64':
+        if _format == 'int64':
             return LongType()
 
-        if f == 'int32':
+        if _format == 'int32':
             return IntegerType()
 
-        if f == 'float64':
+        if _format == 'float64':
             return DoubleType()
 
-        if f == 'float32':
+        if _format == 'float32':
             return FloatType()
 
         else:
