@@ -21,7 +21,7 @@ def list_files(directory, walk=False):
 
 
     Parameters
-    ---------- 
+    ----------
     directory : str
       String path of directory
     walk : boolean {True, False}
@@ -252,7 +252,8 @@ def most_recent(path, filetype, regex=None):
         # if filetype != hive
         else:
 
-            # return all files in dir recursively, sorted by modification date (ascending), decode from bytes-like to str
+            # return all files in dir recursively, sorted by modification date (ascending),
+            # decode from bytes-like to str
             files = subprocess.check_output(
                 ["hdfs", "dfs", "-ls", "-R", "-t", "-C", path]).decode()
 
@@ -329,13 +330,14 @@ def most_recent(path, filetype, regex=None):
 
             except Exception as exc:
 
-                raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                        " not found in this directory: " + path) from exc
+                raise FileNotFoundError(filetype + " file, matching this regular expression: " +\ 
+                                        regex + " not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
 
-            # return all files in dir recursively, sorted by modification date (ascending), decode from bytes-like to str
+            # return all files in dir recursively, sorted by modification date (ascending),
+            # decode from bytes-like to str
             files = subprocess.check_output(
                 ["hdfs", "dfs", "-ls", "-R", "-t", "-C", path]).decode()
 
@@ -360,8 +362,8 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path) from exc
+                    raise FileNotFoundError(filetype + " file, matching this regular expression: " +\
+                                            regex + " not found in this directory: " + path) from exc
 
             elif filetype == 'parquet':
 
@@ -376,8 +378,8 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " + regex +
-                                            " not found in this directory: " + path) from exc
+                    raise FileNotFoundError(filetype + " file, matching this regular expression: " +\ 
+                                            regex + " not found in this directory: " + path) from exc
 
     return most_recent_filepath, filetype
 
@@ -393,7 +395,7 @@ def write_format(df, write, path,
     format.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to be written
     write : {csv, parquet, hive}
@@ -401,7 +403,7 @@ def write_format(df, write, path,
     path : str
       The path or database to which dataframe is to be written
     file_name : str
-      The file or table name under which dataframe is to be saved. Note that if 
+      The file or table name under which dataframe is to be saved. Note that if
       None, function will write to the HDFS path specified in case of csv
       or parquet
     sep : str
@@ -627,17 +629,17 @@ def describe_metrics(df, output_mode='pandas'):
     -------
     > describe_metrics(df = df,output_mode='spark').show()
 
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
-    |  variable|  type|count|distinct|  percent_distinct|null|      percent_null|not_null| percent_not_null|
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
-    |        ID|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |  Forename|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |Middlename|string|    6|       4| 66.66666666666666|   1|16.666666666666664|       5|83.33333333333334|
-    |   Surname|string|    6|       1|16.666666666666664|   0|               0.0|       6|            100.0|
-    |       DoB|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |       Sex|string|    6|       2| 33.33333333333333|   0|               0.0|       6|            100.0|
-    |  Postcode|string|    6|       1|16.666666666666664|   0|               0.0|       6|            100.0|
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
+    |  variable|  type|count|distinct|percent_distinct|null|percent_null|not_null|percent_not_null|
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
+    |        ID|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |  Forename|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |Middlename|string|    6|       4| 66.666666666666|   1|16.666666664|       5| 83.333333333334|
+    |   Surname|string|    6|       1|16.6666666666664|   0|         0.0|       6|           100.0|
+    |       DoB|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |       Sex|string|    6|       2| 33.333333333333|   0|         0.0|       6|           100.0|
+    |  Postcode|string|    6|       1|16.6666666666664|   0|         0.0|       6|           100.0|
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
     """
 
     spark = SparkSession.builder.getOrCreate()

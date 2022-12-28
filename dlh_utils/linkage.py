@@ -14,8 +14,9 @@ from graphframes import *
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
 
-# phonetic encoders
+###############################################################################
 
+# phonetic encoders
 
 def alpha_name(df, input_col, output_col):
     """
@@ -62,7 +63,7 @@ def alpha_name(df, input_col, output_col):
     df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
            .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
            .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
-           .drop('name_array', 'sorted_name_array') 
+           .drop('name_array', 'sorted_name_array')
     return df
 
 ###############################################################################
@@ -161,7 +162,7 @@ def soundex(df, input_col, output_col):
 
 def std_lev_score(string1, string2):
     """
-    Applies the standardised levenshtein string similarity function to two 
+    Applies the standardised levenshtein string similarity function to two
     strings to return a score between 0 and 1.
 
     This function works at the column level, and so needs to either be applied
@@ -218,8 +219,9 @@ def std_lev_score(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/some_path/links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS,
+                                          id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, out_dir = '/some_path/links')
     """
 
     return (1 - ((F.levenshtein(string1, string2)) /
@@ -254,8 +256,8 @@ def jaro(string1, string2):
     --------
 
     for a pre-joined dataset:
-    
-    >df.show()    
+
+    >df.show()
     +---+--------+----------+
     | ID|Forename|Forename_2|
     +---+--------+----------+
@@ -289,8 +291,9 @@ def jaro(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/some_path/links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS,
+                                          id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, out_dir = '/some_path/links')
     """
 
     return jellyfish.jaro_similarity(
@@ -355,8 +358,9 @@ def jaro_winkler(string1, string2):
         CEN.Resident_Age_cen == CCS.Resident_Age_ccs,
         CEN.Postcode_cen == CCS.Postcode_ccs]
 
-    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
-                               matchkeys = MK, out_dir = '/user/username/cen_ccs_links')
+    links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS,
+                                          id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
+                                          matchkeys = MK, out_dir = '/user/username/cen_ccs_links')
 
     """
 
@@ -368,7 +372,7 @@ def jaro_winkler(string1, string2):
 
 
 def blocking(df1, df2, blocks, id_vars):
-    """ 
+    """
     Combines two spark dataframes, based on a set of defined blocking criteria,
     to create a new dataframe of unique record pairs.
 
@@ -445,7 +449,7 @@ def blocking(df1, df2, blocks, id_vars):
 
 
 def cluster_number(df, id_1, id_2):
-    """ 
+    """
     Takes dataframe of matches with two id columns (id_1 and id_2) and assigns
     a cluster number to the dataframe based on the unique id pairings.
 
@@ -456,7 +460,7 @@ def cluster_number(df, id_1, id_2):
     java.lang.ClassNotFoundException: org.graphframes.GraphFramePythonAPI
 
     This can either be fixed by starting a sparksession from the `sessions` module of
-    this package, or by adding the JAR files from within the graphframes-wrapper 
+    this package, or by adding the JAR files from within the graphframes-wrapper
     package to your spark session, by setting the "spark.jars" spark config parameter
     equal to the path to these JAR files.
 
@@ -477,7 +481,7 @@ def cluster_number(df, id_1, id_2):
     Returns
     ------
     df: dataframe
-        dataframe with cluster number    
+        dataframe with cluster number
 
     Example
     -------
@@ -505,10 +509,11 @@ def cluster_number(df, id_1, id_2):
     | 1a| 8b|             2|
     | 3a| 7b|             3|
     | 3a| 3b|             3|
-    +---+---+--------------+     
+    +---+---+--------------+  
     """
     # Check variable types
-    if not ((isinstance(df.schema[id_1].dataType, StringType)) and (isinstance(df.schema[id_2].dataType, StringType))):
+    if not ((isinstance(df.schema[id_1].dataType, StringType))\ 
+    and (isinstance(df.schema[id_2].dataType, StringType))):
         raise TypeError('ID variables must be strings')
 
     # Set up spark checkpoint settings
@@ -527,28 +532,32 @@ def cluster_number(df, id_1, id_2):
 
     # Create graph & get connected components / clusters
     try:
-      graph = GraphFrame(ids, matches)
-      
-      cluster = graph.connectedComponents()
+        graph = GraphFrame(ids, matches)
 
-      # Update cluster numbers to be consecutive (1,2,3,4,... instead of 1,2,3,1000,1001...)
-      lookup = cluster.select('component').dropDuplicates(['component']).withColumn(
-          'Cluster_Number', F.rank().over(Window.orderBy("component"))).sort('component')
-      cluster = cluster.join(lookup, on='component',
-                             how='left').withColumnRenamed('id', id_1)
+        cluster = graph.connectedComponents()
 
-      # Join new cluster number onto matched pairs
-      df = df.join(cluster, on=id_1, how='left').sort(
-          'Cluster_Number').drop('component')
+        # Update cluster numbers to be consecutive (1,2,3,4,... instead of 1,2,3,1000,1001...)
+        lookup = cluster.select('component').dropDuplicates(['component']).withColumn(
+            'Cluster_Number', F.rank().over(Window.orderBy("component"))).sort('component')
+        cluster = cluster.join(lookup, on='component',
+                               how='left').withColumnRenamed('id', id_1)
 
-      return df
-  
+        # Join new cluster number onto matched pairs
+        df = df.join(cluster, on=id_1, how='left').sort(
+            'Cluster_Number').drop('component')
+
+        return df
+
     except py4j.protocol.Py4JJavaError:
-      print("""WARNING: A graphframes wrapper package installation has not been found! If you have not already done so,
-      you will need to submit graphframes' JAR file dependency to your spark context. This can be found here:
-      \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/graphframes-0.6.0-spark2.3-s_2.11.jar
-      \nOnce downloaded, this can be submitted to your spark context via: spark.conf.set('spark.jars', path_to_jar_file)
-      """)
+        print("""WARNING: A graphframes wrapper package installation has not been found! 
+        If you have not already done so, you will need to submit graphframes' JAR file 
+        dependency to your spark context. This can be found here:
+        \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/
+        graphframes-0.6.0-spark2.3-s_2.11.jar\nOnce downloaded, 
+        this can be submitted to your spark context via:
+        spark.conf.set('spark.jars', path_to_jar_file)
+        """)
+
 ###############################################################################
 
 
@@ -556,12 +565,12 @@ def extract_mk_variables(df, mk):
     '''
     Extracts variables from matchkey join condition
 
-    For example, would return ['first_name','last_name',date_of_birth'] for a 
-    matchkey using these components. Used in mk_drop(na) to exclude instances 
+    For example, would return ['first_name','last_name',date_of_birth'] for a
+    matchkey using these components. Used in mk_drop(na) to exclude instances
     of null in any matchkey component columns.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe the to which matchkeys will be applied.
     mk : list
@@ -574,7 +583,7 @@ def extract_mk_variables(df, mk):
 
     Raises
     -------
-      None at present.  
+      None at present.
     '''
 
     mk_variables = re.split("[^a-zA-Z0-9_]", str(mk))
@@ -590,7 +599,7 @@ def mk_dropna(df, mk):
     """
     Drops null values in variables included in matchkeys join conditions
 
-    Improves efficiency of join by excluding records containing nulls in matchkey 
+    Improves efficiency of join by excluding records containing nulls in matchkey
     component columns as these records would not match. Also avoids skew resulting
     from nulls. Used in order_matchkeys() and matchkey_join()
 
@@ -629,7 +638,7 @@ def order_matchkeys(df_l, df_r, mks, chunk=10):
     in ascending order
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe the to which matchkeys will be applied.
     mk : list
@@ -701,12 +710,12 @@ def matchkey_join(df_l, df_r, id_l, id_r, mk, mk_n=0):
     Joins dataframes on matchkey retaining only 1:1 matches
 
     Joins left and right dataframes on specified matchkey. Retains only instances
-    of 1:1 matches between left and right identifiers (i.e. where matches are 
+    of 1:1 matches between left and right identifiers (i.e. where matches are
     unique and there is only one match candidate for each left and right identifier).
     Adds 'matchkey' column to record matchkey number.
 
     Parameters
-    ---------- 
+    ----------
     df_l : dataframe
       left dataframe to be joined.
     df_r : dataframe
@@ -728,7 +737,7 @@ def matchkey_join(df_l, df_r, id_l, id_r, mk, mk_n=0):
 
     Raises
     -------
-      None at present. 
+      None at present.
 
     See Also
     --------
@@ -767,14 +776,14 @@ def chunk_list(l, n):
 
 def matchkey_dataframe(mks):
     """
-    Creates dataframe of matchkeys and descriptions 
+    Creates dataframe of matchkeys and descriptions
 
-    Takes a list of matchkeys. Assigns numbers to matchkeys based on order in list 
+    Takes a list of matchkeys. Assigns numbers to matchkeys based on order in list
     provided. Adds description of each matchkey from string manipulation of join
     condition.
 
     Parameters
-    ---------- 
+    ----------
     mks : list
       list of matchkeys
 
@@ -785,7 +794,7 @@ def matchkey_dataframe(mks):
 
     Raises
     -------
-      None at present.  
+      None at present.
     """
     spark = SparkSession.builder.getOrCreate()
 
@@ -812,13 +821,13 @@ def matchkey_dataframe(mks):
 
 def assert_unique_matches(linked_ids, *identifier_col):
     """
-    Asserts that all linkage results are unique (i.e. that there is 1:1 relationship 
+    Asserts that all linkage results are unique (i.e. that there is 1:1 relationship
     between matched records).
 
     Note: This will return an AssertError if linkage results are not unique.
 
     Parameters
-    ---------- 
+    ----------
     linked_ids : dataframe
       linked dataframe that includes unique identifier columns
     identifier_col: string or multiple strings
@@ -856,7 +865,7 @@ def matchkey_counts(linked_df):
     each matchkey.
 
     Parameters
-    ---------- 
+    ----------
     linked_df : dataframe
       dataframe returned by deterministic_linkage(). This will include variables:
       left identifier; right identifier and matchkey number
@@ -868,7 +877,7 @@ def matchkey_counts(linked_df):
 
     Raises
     -------
-      None at present.    
+      None at present.  
     """
 
     return (linked_df
@@ -889,7 +898,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
     examples for each matchkey as specified.
 
     Parameters
-    ---------- 
+    ----------
     linked_ids : dataframe
       dataframe returned by deterministic_linkage(). This will include variables:
       left identifier; right identifier and matchkey number.
@@ -918,7 +927,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
 
     Raises
     -------
-      None at present.    
+      None at present. 
 
     See Also
     --------
@@ -970,12 +979,12 @@ def demographics(*args, df, identifier,):
     """
     Produces demographics count of dataframe for groups specified.
 
-    Used to get counts of, for example number of persons in age 
+    Used to get counts of, for example number of persons in age
     groups, to allow comparison of counts in raw data to counts in
     linked data. Produces output used in demographics_compare()
 
     Parameters
-    ---------- 
+    ----------
     *args : str or list of str
       Variable column titles to be included in group counts
     df : dataframe
@@ -1039,7 +1048,7 @@ def demographics_compare(df_raw, df_linked):
     raw data.
 
     Parameters
-    ---------- 
+    ----------
     df_raw : dataframe
       output of demographics() for raw data
     df_linked : dataframe
@@ -1121,7 +1130,7 @@ def demographics_compare(df_raw, df_linked):
 
 
 def matchkeys_drop_duplicates(mks):
-    ''' 
+    '''
     Removes duplicates from generated matchkeys
     '''
     out = pd.DataFrame({'mks': mks})
@@ -1138,7 +1147,7 @@ def deduplicate(df, record_id, mks):
     Filters out duplicate records from a supplied dataframe.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
     record_id : string
       name of unique identifier column in data
@@ -1186,7 +1195,7 @@ def deduplicate(df, record_id, mks):
         else:
 
             unique = unique.dropDuplicates(MK)
-    
+
     duplicates = df.join(unique, on = record_id, how = 'left_anti').dropDuplicates([record_id])
 
 
@@ -1197,13 +1206,13 @@ def deduplicate(df, record_id, mks):
 def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     '''
     Performs determistic linkage of two dataframes given a list of matchkeys /
-    join conditions. Returns a dataframe of the linked identifers of left and 
-    right dataframes,together with the numeric identifier of the matchkey / join 
-    condition on which the link was achieved. Also saves a parquet of linked 
+    join conditions. Returns a dataframe of the linked identifers of left and
+    right dataframes,together with the numeric identifier of the matchkey / join
+    condition on which the link was achieved. Also saves a parquet of linked
     identifiers in specified directory.
 
     Parameters
-    ---------- 
+    ----------
     df_l : dataframe
       Left dtaframe to be linked
     df_r : dataframe
@@ -1216,13 +1225,13 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
       A list of join conditions to be sequentially applied in linkage
     out_dir : string
       Specified file path for the directory in which parquet of linked identifiers
-      will be saved and which will be used in processing the linkage. 
+      will be saved and which will be used in processing the linkage.
 
     Returns
     -------
     list
-      a dataframe of the linked identifers of left and right dataframes,together with 
-      the numeric identifier of the matchkey / join condition on which the link was 
+      a dataframe of the linked identifers of left and right dataframes,together with
+      the numeric identifier of the matchkey / join condition on which the link was
       achieved. Also saves a parquet of linked identifiers in out_dir.
 
     Raises
@@ -1243,7 +1252,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
 
     > matchkeys = [MK1, MK2, MK3, MK4, MK5]
 
-    > links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS, 
+    > links = linkage.deterministic_linkage(df_l = CEN, df_r = CCS,
                                             id_l = 'Resident_ID_cen', id_r = 'Resident_ID_ccs',
                                             matchkeys = matchkeys, out_dir = '/path_to_file')
 
