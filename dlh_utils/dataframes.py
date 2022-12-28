@@ -986,7 +986,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              mode = 'countDistinct',
              alias= 'distinct_forenames_per_ID',
              drop_na=False).show()
- 
+
     +---+-------------------------+--------+----------+-------+----------+---+-----------------+
     | ID|distinct_forenames_per_ID|Forename|Middlename|Surname|       DoB|Sex|age_at_2022-12-06|
     +---+-------------------------+--------+----------+-------+----------+---+-----------------+
@@ -1004,7 +1004,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
              mode = 'max',
              alias= 'oldest_family_member',
              drop_na=False).show()
-    
+
     See Also
     --------
     standardisation.standardise_null()

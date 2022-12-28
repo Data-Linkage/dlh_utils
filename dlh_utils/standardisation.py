@@ -1285,7 +1285,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
     meets regex.
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe to which the function is applied.
     target_col : str

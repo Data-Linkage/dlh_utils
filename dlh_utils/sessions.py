@@ -54,7 +54,7 @@ def getOrCreateSparkSession(appName='DE_DL',
     spark_ui = display(HTML('<a href=http://%s>Spark UI</a>' % url))
 
     try:
- 
+
       # get graphframes jar path to configure session with
         graphframes_path = graphframes.__file__
         graphframes_path = graphframes_path.rsplit('/', 1)[0]
