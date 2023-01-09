@@ -1,3 +1,6 @@
+'''
+Functions used to standardise and clean data prior to linkage. 
+'''
 import pyspark.sql.functions as F
 from pyspark.sql.types import *
 from dlh_utils import dataframes as da

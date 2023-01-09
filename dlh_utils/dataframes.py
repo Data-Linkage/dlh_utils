@@ -1,3 +1,6 @@
+'''
+Functions used to modify aspects of a dataframe prior to linkage. 
+'''
 import re
 import pyspark.sql.functions as F
 from pyspark.sql import Window
