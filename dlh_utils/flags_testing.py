@@ -25,7 +25,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 1
 
     assert (flag(df,
@@ -36,7 +36,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 1
 
     assert (flag(df,
@@ -47,7 +47,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 49
 
     assert (flag(df,
@@ -58,7 +58,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 49
 
     assert (flag(df,
@@ -69,7 +69,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 10
 
     assert (flag(df,
@@ -80,7 +80,7 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
+            .where(F.col('test') is True)
             ).count() == 40
 
 ##################################################################
@@ -191,11 +191,11 @@ def test_flag_check():
     assert master.count() == 100
 
     assert (master
-            .where(F.col('FAIL') == True)
+            .where(F.col('FAIL') is True)
             ).count() == 50
 
     assert (master
-            .where(F.col('FAIL') == False)
+            .where(F.col('FAIL') is False)
             ).count() == 50
 
     pass_df = flag_check(df,
@@ -207,11 +207,11 @@ def test_flag_check():
     assert pass_df.count() == 50
 
     assert (pass_df
-            .where(F.col('FAIL') == True)
+            .where(F.col('FAIL') is True)
             ).count() == 0
 
     assert (pass_df
-            .where(F.col('FAIL') == False)
+            .where(F.col('FAIL') is False)
             ).count() == 50
 
     fail_df = flag_check(df,
@@ -223,11 +223,11 @@ def test_flag_check():
     assert fail_df.count() == 50
 
     assert (fail_df
-            .where(F.col('FAIL') == True)
+            .where(F.col('FAIL') is True)
             ).count() == 50
 
     assert (fail_df
-            .where(F.col('FAIL') == False)
+            .where(F.col('FAIL') is False)
             ).count() == 0
 
     pass_df, fail_df = flag_check(df,
@@ -239,21 +239,21 @@ def test_flag_check():
     assert pass_df.count() == 50
 
     assert (pass_df
-            .where(F.col('FAIL') == True)
+            .where(F.col('FAIL') is True)
             ).count() == 0
 
     assert (pass_df
-            .where(F.col('FAIL') == False)
+            .where(F.col('FAIL') is False)
             ).count() == 50
 
     assert fail_df.count() == 50
 
     assert (fail_df
-            .where(F.col('FAIL') == True)
+            .where(F.col('FAIL') is True)
             ).count() == 50
 
     assert (fail_df
-            .where(F.col('FAIL') == False)
+            .where(F.col('FAIL') is False)
             ).count() == 0
 
     master, summary = flag_check(df,
@@ -269,5 +269,5 @@ def test_flag_check():
         ['flag', 'true', 'false', 'rows', 'percent_true', 'percent_false']
     ).toPandas()
 
-    assert [summary[summary[variable] != True].shape[0]
+    assert [summary[summary[variable] is not True].shape[0]
             for variable in list(summary)] == [0]*len(list(summary))

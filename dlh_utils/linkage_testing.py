@@ -11,7 +11,8 @@ def test_order_matchkeys():
     spark = SparkSession.builder.getOrCreate()
     dfo = spark.createDataFrame(
         (pd.DataFrame({
-            "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -22,7 +23,8 @@ def test_order_matchkeys():
 
     dffn = spark.createDataFrame(
         (pd.DataFrame({
-            "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -40,15 +42,15 @@ def test_order_matchkeys():
             dfo['last_name'] == dffn['last_name']]
     ]
 
-    testDf = pd.DataFrame({
+    test_df = pd.DataFrame({
         'mks': mks,
         'count': [(dfo.join(dffn, on=mk, how='inner')).count()
                   for mk in mks]
     })
-    testDf = testDf.sort_values('count')
-    testDf['mks'] = [str(x) for x in testDf['mks']]
+    test_df = test_df.sort_values('count')
+    test_df['mks'] = [str(x) for x in test_df['mks']]
 
-    test_mks = list(testDf['mks'])
+    test_mks = list(test_df['mks'])
 
     [str(x) for x in order_matchkeys(dfo, dffn, mks)]
 
@@ -62,7 +64,8 @@ def test_matchkey_join():
     spark = SparkSession.builder.getOrCreate()
     df_l = spark.createDataFrame(
         (pd.DataFrame({
-            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -73,7 +76,8 @@ def test_matchkey_join():
 
     df_r = spark.createDataFrame(
         (pd.DataFrame({
-            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -104,7 +108,8 @@ def test_extract_mk_variables():
     spark = SparkSession.builder.getOrCreate()
     df_l = spark.createDataFrame(
         (pd.DataFrame({
-            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -133,7 +138,8 @@ def test_deterministic_linkage():
     spark = SparkSession.builder.getOrCreate()
     df_l = spark.createDataFrame(
         (pd.DataFrame({
-            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -144,7 +150,8 @@ def test_deterministic_linkage():
 
     df_r = spark.createDataFrame(
         (pd.DataFrame({
-            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                     '14', '15', '16', '17', '18', '19', '20'],
 
             "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
                            'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
@@ -207,7 +214,7 @@ def test_demographics():
         ['variable', 'value', 'count', 'total_count']
     ).toPandas()
 
-    assert [dem_raw[dem_raw[variable] != True].shape[0]
+    assert [dem_raw[dem_raw[variable] is not True].shape[0]
             for variable in list(dem_raw)] == [0, 0, 0, 0]
 
     dem_linked = demographics(*['sex', 'age_group'],
@@ -222,7 +229,7 @@ def test_demographics():
         ['variable', 'value', 'count', 'total_count']
     ).toPandas()
 
-    assert [dem_linked[dem_linked[variable] != True].shape[0]
+    assert [dem_linked[dem_linked[variable] is not True].shape[0]
             for variable in list(dem_linked)] == [0, 0, 0, 0]
 
 ##################################################################

@@ -287,10 +287,12 @@ def test_window():
         })))
 
     assert (window(df, window=['col1', 'col2'], target='col2', mode='count', alias='new')
-            .where((F.col("col1") == 'd') & (F.col("col2") == 1) & (F.col("new") == 2)).count() == 2)
+            .where((F.col("col1") == 'd') & (F.col("col2") == 1) &\
+                   (F.col("new") == 2)).count() == 2)
 
     assert (window(df, window=['col1', 'col2'], target='col2', mode='count', alias='new')
-            .where((F.col("col1") == 'c') & (F.col("col2") == 2) & (F.col("new") == 2)).count() == 2)
+            .where((F.col("col1") == 'c') & (F.col("col2") == 2) &\
+                   (F.col("new") == 2)).count() == 2)
 
     df = spark.createDataFrame(
         (pd.DataFrame({

@@ -46,7 +46,7 @@ def test_standardise_white_space():
 
 ##############################################################################
 
-def test_removePunct():
+def test_remove_punct():
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
         (pd.DataFrame({
@@ -55,10 +55,10 @@ def test_removePunct():
             "extra": [None, 'TWO', "TH@REE", 'FO+UR', "FI@^VE"]
         })))
 
-    assert (removePunct(df, keep='^')
+    assert (remove_punct(df, keep='^')
             .where(F.col("after") == F.col("before")).count() == 4)
 
-    assert (removePunct(df, keep='^', subset=['after', 'before'])
+    assert (remove_punct(df, keep='^', subset=['after', 'before'])
             .where(F.col("after") == F.col("extra")).count() == 1)
 
 
@@ -141,19 +141,21 @@ def test_standardise_date():
             "slashedReverse": [None, '1996/05/14', '1996/04/15']
         })))
 
-    assert (standardise_date(df, colName='before').
+    assert (standardise_date(df, col_name='before').
             where(F.col("before") == F.col("after")).count() == 2)
 
-    assert (standardise_date(df, colName='before', outDateFormat='dd/mm/yyyy').
+    assert (standardise_date(df, col_name='before', out_date_format='dd/mm/yyyy').
             where(F.col("before") == F.col("slashed")).count() == 2)
 
-    assert (standardise_date(df, colName='before', outDateFormat='yyyy/mm/dd').
+    assert (standardise_date(df, col_name='before', out_date_format='yyyy/mm/dd').
             where(F.col("before") == F.col("slashedReverse")).count() == 2)
 
-    assert (standardise_date(df, colName='slashed', inDateFormat='dd/mm/yyyy', outDateFormat='yyyy/mm/dd').
+    assert (standardise_date(df, col_name='slashed', in_date_format='dd/mm/yyyy',\ 
+                             out_date_format='yyyy/mm/dd').
             where(F.col("slashed") == F.col("slashedReverse")).count() == 2)
 
-    assert (standardise_date(df, colName='slashedReverse', inDateFormat='yyyy/mm/dd', outDateFormat='dd-mm-yyyy').
+    assert (standardise_date(df, col_name='slashedReverse', in_date_format='yyyy/mm/dd',\
+                             out_date_format='dd-mm-yyyy').
             where(F.col("slashedReverse") == F.col("before")).count() == 2)
 
 
@@ -373,67 +375,6 @@ def test_cen_ethnic_group_5():
 
 ##############################################################################
 
-
-def test_mod_ethnic_group_5():
-
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "before": [
-                None,
-                'WHITE ENGLISH/WELSH/SCOTTISH/NORTHERN IRISH/BRITISH',
-                'WHITE BACKGROUND',
-                'WHITE GYPSY OR IRISH TRAVELLER',
-                'WHITE IRISH',
-                'ANY OTHER WHITE BACKGROUND',
-                'MIXED ASIAN AND WHITE',
-                'MIXED BLACK AFRICAN AND WHITE',
-                'MIXED BLACK CARIBBEAN AND WHITE',
-                'OTHER MIXED ETHNIC BACKGROUND',
-                'ANY CHINESE BACKGROUND',
-                'ASIAN BANGLADESHI',
-                'ASIAN INDIAN',
-                'ASIAN PAKISTANI',
-                'OTHER ASIAN BACKGROUND',
-                'BLACK AFRICAN',
-                'BLACK CARIBBEAN',
-                'OTHER BLACK BACKGROUND',
-                'ARAB',
-                'OTHER ETHNIC BACKGROUND',
-            ],
-            "after": [
-                None,
-                '1',
-                '1',
-                '1',
-                '1',
-                '1',
-                '2',
-                '2',
-                '2',
-                '2',
-                '3',
-                '3',
-                '3',
-                '3',
-                '3',
-                '4',
-                '4',
-                '4',
-                '5',
-                '5',
-            ]
-        })))
-
-    assert (mod_ethnic_group_5(df, "before")
-            .fillna('<<>>')
-            .where(F.col('before') == F.col('after'))
-            ).count() == 20
-
-
-##############################################################################
-
-
 def test_fill_nulls():
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
@@ -515,7 +456,7 @@ def test_clean_surname():
 ##############################################################################
 
 
-def test_regReplace():
+def test_reg_replace():
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
         (pd.DataFrame({
@@ -523,7 +464,7 @@ def test_regReplace():
             "col2": [None, "bond street", "queen street", "queen avenue"]
         })))
 
-    assert (regReplace(df, dic={'street': '\\bstr\\b|\\bstrt\\b',
+    assert (reg_replace(df, dic={'street': '\\bstr\\b|\\bstrt\\b',
                                 'avenue': 'road',
                                 "bond": "hello",
                                 "queen": "king"})

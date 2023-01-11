@@ -1,5 +1,5 @@
 '''
-Functions used to standardise and clean data prior to linkage. 
+Functions used to standardise and clean data prior to linkage.
 '''
 import pyspark.sql.functions as F
 from pyspark.sql.types import *
@@ -904,7 +904,7 @@ def standardise_case(df, subset=None, val='upper'):
     if subset is None:
         subset = df.columns
 
-    if type(subset) != list:
+    if isinstance(subset) != list:
         subset = [subset]
 
     for col in subset:

@@ -1,6 +1,6 @@
 '''
-Function used to create and start different sized spark sessions, also 
-generating a Spark UI link to monitor session progress. 
+Function used to create and start different sized spark sessions, also
+generating a Spark UI link to monitor session progress.
 '''
 import os
 from IPython.core.display import display, HTML

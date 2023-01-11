@@ -151,7 +151,7 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
     if condition == 'isNotNull':
         df = df.withColumn(alias,
                            (F.col(ref_col).isNotNull()) & (
-                               F.isnan(F.col(ref_col)) == False)
+                               F.isnan(F.col(ref_col)) is False)
                            )
 
     if fill_null is not None:
@@ -227,7 +227,7 @@ def flag_summary(df, flags=None, pandas=False):
         flags = [
             column for column in df.columns if column.startswith('FLAG_')]
 
-    if type(flags) != list:
+    if isinstance(flags) != list:
         flags = [flags]
 
     rows = df.count()
@@ -238,7 +238,7 @@ def flag_summary(df, flags=None, pandas=False):
 
         flags_out.append((df
                           .select(col)
-                         .where(F.col(col) == True)
+                         .where(F.col(col) is True)
 
                           .count()
                           ))
@@ -261,7 +261,7 @@ def flag_summary(df, flags=None, pandas=False):
         'percent_false'
     ]]
 
-    if pandas == False:
+    if pandas is False:
 
         out = (spark
                .createDataFrame(out)
@@ -366,7 +366,7 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
         df = (df
               .withColumn('flag_count',
-                          F.when(F.col(flag) == True,
+                          F.when(F.col(flag) is True,
                                  F.col('flag_count')+1)
                           .otherwise(F.col('flag_count')))
               )
@@ -376,37 +376,37 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
                                     for flag in flags]))
     df = df.withColumn('FAIL', F.col('FAIL') > 0)
 
-    if summary == True:
+    if summary is True:
 
         summary_df = flag_summary(df, flags+['FAIL'], pandas=False)
 
-        if mode == 'master':
+        if mode is 'master':
             return (df,
                     summary_df)
 
-        if mode == 'split':
-            return ((df.where(F.col('Fail') == False)),
-                    (df.where(F.col('Fail') == True)),
+        if mode is 'split':
+            return ((df.where(F.col('Fail') is False)),
+                    (df.where(F.col('Fail') is True)),
                     summary_df)
 
-        if mode == 'pass':
-            return (df.where(F.col('Fail') == False),
+        if mode is 'pass':
+            return (df.where(F.col('Fail') is False),
                     summary_df)
 
-        if mode == 'fail':
-            return (df.where(F.col('Fail') == True),
+        if mode is 'fail':
+            return (df.where(F.col('Fail') is True),
                     summary_df)
 
     else:
-        if mode == 'master':
+        if mode is 'master':
             return df
 
-        if mode == 'split':
-            return ((df.where(F.col('Fail') == False)),
-                    (df.where(F.col('Fail') == True)))
+        if mode is 'split':
+            return ((df.where(F.col('Fail') is False)),
+                    (df.where(F.col('Fail') is True)))
 
-        if mode == 'pass':
-            return df.where(F.col('Fail') == False)
+        if mode is 'pass':
+            return df.where(F.col('Fail') is False)
 
-        if mode == 'fail':
-            return df.where(F.col('Fail') == True)
+        if mode is 'fail':
+            return df.where(F.col('Fail') is True)
