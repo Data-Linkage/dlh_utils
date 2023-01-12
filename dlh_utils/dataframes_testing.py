@@ -63,12 +63,12 @@ def test_drop_columns():
             "extra": ['One', 'Two', 'Three']
         })))
 
-    assert (len(drop_columns(df, subset='col1').columns) == 2)
-    assert (len(drop_columns(df, subset=['col1', 'col2']).columns) == 1)
-    assert (len(drop_columns(df, startswith='col').columns) == 1)
-    assert (len(drop_columns(df, startswith='ex').columns) == 2)
-    assert (len(drop_columns(df, endswith='1').columns) == 2)
-    assert (len(drop_columns(df, endswith='tra').columns) == 2)
+    assert len(drop_columns(df, subset='col1').columns) == 2
+    assert len(drop_columns(df, subset=['col1', 'col2']).columns) == 1
+    assert len(drop_columns(df, startswith='col').columns) == 1
+    assert len(drop_columns(df, startswith='ex').columns) == 2
+    assert len(drop_columns(df, endswith='1').columns) == 2
+    assert len(drop_columns(df, endswith='tra').columns) == 2
 
 
 ##############################################################################
@@ -84,10 +84,10 @@ def test_select():
             "first": ['x', '2', '3', '4'],
             "numbers": [1, 2, 3, 4],
         })))
-    assert (len(select(df, columns=['identifier', 'firstName']).columns) == 2)
-    assert (len(select(df, startswith='first').columns) == 3)
-    assert (len(select(df, endswith='ers').columns) == 1)
-    assert (len(select(df, contains='ame').columns) == 1)
+    assert len(select(df, columns=['identifier', 'firstName']).columns) == 2
+    assert len(select(df, startswith='first').columns) == 3
+    assert len(select(df, endswith='ers').columns) == 1
+    assert len(select(df, contains='ame').columns) == 1
 
 
 ################################################################################
@@ -121,7 +121,7 @@ def test_cut_off():
         })))
 
     # cut_off does not remove null values when the val is an Int type
-    assert (cut_off(df, threshold_column='ints', val=3, mode='>=').count() == 4)
+    assert cut_off(df, threshold_column='ints', val=3, mode='>=').count() == 4
 
     # cut_off removes null values when the val is a string type
     assert (cut_off(df, threshold_column='strings',
@@ -140,9 +140,9 @@ def test_cut_off():
         })))
     df2 = df.withColumn("col1", F.to_date("col1", 'dd-MM-yyyy'))
 
-    assert (cut_off(df2, 'col1', '1997-01-15', '>=').count() == 1)
-    assert (cut_off(df2, 'col1', '1997-01-15', '<=').count() == 3)
-    assert (cut_off(df2, 'col1', '1996-05-15', '<=').count() == 2)
+    assert cut_off(df2, 'col1', '1997-01-15', '>=').count() == 1
+    assert cut_off(df2, 'col1', '1997-01-15', '<=').count() == 3
+    assert cut_off(df2, 'col1', '1996-05-15', '<=').count() == 2
 
 ####################################################################
 
@@ -177,11 +177,11 @@ def test_drop_nulls():
     assert (drop_nulls(df)
             .count() == 3)
 
-    assert (drop_nulls(df, val='five').count() == 4)
+    assert drop_nulls(df, val='five').count() == 4
 
-    assert (drop_nulls(df, subset='lower', val='five').count() == 4)
+    assert drop_nulls(df, subset='lower', val='five').count() == 4
 
-####################################################################    
+#################################################################### 
 
 def test_union_all():
     spark = SparkSession.builder.getOrCreate()
@@ -200,7 +200,7 @@ def test_union_all():
         (pd.DataFrame({
             "col3": [None, 'okay', 'dfs', 'few', 'dfs']
         })))
-    assert (union_all(df, df2).count() == 10)
+    assert union_all(df, df2).count() == 10
 
     assert (union_all(df, df2, df3, fill='xd').
             where(F.col('col1') == 'xd').count() == 5)
