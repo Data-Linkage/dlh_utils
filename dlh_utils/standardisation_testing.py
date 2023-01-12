@@ -150,7 +150,7 @@ def test_standardise_date():
     assert (standardise_date(df, col_name='before', out_date_format='yyyy/mm/dd').
             where(F.col("before") == F.col("slashedReverse")).count() == 2)
 
-    assert (standardise_date(df, col_name='slashed', in_date_format='dd/mm/yyyy',\ 
+    assert (standardise_date(df, col_name='slashed', in_date_format='dd/mm/yyyy',\
                              out_date_format='yyyy/mm/dd').
             where(F.col("slashed") == F.col("slashedReverse")).count() == 2)
 

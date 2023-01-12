@@ -512,7 +512,7 @@ def cluster_number(df, id_1, id_2):
     +---+---+--------------+  
     """
     # Check variable types
-    if not ((isinstance(df.schema[id_1].dataType, StringType))\ 
+    if not ((isinstance(df.schema[id_1].dataType, StringType))\
     and (isinstance(df.schema[id_2].dataType, StringType))):
         raise TypeError('ID variables must be strings')
 
