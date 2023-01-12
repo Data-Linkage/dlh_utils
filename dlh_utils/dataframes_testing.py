@@ -53,7 +53,7 @@ def test_concat():
 ##############################################################################
 
 
-def test_dropColumns():
+def test_drop_columns():
 
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
@@ -63,12 +63,12 @@ def test_dropColumns():
             "extra": ['One', 'Two', 'Three']
         })))
 
-    assert (len(dropColumns(df, subset='col1').columns) == 2)
-    assert (len(dropColumns(df, subset=['col1', 'col2']).columns) == 1)
-    assert (len(dropColumns(df, startswith='col').columns) == 1)
-    assert (len(dropColumns(df, startswith='ex').columns) == 2)
-    assert (len(dropColumns(df, endswith='1').columns) == 2)
-    assert (len(dropColumns(df, endswith='tra').columns) == 2)
+    assert (len(drop_columns(df, subset='col1').columns) == 2)
+    assert (len(drop_columns(df, subset=['col1', 'col2']).columns) == 1)
+    assert (len(drop_columns(df, startswith='col').columns) == 1)
+    assert (len(drop_columns(df, startswith='ex').columns) == 2)
+    assert (len(drop_columns(df, endswith='1').columns) == 2)
+    assert (len(drop_columns(df, endswith='tra').columns) == 2)
 
 
 ##############################################################################
@@ -111,7 +111,7 @@ def test_coalesced():
 #################################################################
 
 
-def test_cutOff():
+def test_cut_off():
 
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
@@ -120,18 +120,18 @@ def test_cutOff():
             "ints": [None, 2, 3, 4, 5]
         })))
 
-    # cutOff does not remove null values when the val is an Int type
-    assert (cutOff(df, threshold_column='ints', val=3, mode='>=').count() == 4)
+    # cut_off does not remove null values when the val is an Int type
+    assert (cut_off(df, threshold_column='ints', val=3, mode='>=').count() == 4)
 
-    # cutOff removes null values when the val is a string type
-    assert (cutOff(df, threshold_column='strings',
+    # cut_off removes null values when the val is a string type
+    assert (cut_off(df, threshold_column='strings',
             val='3', mode='>=').count() == 3)
 
-    assert (cutOff(df, threshold_column='strings',
+    assert (cut_off(df, threshold_column='strings',
             val='3', mode='>').count() == 2)
-    assert (cutOff(df, threshold_column='strings',
+    assert (cut_off(df, threshold_column='strings',
             val='2', mode='<=').count() == 1)
-    assert (cutOff(df, threshold_column='strings',
+    assert (cut_off(df, threshold_column='strings',
             val='4', mode='<').count() == 2)
 
     df = spark.createDataFrame(
@@ -140,14 +140,14 @@ def test_cutOff():
         })))
     df2 = df.withColumn("col1", F.to_date("col1", 'dd-MM-yyyy'))
 
-    assert (cutOff(df2, 'col1', '1997-01-15', '>=').count() == 1)
-    assert (cutOff(df2, 'col1', '1997-01-15', '<=').count() == 3)
-    assert (cutOff(df2, 'col1', '1996-05-15', '<=').count() == 2)
+    assert (cut_off(df2, 'col1', '1997-01-15', '>=').count() == 1)
+    assert (cut_off(df2, 'col1', '1997-01-15', '<=').count() == 3)
+    assert (cut_off(df2, 'col1', '1996-05-15', '<=').count() == 2)
 
 ####################################################################
 
 
-def test_literalColumn():
+def test_literal_column():
 
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
@@ -156,16 +156,16 @@ def test_literalColumn():
             "col2": [1, 2, 3, 4, 5]
         })))
 
-    assert (literalColumn(df, "newStr", "yes")
+    assert (literal_column(df, "newStr", "yes")
             .where(F.col("newStr") == "yes").count() == 5)
 
-    assert (literalColumn(df, "newInt", 1)
+    assert (literal_column(df, "newInt", 1)
             .where(F.col("newInt") == 1).count() == 5)
 
 
 ####################################################################
 
-def test_dropNulls():
+def test_drop_nulls():
 
     spark = SparkSession.builder.getOrCreate()
     df = spark.createDataFrame(
@@ -174,13 +174,14 @@ def test_dropNulls():
             "after": [None, None, 'one', 'four', 'three']
         })))
 
-    assert (dropNulls(df)
+    assert (drop_nulls(df)
             .count() == 3)
 
-    assert (dropNulls(df, val='five').count() == 4)
+    assert (drop_nulls(df, val='five').count() == 4)
 
-    assert (dropNulls(df, subset='lower', val='five').count() == 4)
+    assert (drop_nulls(df, subset='lower', val='five').count() == 4)
 
+####################################################################    
 
 def test_union_all():
     spark = SparkSession.builder.getOrCreate()
@@ -315,25 +316,6 @@ def test_window():
 
     assert (window(df, window=['col1'], target='col2', mode='countDistinct', alias='new')
             .where((F.col("col1") == 'd') & (F.col("new") == 4)).count() == 4)
-
-#############################################################
-
-
-def test_coalesced():
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "lower": ['one', None, 'one', 'four', None],
-            "value": [1, 2, 3, 4, 5],
-            "extra": [None, None, None, 'FO+ UR', None],
-            "lowerNulls": ['one', 'two', None, 'four', None],
-            "upperNulls": ["ONE", 'TWO', None, 'FOU  R', None]
-        })))
-
-    assert (coalesced(df)
-            .where(F.col("coalescedCol").isNull())
-            .count() == 0)
-
 
 ###############################################################################
 

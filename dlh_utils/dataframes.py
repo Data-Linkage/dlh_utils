@@ -2007,14 +2007,14 @@ def date_diff(df, col_name1, col_name2, diff='Difference',
     df = df.withColumn(diff, F.unix_timestamp(F.col(col_name1), in_date_format)
                        - F.unix_timestamp(F.col(col_name2), in_date_format))
 
-    if units is 'days':
+    if units == 'days':
         df = df.withColumn(diff, (F.col(diff)/86400))
         df = df.withColumn(diff, F.round(diff, 2))
-    elif units is 'months':
+    elif units == 'months':
         # months value is slightly inaccurate as it assumes every month is a 31 day month
         df = df.withColumn(diff, F.col(diff)/(31*86400))
         df = df.withColumn(diff, F.round(diff, 2))
-    elif units is 'years':
+    elif units == 'years':
         df = df.withColumn(diff, F.col(diff)/(86400*365))
         df = df.withColumn(diff, F.round(diff, 2))
     if absolute is True:
