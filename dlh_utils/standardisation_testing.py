@@ -464,12 +464,12 @@ def test_reg_replace():
             "col2": [None, "bond street", "queen street", "queen avenue"]
         })))
 
-    assert (reg_replace(df, dic={'street': '\\bstr\\b|\\bstrt\\b',
-                                'avenue': 'road',
-                                "bond": "hello",
-                                "queen": "king"})
-            .where(F.col("col1") == F.col("col2"))
-            .count() == 3)
+      assert (reg_replace(df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
+                                            'avenue': 'road',
+                                            "bond": "hello",
+                                            "queen": "king"})
+              .where(F.col("col1") == F.col("col2"))
+              .count() == 3)
 
 ##############################################################################
 

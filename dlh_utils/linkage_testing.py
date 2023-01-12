@@ -97,9 +97,9 @@ def test_matchkey_join():
             F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
     ]
 
-    assert (matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[2], 1).count() == 10)
-    assert (matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[1], 1).count() == 20)
-    assert (matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[0], 1).count() == 15)
+    assert matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[2], 1).count() == 10
+    assert matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[1], 1).count() == 20
+    assert matchkey_join(df_l, df_r, 'l_id', 'r_id', mks[0], 1).count() == 15
 
 ####################################################################
 
@@ -128,8 +128,8 @@ def test_extract_mk_variables():
         [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
             F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
     ]
-    assert (extract_mk_variables(df_l, mks)[0] == 'first_name')
-    assert (extract_mk_variables(df_l, mks)[1] == 'last_name')
+    assert extract_mk_variables(df_l, mks)[0] == 'first_name'
+    assert extract_mk_variables(df_l, mks)[1] == 'last_name'
 
 ###########################################################################
 

@@ -2,11 +2,11 @@
 Flag functions, used to quickly highlight anomalous values within data
 '''
 from operator import add
+from functools import reduce
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType
 import pyspark.sql.functions as F
 import pandas as pd
-from functools import reduce
 
 ###############################################################################
 
@@ -380,33 +380,33 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
         summary_df = flag_summary(df, flags+['FAIL'], pandas=False)
 
-        if mode is 'master':
+        if mode == 'master':
             return (df,
                     summary_df)
 
-        if mode is 'split':
+        if mode == 'split':
             return ((df.where(F.col('Fail') is False)),
                     (df.where(F.col('Fail') is True)),
                     summary_df)
 
-        if mode is 'pass':
+        if mode == 'pass':
             return (df.where(F.col('Fail') is False),
                     summary_df)
 
-        if mode is 'fail':
+        if mode == 'fail':
             return (df.where(F.col('Fail') is True),
                     summary_df)
 
     else:
-        if mode is 'master':
+        if mode == 'master':
             return df
 
-        if mode is 'split':
+        if mode == 'split':
             return ((df.where(F.col('Fail') is False)),
                     (df.where(F.col('Fail') is True)))
 
-        if mode is 'pass':
+        if mode == 'pass':
             return df.where(F.col('Fail') is False)
 
-        if mode is 'fail':
+        if mode == 'fail':
             return df.where(F.col('Fail') is True)

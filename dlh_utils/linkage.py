@@ -2,10 +2,10 @@
 Functions used within the linkage phase of data linkage projects
 '''
 import os
+import re
+from copy import deepcopy
 import pandas as pd
 import jellyfish
-from copy import deepcopy
-import re
 import py4j
 from pyspark.sql import SparkSession, Window
 import pyspark.sql.functions as F
@@ -102,7 +102,7 @@ def metaphone(df, input_col, output_col):
     """
     @F.udf(returnType=StringType())
     def meta(s):
-        return None if s == None else jellyfish.metaphone(s)
+        return None if s is None else jellyfish.metaphone(s)
 
     df = df.withColumn(output_col, meta(F.col(input_col)))
 
@@ -509,7 +509,7 @@ def cluster_number(df, id_1, id_2):
     | 1a| 8b|             2|
     | 3a| 7b|             3|
     | 3a| 3b|             3|
-    +---+---+--------------+  
+    +---+---+--------------+
     """
     # Check variable types
     if not ((isinstance(df.schema[id_1].dataType, StringType))\
@@ -549,7 +549,7 @@ def cluster_number(df, id_1, id_2):
         return df
 
     except py4j.protocol.Py4JJavaError:
-        print("""WARNING: A graphframes wrapper package installation has not been found! 
+        print("""WARNING: A graphframes wrapper package installation has not been found!
         If you have not already done so, you will need to submit graphframes' JAR file 
         dependency to your spark context. This can be found here:
         \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/
@@ -604,7 +604,7 @@ def mk_dropna(df, mk):
     from nulls. Used in order_matchkeys() and matchkey_join()
 
     Parameters
-    ---------- 
+    ----------
     df : dataframe
       Dataframe the to which matchkeys will be applied.
     mk : list
@@ -849,7 +849,7 @@ def assert_unique_matches(linked_ids, *identifier_col):
 
 def assert_unique(df, col):
 
-    if type(col) != list:
+    if isinstance(col) != list:
         col = [col]
 
     assert df.count() == df.dropDuplicates(subset=col).count()
@@ -877,7 +877,7 @@ def matchkey_counts(linked_df):
 
     Raises
     -------
-      None at present.  
+      None at present.
     """
 
     return (linked_df
@@ -927,7 +927,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
 
     Raises
     -------
-      None at present. 
+      None at present.
 
     See Also
     --------
@@ -1183,7 +1183,7 @@ def deduplicate(df, record_id, mks):
     spark = SparkSession.builder.getOrCreate()
 
     # check to see if matchkeys are passed as a list of lists
-    if any(isinstance(MK, list) for MK in mks) == False:
+    if any(isinstance(MK, list) for MK in mks) is False:
         mks = [mks]
 
     for count, MK in enumerate(mks, 1):

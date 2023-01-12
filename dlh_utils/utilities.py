@@ -362,8 +362,10 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " +\
-                                            regex + " not found in this directory: " + path) from exc
+                    raise FileNotFoundError(filetype + 
+                                            " file, matching this regular expression: " +\
+                                            regex + " not found in this directory: " +\
+                                            path) from exc
 
             elif filetype == 'parquet':
 
@@ -378,8 +380,10 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " +\
-                                            regex + " not found in this directory: " + path) from exc
+                    raise FileNotFoundError(filetype +
+                                            " file, matching this regular expression: " +\
+                                            regex + " not found in this directory: " +\
+                                            path) from exc
 
     return most_recent_filepath, filetype
 
