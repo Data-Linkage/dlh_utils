@@ -904,7 +904,7 @@ def standardise_case(df, subset=None, val='upper'):
     if subset is None:
         subset = df.columns
 
-    if isinstance(subset) != list:
+    if not isinstance(subset,list):
         subset = [subset]
 
     for col in subset:

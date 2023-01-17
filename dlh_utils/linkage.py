@@ -849,7 +849,7 @@ def assert_unique_matches(linked_ids, *identifier_col):
 
 def assert_unique(df, col):
 
-    if isinstance(col) != list:
+    if not isinstance(col,list):
         col = [col]
 
     assert df.count() == df.dropDuplicates(subset=col).count()
