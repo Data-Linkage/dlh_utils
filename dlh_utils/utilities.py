@@ -362,7 +362,7 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype + 
+                    raise FileNotFoundError(filetype +
                                             " file, matching this regular expression: " +\
                                             regex + " not found in this directory: " +\
                                             path) from exc

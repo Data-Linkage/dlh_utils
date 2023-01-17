@@ -181,7 +181,7 @@ def test_drop_nulls():
 
     assert drop_nulls(df, subset='lower', val='five').count() == 4
 
-#################################################################### 
+####################################################################
 
 def test_union_all():
     spark = SparkSession.builder.getOrCreate()
