@@ -68,7 +68,8 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
           ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","ET74 2SP"),
           ("4","Lisa","Marie","Simpson","2014-05-09","F","ET74 2SP"),
           ("5","Maggie",None,"Simpson","2021-01-12","F","ET74 2SP")]
-  df = spark.createDataFrame(data=data,schema=["ID","Forename","Middlename","Surname","DoB","Sex","Postcode"])
+  df = spark.createDataFrame(data=data,schema=["ID","Forename","Middlename",\
+                                              "Surname","DoB","Sex","Postcode"])
 
     > df.show()
     +---+--------+----------+-------+----------+---+--------+
