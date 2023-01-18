@@ -464,7 +464,7 @@ def test_reg_replace():
               "col2": [None, "bond street", "queen street", "queen avenue"]
           })))
 
-        assert (reg_replace(df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
+      assert (reg_replace(df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
                                               'avenue': 'road',
                                               "bond": "hello",
                                               "queen": "king"})
