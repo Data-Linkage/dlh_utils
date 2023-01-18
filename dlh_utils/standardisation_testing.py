@@ -457,14 +457,14 @@ def test_clean_surname():
 
 
 def test_reg_replace():
-      spark = SparkSession.builder.getOrCreate()
-      df = spark.createDataFrame(
+    spark = SparkSession.builder.getOrCreate()
+    df = spark.createDataFrame(
           (pd.DataFrame({
               "col1": [None, "hello str", 'king strt', 'king road'],
               "col2": [None, "bond street", "queen street", "queen avenue"]
           })))
 
-      assert (reg_replace(df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
+    assert (reg_replace(df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
                                               'avenue': 'road',
                                               "bond": "hello",
                                               "queen": "king"})

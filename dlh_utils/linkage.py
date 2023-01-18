@@ -561,7 +561,7 @@ def cluster_number(df, id_1, id_2):
 ###############################################################################
 
 
-def extract_mk_variables(df, mk):
+def extract_mk_variables(df, match_key):
     '''
     Extracts variables from matchkey join condition
 
@@ -573,7 +573,7 @@ def extract_mk_variables(df, mk):
     ----------
     df : dataframe
       Dataframe the to which matchkeys will be applied.
-    mk : list
+    match_key : list
       The join conditions as specified in matchkey
 
     Returns
@@ -586,7 +586,7 @@ def extract_mk_variables(df, mk):
       None at present.
     '''
 
-    mk_variables = re.split("[^a-zA-Z0-9_]", str(mk))
+    mk_variables = re.split("[^a-zA-Z0-9_]", str(match_key))
     mk_variables = [x for x in mk_variables if x in df.columns]
     mk_variables = list(set(mk_variables))
 
@@ -595,7 +595,7 @@ def extract_mk_variables(df, mk):
 ###############################################################################
 
 
-def mk_dropna(df, mk):
+def mk_dropna(df, match_key):
     """
     Drops null values in variables included in matchkeys join conditions
 
@@ -607,7 +607,7 @@ def mk_dropna(df, mk):
     ----------
     df : dataframe
       Dataframe the to which matchkeys will be applied.
-    mk : list
+    match_key : list
       A list of join conditions (as specified in a matchkey(s)).
 
     Returns
@@ -623,7 +623,7 @@ def mk_dropna(df, mk):
     --------
     extract_mk_variables()
     """
-    variables = extract_mk_variables(df, mk)
+    variables = extract_mk_variables(df, match_key)
 
     df = df.dropna(subset=variables)
 
@@ -705,7 +705,7 @@ def order_matchkeys(df_l, df_r, mks, chunk=10):
 ###############################################################################
 
 
-def matchkey_join(df_l, df_r, id_l, id_r, mk, mk_n=0):
+def matchkey_join(df_l, df_r, id_l, id_r, match_key, mk_n=0):
     """
     Joins dataframes on matchkey retaining only 1:1 matches
 
@@ -724,7 +724,7 @@ def matchkey_join(df_l, df_r, id_l, id_r, mk, mk_n=0):
       variable name of column containing left unique identifier
     id_r : string
       variable name of column containing right unique identifier
-    mk : list
+    match_key : list
       matchkey join conditions
     mk_n : int
       matchkey number (order of application)
@@ -743,17 +743,17 @@ def matchkey_join(df_l, df_r, id_l, id_r, mk, mk_n=0):
     --------
     mk_dropna()
     """
-    #variables_l = extract_mk_variables(df_l,mk)
-    #variables_r = extract_mk_variables(df_r,mk)
+    #variables_l = extract_mk_variables(df_l,match_key)
+    #variables_r = extract_mk_variables(df_r,match_key)
 
     #df_l = df_l.dropna(subset=variables_l)
     #df_r = df_r.dropna(subset=variables_r)
 
-    df_l = mk_dropna(df_l, mk)
-    df_r = mk_dropna(df_r, mk)
+    df_l = mk_dropna(df_l, match_key)
+    df_r = mk_dropna(df_r, match_key)
 
     df = (df_l
-          .join(df_r, mk, 'inner')
+          .join(df_r, match_key, 'inner')
           .select(id_l, id_r)
           .dropDuplicates()
           .withColumn('matchkey', F.lit(mk_n))
