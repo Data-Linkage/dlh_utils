@@ -19,6 +19,15 @@ DLH_utils supports Python 3.6+. To install the latest version, simply run:
 ```sh
 pip install dlh_utils
 ```
+## Common issues
+
+* when using the jaro/jaro_winkler functions the error "no module called Jellyfish found" is thrown
+
+These functions are dependent on the Jellyfish package and this may not be installed on the executors used in your spark session.
+Try submitting Jellyfish to your sparkcontext via addPyFile() or by setting the following environmental variables in your CDSW engine settings (ONS only):
+
+* PYSPARK_DRIVER_PYTHON = /usr/local/bin/python3.6
+* PYSPARK_PYTHON = /opt/ons/virtualenv/miscMods_v4.04/bin/python3.6
 
 ## Using the cluster function
 
