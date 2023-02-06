@@ -305,7 +305,7 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
 ###############################################################################
 
 
-def concat(df, out_col, sep=' ', cols):
+def concat(df, out_col, cols, sep=' '):
     """
     Concatenates strings from specified columns into a single string and stores
     the new string value in a new column.
@@ -821,9 +821,9 @@ def union_all(*dfs, fill=None):
     if len(dfs) == 1:
         return dfs[0]
 
-    columns = list(set([x for y in
+    columns = list({x for y in
                         [df.columns for df in dfs]
-                        for x in y]))
+                        for x in y})
 
     out = dfs[0]
 
@@ -1016,7 +1016,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
     if not isinstance(window,list):
         window = [window]
 
-    w = Window.partitionBy(window)
+    window_spec = Window.partitionBy(window)
 
     if mode == 'count':
 
@@ -1025,7 +1025,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
             df = (df
                   .select(*df.columns,
                           F.count(target)
-                          .over(w)
+                          .over(window_spec)
                           .alias(alias))
                   )
 
@@ -1033,7 +1033,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
             df = (df
                   .select(*df.columns,
                           F.count(target)
-                          .over(w))
+                          .over(window_spec))
                   )
 
     if mode == 'countDistinct':
@@ -1047,7 +1047,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                       .dropna(subset=[target])
                       .select(*window+[target],
                               F.count(target)
-                              .over(w)
+                              .over(window_spec)
                               .alias(alias))
                       .drop(target)
                       .dropDuplicates()
@@ -1059,7 +1059,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                       .dropDuplicates(subset=window+[target])
                       .select(*window+[target],
                               F.count(target)
-                              .over(w)
+                              .over(window_spec)
                               .alias(alias))
                       .drop(target)
                       .dropDuplicates()
@@ -1074,7 +1074,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                       .dropna(subset=[target])
                       .select(*window+[target],
                               F.count(target)
-                              .over(w))
+                              .over(window_spec))
                       .drop(target)
                       .dropDuplicates()
                       ).join(df,
@@ -1085,7 +1085,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                       .dropDuplicates(subset=window+[target])
                       .select(*window+[target],
                               F.count(target)
-                              .over(w))
+                              .over(window_spec))
                       .drop(target)
                       .dropDuplicates()
                       ).join(df,
@@ -1100,7 +1100,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.min(target)
-                            .over(w)
+                            .over(window_spec)
                             .alias(alias))
                     )
 
@@ -1125,7 +1125,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.min(target)
-                            .over(w))
+                            .over(window_spec))
                     )
 
             df_2 = (df
@@ -1152,7 +1152,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.max(target)
-                            .over(w)
+                            .over(window_spec)
                             .alias(alias))
                     .select(window+[alias])
                     )
@@ -1185,7 +1185,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.max(target)
-                            .over(w))
+                            .over(window_spec))
                     .drop(*drop)
                     )
 
@@ -1214,7 +1214,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.sum(target)
-                            .over(w)
+                            .over(window_spec)
                             .alias(alias))
                     .select(window+[alias])
                     )
@@ -1247,7 +1247,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .dropna(subset=target)
                     .select(*df.columns,
                             F.sum(target)
-                            .over(w))
+                            .over(window_spec))
                     .drop(*drop)
                     )
 

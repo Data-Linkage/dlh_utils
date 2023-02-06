@@ -593,7 +593,7 @@ def search_files(path, string):
 
             if len(count_list) != 0:
                 diction[file] = count_list
-        except Exception:
+        except IsADirectoryError:
             continue
 
     return diction

@@ -3,7 +3,6 @@ Functions used within the linkage phase of data linkage projects
 '''
 import os
 import re
-from copy import deepcopy
 import pandas as pd
 import jellyfish
 import py4j
@@ -101,8 +100,8 @@ def metaphone(df, input_col, output_col):
 
     """
     @F.udf(returnType=StringType())
-    def meta(s):
-        return None if s is None else jellyfish.metaphone(s)
+    def meta(_string):
+        return None if _string is None else jellyfish.metaphone(_string)
 
     df = df.withColumn(output_col, meta(F.col(input_col)))
 
@@ -767,9 +766,10 @@ def matchkey_join(df_l, df_r, id_l, id_r, match_key, mk_n=0):
 ###############################################################################
 
 
-def chunk_list(l, n):
-    return [l[i * n:(i + 1) * n]
-            for i in range((len(l) + n - 1) // n)]
+def chunk_list(_list, _num):
+  '''splits a list into a specified number of chunks'''
+    return [_list[i * _num:(i + 1) * _num]
+            for i in range((len(_list) + _num - 1) // _num)]
 
 ###############################################################################
 
@@ -848,6 +848,10 @@ def assert_unique_matches(linked_ids, *identifier_col):
 
 
 def assert_unique(df, col):
+  '''
+  Asserts whether a dataframe contains only one instance of each
+  unique identifier, specified by the col argument.
+  '''
 
     if not isinstance(col,list):
         col = [col]
@@ -1183,18 +1187,18 @@ def deduplicate(df, record_id, mks):
     spark = SparkSession.builder.getOrCreate()
 
     # check to see if matchkeys are passed as a list of lists
-    if any(isinstance(MK, list) for MK in mks) is False:
+    if any(isinstance(matchkey, list) for matchkey in mks) is False:
         mks = [mks]
 
-    for count, MK in enumerate(mks, 1):
+    for count, matchkey in enumerate(mks, 1):
 
         if count == 1:
 
-            unique = df.dropDuplicates(MK)
+            unique = df.dropDuplicates(matchkey)
 
         else:
 
-            unique = unique.dropDuplicates(MK)
+            unique = unique.dropDuplicates(matchkey)
 
     duplicates = df.join(unique, on = record_id, how = 'left_anti').dropDuplicates([record_id])
 

@@ -458,10 +458,10 @@ def hive_variable_matrix(database, regex=None, output_mode='spark'):
     variable_types = [(table, hive_dtypes(database, table))
                       for table in tables]
 
-    all_variables = list(set([y[0] for y in
+    all_variables = list({y[0] for y in
                               [item for sublist in
                                [x[1] for x in variable_types]
-                               for item in sublist]]))
+                               for item in sublist]})
 
     out = pd.DataFrame({'variable': all_variables})
 
