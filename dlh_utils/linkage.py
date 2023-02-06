@@ -541,11 +541,11 @@ def cluster_number(df, id_1, id_2):
         cluster = cluster.join(lookup, on='component',
                              how='left').withColumnRenamed('id', id_1)
 
-      # Join new cluster number onto matched pairs
-      df = df.join(cluster, on=id_1, how='left').sort(
-          'Cluster_Number').drop('component')
+        # Join new cluster number onto matched pairs
+        df = df.join(cluster, on=id_1, how='left').sort(
+            'Cluster_Number').drop('component')
 
-      return df
+        return df
   
     except py4j.protocol.Py4JJavaError:
       print("""WARNING: A graphframes wrapper package installation has not been found! If you have not already done so,

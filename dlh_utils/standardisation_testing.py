@@ -20,95 +20,99 @@ def spark(request):
         request: pytest.FixtureRequest object
     """
     spark = (SparkSession.builder.appName("dataframe_testing")
-            .config('spark.executor.memory', '5g')
-            .config('spark.yarn.excecutor.memoryOverhead', '2g')
-            .getOrCreate())
+             .config('spark.executor.memory', '5g')
+             .config('spark.yarn.excecutor.memoryOverhead', '2g')
+             .getOrCreate())
     request.addfinalizer(lambda: spark.stop())
     return spark
-  
+
 
 class TestCastType(object):
-      def test_expected(self, spark):
-          test_df = spark.createDataFrame(
-              (pd.DataFrame({
-                  "before": [None, '2', '3', '4', '5'],
-                  "after": [None, 2, 3, 4, 5]
-              })))
-        
-          intended_schema = StructType([
-                     StructField( "after", StringType(), True),
-                     StructField( "before", StringType(), True)
-                     ])
-          
-          intended_data = [[float('NaN'),None],
-                           [2.0, 2],
-                           [3.0, 3],
-                           [4.0, 4],
-                           [5.0, 5]]
-          intended_df = spark.createDataFrame(intended_data,intended_schema)
-            
-          # check if it is string first
-          result_df = cast_type(test_df, subset='after', types='string')      
-          assert_df_equality(intended_df, result_df, allow_nan_equality=True)
-          
-          
-          intended_schema = StructType([
-                     StructField( "after", DoubleType(), True),
-                     StructField( "before", IntegerType(), True)
-                     ])
-          
-          intended_data = [[float('NaN'),None],
-                           [2.0, 2],
-                           [3.0, 3],
-                           [4.0, 4],
-                           [5.0, 5]]
-          intended_df2 = spark.createDataFrame(intended_data,intended_schema)
-          # check if columns are the same after various conversions
-          result_df2 = cast_type(test_df, subset='before', types='int')
-          assert_df_equality(intended_df2, result_df2, allow_nan_equality=True)
+  
+    def test_expected(self, spark):
+      
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "before": [None, '2', '3', '4', '5'],
+                "after": [None, 2, 3, 4, 5]
+            })))
+
+        intended_schema = StructType([
+            StructField("after", StringType(), True),
+            StructField("before", StringType(), True)
+        ])
+
+        intended_data = [[float('NaN'), None],
+                         [2.0, 2],
+                         [3.0, 3],
+                         [4.0, 4],
+                         [5.0, 5]]
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        # check if it is string first
+        result_df = cast_type(test_df, subset='after', types='string')
+        assert_df_equality(intended_df, result_df, allow_nan_equality=True)
+
+        intended_schema = StructType([
+            StructField("after", DoubleType(), True),
+            StructField("before", IntegerType(), True)
+        ])
+
+        intended_data = [[float('NaN'), None],
+                         [2.0, 2],
+                         [3.0, 3],
+                         [4.0, 4],
+                         [5.0, 5]]
+        intended_df2 = spark.createDataFrame(intended_data, intended_schema)
+        # check if columns are the same after various conversions
+        result_df2 = cast_type(test_df, subset='before', types='int')
+        assert_df_equality(intended_df2, result_df2, allow_nan_equality=True)
 ##############################################################################
 
+
 class TestStandardiseWhiteSpace(object):
-      def test_expected(self,spark):
+  
+    def test_expected(self, spark):
 
-          test_df = spark.createDataFrame(
-              (pd.DataFrame({
-                  "before": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
-                  "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "before": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
+                "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
 
-                  "before2": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
-                  "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
-              })))
-          intended_df = spark.createDataFrame(
-                    (pd.DataFrame({
-                        "before": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
-                        "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
+                "before2": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
+                "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
+            })))
+        intended_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "before": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
+                "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
 
-                        "before2": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
-                        "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
-                    })))
-          result_df = standardise_white_space(test_df, subset='before', wsl='one')
-          assert_df_equality(intended_df, result_df)    
+                "before2": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
+                "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
+            })))
+        result_df = standardise_white_space(
+            test_df, subset='before', wsl='one')
+        assert_df_equality(intended_df, result_df)
 
+        intended_df2 = spark.createDataFrame(
+            (pd.DataFrame({
+                "before": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
+                "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
 
-          intended_df2 = spark.createDataFrame(
-                    (pd.DataFrame({
-                        "before": [None, 'hello  yes', 'hello yes', 'hello   yes', 'hello yes'],
-                        "after": [None, 'hello yes', 'hello yes', 'hello yes', 'hello yes'],
-
-                        "before2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes'],
-                        "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
-                    })))
-          result_df2 = standardise_white_space(test_df, subset='before2', fill='_')
-          assert_df_equality(intended_df2, result_df2)      
-
+                "before2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes'],
+                "after2": [None, 'hello_yes', 'hello_yes', 'hello_yes', 'hello_yes']
+            })))
+        result_df2 = standardise_white_space(
+            test_df, subset='before2', fill='_')
+        assert_df_equality(intended_df2, result_df2)
 
 
 ##############################################################################
 
 class TestRemovePunct(object):
+  
     def test_expected(self, spark):
-    
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "after": ['ONE', 'TWO', 'THREE', 'FOUR', 'FI^VE'],
@@ -116,7 +120,6 @@ class TestRemovePunct(object):
                 "extra": [None, 'TWO', "TH@REE", 'FO+UR', "FI@^VE"]
             })))
 
-       
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "after": ['ONE', 'TWO', 'THREE', 'FOUR', 'FI^VE'],
@@ -125,12 +128,14 @@ class TestRemovePunct(object):
             })))
 
         result_df = remove_punct(test_df, keep='^', subset=['after', 'before'])
-        
-        assert_df_equality(intended_df, result_df)      
+
+        assert_df_equality(intended_df, result_df)
 
 ##############################################################################
 
+
 class TestTrim(object):
+  
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -140,8 +145,7 @@ class TestTrim(object):
                 "numeric": [1, 2, 3, 4, 5],
                 "after": [None, '', 'th re e', 'four', 'f iv  e']
             })))
-        
-        
+
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before1": [None, '', 'th re e', 'four', 'f iv  e'],
@@ -149,35 +153,34 @@ class TestTrim(object):
                 "numeric": [1, 2, 3, 4, 5],
                 "after": [None, '', 'th re e', 'four', 'f iv  e']
             })))
-        
-        
+
         result_df = trim(test_df, subset=["before1", "numeric", "after"])
-        
-        assert_df_equality(intended_df, result_df) 
-                
+
+        assert_df_equality(intended_df, result_df)
+
 
 ##############################################################################
 
 class TestStandardiseCase(object):
+  
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "upper": ['ONE', 'TWO', 'THREE'],
                 "lower": ['one', 'two', 'three'],
                 "title": ['One', 'Two', 'Three']
             })))
- 
-        
+
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "upper": ['ONE', 'TWO', 'THREE'],
                 "lower": ['ONE', 'TWO', 'THREE'],
                 "title": ['One', 'Two', 'Three']
-            })))                
+            })))
 
         result_df = standardise_case(test_df, subset='lower', val='upper')
-        assert_df_equality(intended_df, result_df)        
+        assert_df_equality(intended_df, result_df)
 
         intended_df2 = spark.createDataFrame(
             (pd.DataFrame({
@@ -185,14 +188,15 @@ class TestStandardiseCase(object):
                 "lower": ['one', 'two', 'three'],
                 "title": ['One', 'Two', 'Three']
             })))
-        
+
         result_df2 = standardise_case(test_df, subset='upper', val='lower')
         assert_df_equality(intended_df2, result_df2)
-        
+
 ##############################################################################
 
 
 class TestStandardiseDate(object):
+  
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -210,40 +214,47 @@ class TestStandardiseDate(object):
                 "slashed": [None, '14/05/1996', '15/04/1996'],
                 "slashedReverse": [None, '1996/05/14', '1996/04/15']
             })))
-        
-        
+
         result_df = standardise_date(test_df, col_name='before')
         assert_df_equality(intended_df, result_df)
 
-        
         intended_df2 = spark.createDataFrame(
-                (pd.DataFrame({
-                    "before": [None, '14/05/1996', '15/04/1996'],
-                    "after": [None, '1996-05-14', '1996-04-15'],
-                    "slashed": [None, '14/05/1996', '15/04/1996'],
-                    "slashedReverse": [None, '1996/05/14', '1996/04/15']
-                })))
-        
-        result_df2 = standardise_date(test_df, col_name='before', out_date_format='dd/MM/yyyy')
+            (pd.DataFrame({
+                "before": [None, '14/05/1996', '15/04/1996'],
+                "after": [None, '1996-05-14', '1996-04-15'],
+                "slashed": [None, '14/05/1996', '15/04/1996'],
+                "slashedReverse": [None, '1996/05/14', '1996/04/15']
+            })))
+
+        result_df2 = standardise_date(
+            test_df,
+            col_name='before',
+            out_date_format='dd/MM/yyyy')
         assert_df_equality(intended_df2, result_df2)
-        
+
         intended_df3 = spark.createDataFrame(
-                (pd.DataFrame({
-                    "before": [None, '14-05-1996', '15-04-1996'],
-                    "after": [None, '1996-05-14', '1996-04-15'],
-                    "slashed": [None, '14/05/1996', '15/04/1996'],
-                    "slashedReverse": [None, '14-05-1996', '15-04-1996']
-                })))
-        
-        result_df3 = standardise_date(test_df, col_name='slashedReverse',
-                                      in_date_format='yyyy/mm/dd', out_date_format='dd-mm-yyyy')
-                
+            (pd.DataFrame({
+                "before": [None, '14-05-1996', '15-04-1996'],
+                "after": [None, '1996-05-14', '1996-04-15'],
+                "slashed": [None, '14/05/1996', '15/04/1996'],
+                "slashedReverse": [None, '14-05-1996', '15-04-1996']
+            })))
+
+        result_df3 = standardise_date(
+            test_df,
+            col_name='slashedReverse',
+            in_date_format='yyyy/mm/dd',
+            out_date_format='dd-mm-yyyy')
+
         assert_df_equality(intended_df3, result_df3)
 
 ##############################################################################
 
+
 class TestMaxHyphen(object):
+  
     def test_expected(self, spark):
+      
         # max hyphen gets rid of any hyphens that does not match
         # or is under the limit
         test_df = spark.createDataFrame(
@@ -264,7 +275,6 @@ class TestMaxHyphen(object):
         result_df = max_hyphen(test_df, limit=2, subset=['before'])
         assert_df_equality(intended_df, result_df)
 
-
         intended_df2 = spark.createDataFrame(
             pd.DataFrame({
                 "before": ["james--brad", "tom----ridley", "chicken-wing", "agent----john"],
@@ -277,8 +287,10 @@ class TestMaxHyphen(object):
 
 ##############################################################################
 
+
 class TestMaxWhiteSpace(object):
-    def test_expected(self,spark):
+  
+    def test_expected(self, spark):
 
         # max_white_space gets rid of any whitespace that does not match
         # or is under the limit
@@ -301,8 +313,6 @@ class TestMaxWhiteSpace(object):
         result_df = max_white_space(test_df, limit=2, subset=['before'])
         assert_df_equality(intended_df, result_df)
 
-
-
         intended_df2 = spark.createDataFrame(
             pd.DataFrame({
                 "before": ["james  brad", "tom    ridley", "chicken wing", "agentjohn"],
@@ -312,13 +322,15 @@ class TestMaxWhiteSpace(object):
             }))
 
         result_df2 = max_white_space(test_df, limit=4, subset=['before'])
-        assert_df_equality(intended_df2, result_df2)  
+        assert_df_equality(intended_df2, result_df2)
 
 ##############################################################################
 
 
 class TestAlignForenames(object):
+  
     def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "identifier": [1, 2, 3, 4],
@@ -326,21 +338,21 @@ class TestAlignForenames(object):
                 "middleName": [None, "hog", None, ""]
             })))
 
-        
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "identifier": [1, 3, 2, 4],
                 "firstName": ["robert", "carlos", "andrew", "john"],
-                "middleName": ["green", "senior","hog", "wick"]
+                "middleName": ["green", "senior", "hog", "wick"]
             })))
-        
-        result_df = align_forenames(test_df, "firstName", "middleName", "identifier")
-        assert_df_equality(intended_df, result_df) 
+
+        result_df = align_forenames(
+            test_df, "firstName", "middleName", "identifier")
+        assert_df_equality(intended_df, result_df)
 ##############################################################################
 
 
 class TestAddLeadingZeros(object):
-  
+
     def test_expected(self, spark):
         test_df = spark.createDataFrame(
             (pd.DataFrame({
@@ -360,33 +372,33 @@ class TestAddLeadingZeros(object):
 
 
 class TestGroupSingleCharacters(object):
-      def test_expected(self,spark):
+  
+    def test_expected(self, spark):
 
-          test_df = spark.createDataFrame(
-              (pd.DataFrame({
-                  "before1": [None, '', '-t-h r e e', 'four', 'f i v e'],
-                  "before2": [None, '', '-t-h r e e', 'four', 'f i v e'],
-                  "after": [None, '', '-t-h ree', 'four', 'five']
-              })))
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "before1": [None, '', '-t-h r e e', 'four', 'f i v e'],
+                "before2": [None, '', '-t-h r e e', 'four', 'f i v e'],
+                "after": [None, '', '-t-h ree', 'four', 'five']
+            })))
 
+        intended_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "before1": [None, '', '-t-h ree', 'four', 'five'],
+                "before2": [None, '', '-t-h r e e', 'four', 'f i v e'],
+                "after": [None, '', '-t-h ree', 'four', 'five']
+            })))
 
-          intended_df = spark.createDataFrame(
-              (pd.DataFrame({
-                  "before1": [None, '', '-t-h ree', 'four', 'five'],
-                  "before2": [None, '', '-t-h r e e', 'four', 'f i v e'],
-                  "after": [None, '', '-t-h ree', 'four', 'five']
-              })))        
-
-
-
-          result_df = group_single_characters(test_df, subset='before1')        
-          assert_df_equality(intended_df, result_df)
+        result_df = group_single_characters(test_df, subset='before1')
+        assert_df_equality(intended_df, result_df)
 
 
 ##############################################################################
 
 class TestCleanHyphens(object):
-    def test_expected (self, spark):
+  
+    def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before1": [None, '', 'th- ree', '--fo - ur', 'fi -ve-'],
@@ -400,7 +412,7 @@ class TestCleanHyphens(object):
                 "before2": [None, '', 'th- ree', 'fo - ur', 'fi -ve'],
                 "after": [None, '', 'th-ree', 'fo-ur', 'fi-ve']
             })))
-        
+
         result_df = clean_hyphens(test_df, subset='before1')
         assert_df_equality(intended_df, result_df)
 
@@ -409,7 +421,9 @@ class TestCleanHyphens(object):
 
 
 class TestStandardiseNull(object):
+  
     def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before1": [None, '', '  ', '-999', '####', 'KEEP'],
@@ -418,16 +432,16 @@ class TestStandardiseNull(object):
             })))
 
         intended_df = spark.createDataFrame(
-                      (pd.DataFrame({
+            (pd.DataFrame({
                           "before1": [None, None, None, None, None, 'KEEP'],
-                          "before2": [None,'' , '  ', '-999', '####', 'KEEP'],
+                          "before2": [None, '', '  ', '-999', '####', 'KEEP'],
                           "after": [None, None, None, None, None, 'KEEP']
-                      })))
+                          })))
 
         result_df = standardise_null(test_df,
-                                 replace="^-[0-9]|^[#]+$|^$|^\s*$",
-                                 subset='before1',
-                                 regex=True)
+                                     replace="^-[0-9]|^[#]+$|^$|^\\s*$",
+                                     subset='before1',
+                                     regex=True)
         assert_df_equality(intended_df, result_df)
 
         intended_df2 = spark.createDataFrame(
@@ -438,18 +452,19 @@ class TestStandardiseNull(object):
             })))
 
         result_df2 = standardise_null(test_df,
-                                 replace="-999",
-                                 subset='before1',
-                                 regex=False)
+                                      replace="-999",
+                                      subset='before1',
+                                      regex=False)
         assert_df_equality(intended_df2, result_df2)
 
 
 ##############################################################################
 
 
-
 class TestFillNulls(object):
-    def test_expected(self,spark):
+  
+    def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['abcd', None, 'fg', ''],
@@ -457,7 +472,7 @@ class TestFillNulls(object):
                 "after": ['abcd', None, 'fg', ''],
                 "afternumeric": [1, 2, 0, 3]
             })))
-        
+
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['abcd', '0', 'fg', ''],
@@ -465,7 +480,7 @@ class TestFillNulls(object):
                 "after": ['abcd', '0', 'fg', ''],
                 "afternumeric": [1, 2, 0, 3]
             })))
-        
+
         result_df = fill_nulls(test_df, 0)
         assert_df_equality(intended_df, result_df)
 
@@ -473,6 +488,7 @@ class TestFillNulls(object):
 
 
 class TestReplace(object):
+  
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -483,7 +499,6 @@ class TestReplace(object):
                 "after1": [None, 'b', 'f', 'd']
             })))
 
-        
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": [None, None, 'f', ''],
@@ -492,11 +507,10 @@ class TestReplace(object):
                 "after1": [None, 'b', 'f', 'd']
             })))
 
-        
-        result_df = replace(test_df, subset = "before", replace_dict={'a': None,
-                                                         'c': 'f'})
+        result_df = replace(test_df, subset="before", replace_dict={'a': None,
+                                                                    'c': 'f'})
         assert_df_equality(intended_df, result_df)
-      
+
         intended_df2 = spark.createDataFrame(
             (pd.DataFrame({
                 "before": [None, None, 'f', ''],
@@ -504,19 +518,25 @@ class TestReplace(object):
                 "after": [None, None, 'f', ''],
                 "after1": [None, 'b', 'f', 'd']
             })))
-        
-        
-        
-        result_df2 = replace(test_df, subset=["before", "before1"], replace_dict={'a': None,
-                                                                                  'c': 'f'})
-        assert_df_equality(intended_df2, result_df2)                                                        
+
+        result_df2 = replace(
+            test_df,
+            subset=[
+                "before",
+                "before1"],
+            replace_dict={
+                'a': None,
+                'c': 'f'})
+        assert_df_equality(intended_df2, result_df2)
 
 
 ##############################################################################
 
 
 class TestCleanForename(object):
+  
     def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['MISS Maddie', 'MR GEORGE', 'DR Paul', 'NO NAME'],
@@ -528,8 +548,7 @@ class TestCleanForename(object):
                 "before": [' Maddie', ' GEORGE', ' Paul', ''],
                 "after": [' Maddie', ' GEORGE', ' Paul', '']
             })))
-        
-        
+
         result_df = clean_forename(test_df, "before")
         assert_df_equality(intended_df, result_df)
 
@@ -538,7 +557,9 @@ class TestCleanForename(object):
 
 
 class TestCleanSurname(object):
+  
     def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['O Leary', 'VAN DER VAL', 'SURNAME', 'MC CREW'],
@@ -549,7 +570,7 @@ class TestCleanSurname(object):
             (pd.DataFrame({
                 "before": ['OLeary', 'VANDERVAL', '', 'MCCREW'],
                 "after": ['OLeary', 'VANDERVAL', '', 'MCCREW']
-            })))    
+            })))
 
         result_df = clean_surname(test_df, "before")
         assert_df_equality(intended_df, result_df)
@@ -558,7 +579,9 @@ class TestCleanSurname(object):
 
 
 class TestRegReplace(object):
-    def test_expected (self, spark):
+  
+    def test_expected(self, spark):
+      
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": [None, "hello str", 'king strt', 'king road'],
@@ -569,12 +592,12 @@ class TestRegReplace(object):
             (pd.DataFrame({
                 "col1": [None, "bond street", 'queen street', 'queen avenue'],
                 "col2": [None, "bond street", 'queen street', "queen avenue"]
-            })))    
+            })))
 
         result_df = reg_replace(test_df, dic={'street': '\\bstr\\b|\\bstrt\\b',
-                                    'avenue': 'road',
-                                    "bond": "hello",
-                                    "queen": "king"})
+                                              'avenue': 'road',
+                                              "bond": "hello",
+                                              "queen": "king"})
         assert_df_equality(intended_df, result_df)
 
 
@@ -594,21 +617,21 @@ class TestCastGeographyNull(object):
 
         target_col = 'postcode'
         geo_cols = ['uprn', 'city']
-        
+
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
                 "postcode": [None, None, 'CF249ZZ', None, ""],
                 "uprn": [None, None, '3', '4', '5'],
                 "city": [None, None, 'c', 'd', 'e']
             })))
-              
-              
-        result_df = cast_geography_null(test_df, target_col,geo_cols=geo_cols, regex="^(?i)zz99")
+
+        result_df = cast_geography_null(
+            test_df, target_col, geo_cols=geo_cols, regex="^(?i)zz99")
         assert_df_equality(intended_df, result_df)
 
         target_col2 = 'uprn'
         geo_cols2 = ['postcode', 'city']
-        
+
         intended_df2 = spark.createDataFrame(
             (pd.DataFrame({
                 "postcode": ['zz99 lmn', 'ZZ99ABC', None, None, ""],
@@ -616,5 +639,6 @@ class TestCastGeographyNull(object):
                 "city": ['a', 'b', None, 'd', 'e']
             })))
 
-        result_df2 = cast_geography_null(test_df, target_col2, geo_cols = geo_cols2, regex="^3$")
+        result_df2 = cast_geography_null(
+            test_df, target_col2, geo_cols=geo_cols2, regex="^3$")
         assert_df_equality(intended_df2, result_df2)

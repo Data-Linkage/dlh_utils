@@ -65,7 +65,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
             ("3","7","3","Simpson","2012-04-01","M","ET74 2SP"),
             ("3","9","3","Simpson","2012-04-01","M","ET74 2SP"),
             ("4","9","4","Simpson","2014-05-09","F","ET74 2SP"),
-            ("5","6",4,"Simpson","2021-01-12","F","ET74 2SP")]
+            ("5","6","4","Simpson","2021-01-12","F","ET74 2SP")]
     df=spark.createDataFrame(data=data,schema=["ID","ID2","clust","ROWNUM","DoB","Sex","Postcode"])
 
     > df.show()
