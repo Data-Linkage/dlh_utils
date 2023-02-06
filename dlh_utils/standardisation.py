@@ -3,7 +3,7 @@ Functions used to standardise and clean data prior to linkage.
 '''
 import pyspark.sql.functions as F
 from pyspark.sql.types import *
-from dlh_utils import dataframes as da
+from dlh_utils.dataframes import concat
 
 
 def cast_type(df, subset=None, types='string'):
@@ -196,7 +196,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
                     | (F.col(first_name).isNull())))
     df = df.where(F.col(first_name).contains(sep))
 
-    df = da.concat(df, 'align_forenames', sep, [
+    df = concat(df, 'align_forenames', sep, [
         first_name,
         middle_name
     ])

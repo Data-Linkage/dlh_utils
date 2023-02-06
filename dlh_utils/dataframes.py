@@ -4,7 +4,7 @@ Functions used to modify aspects of a dataframe prior to linkage.
 import re
 import pyspark.sql.functions as F
 from pyspark.sql import Window
-from dlh_utils import standardisation as st
+from dlh_utils.standardisation import fill_nulls, standardise_null
 
 ##################################################################################
 
@@ -1269,7 +1269,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                         how='right')
                   )
 
-    df = st.standardise_null(df, "^<<<>>>$", subset=window)
+    df = standardise_null(df, "^<<<>>>$", subset=window)
 
     return df
 
@@ -1417,14 +1417,14 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
             df = window(df,filter_window,target,mode,alias='value')
 
-            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
             df = (df
               .where(F.col(target)==F.col('value'))
               .drop('value')
                  )
 
-            df = (st.standardise_null(df = df,
+            df = (standardise_null(df = df,
                                   replace = "^<<<>>>$",
                                   subset = target)
            )
@@ -1433,14 +1433,14 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
             df = window(df,filter_window,target,mode,alias='value')
 
-            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
             df = (df
               .where(F.col(target)!=F.col('value'))
               .drop('value')
                  )
 
-            df = (st.standardise_null(df = df,
+            df = (standardise_null(df = df,
                                   replace = "^<<<>>>$",
                                   subset = target)
                 )
