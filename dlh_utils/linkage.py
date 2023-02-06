@@ -846,17 +846,16 @@ def assert_unique_matches(linked_ids, *identifier_col):
 
 ###############################################################################
 
-
 def assert_unique(df, col):
-  '''
-  Asserts whether a dataframe contains only one instance of each
-  unique identifier, specified by the col argument.
-  '''
+    '''
+    Asserts whether a dataframe contains only one instance of each
+    unique identifier, specified by the col argument.
+    '''
 
-    if not isinstance(col,list):
+  if not isinstance(col,list):
         col = [col]
 
-    assert df.count() == df.dropDuplicates(subset=col).count()
+  assert df.count() == df.dropDuplicates(subset=col).count()
 
 ###############################################################################
 
