@@ -950,7 +950,7 @@ def pandas_to_spark(pandas_df):
         try:
             vartype = equivalent_type(format_type)
 
-        except:
+        except TypeError:
             vartype = StringType()
 
         return StructField(string, vartype)
