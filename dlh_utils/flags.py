@@ -353,13 +353,13 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
     In all instances summary will be the last component returned e.g. master,summary
     """
     if flags is None:
-      
+
         flags = [
             column for column in df.columns if column.startswith(prefix)]
-        
+    
     if len(flags) == 0:
-      print("No flag columns found! Please specify which flag column to summarise\
-      with the flags = argument, or specify the correct prefix")
+        print("No flag columns found! Please specify which flag column to summarise\
+        with the flags = argument, or specify the correct prefix")
 
     df = df.withColumn('flag_count', F.lit(0))
 
