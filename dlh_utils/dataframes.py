@@ -305,7 +305,7 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
 ###############################################################################
 
 
-def concat(df, out_col, sep=' ', cols=[]):
+def concat(df, out_col, sep=' ', cols):
     """
     Concatenates strings from specified columns into a single string and stores
     the new string value in a new column.
@@ -322,7 +322,7 @@ def concat(df, out_col, sep=' ', cols=[]):
       This is the value used to seperate the
       strings in the different columns when
       combinging them into a single string.
-    cols : list, default = []
+    cols : list
       The list of columns being concatenated into
       one string
 
@@ -522,7 +522,7 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
 
 #############################################################################
 
-def rename_columns(df, rename_dict={}):
+def rename_columns(df, rename_dict):
     """
     Allows multiple columns to be renamed in one command from {before:after}
     replacement dictionary
@@ -581,7 +581,7 @@ def rename_columns(df, rename_dict={}):
 #############################################################################
 
 
-def prefix_columns(df, prefix, exclude=[]):
+def prefix_columns(df, prefix, exclude):
     """
     Renames columns with specified prefix string.
 
@@ -591,7 +591,7 @@ def prefix_columns(df, prefix, exclude=[]):
     prefix : string
       The prifix string that will be appended
       to column names.
-    exclude : string or list of strings, default = None
+    exclude : string or list of strings
       This argument either takes a list of column names
       or a string value that is a column name.
       These values are excluded from the renaming of
@@ -666,7 +666,7 @@ def prefix_columns(df, prefix, exclude=[]):
 #############################################################################
 
 
-def suffix_columns(df, suffix, exclude=[]):
+def suffix_columns(df, suffix, exclude):
     """
     Renames columns with specified suffix string.
 
