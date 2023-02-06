@@ -852,10 +852,10 @@ def assert_unique(df, col):
     unique identifier, specified by the col argument.
     '''
 
-  if not isinstance(col,list):
-        col = [col]
+    if not isinstance(col,list):
+       col = [col]
 
-  assert df.count() == df.dropDuplicates(subset=col).count()
+    assert df.count() == df.dropDuplicates(subset=col).count()
 
 ###############################################################################
 
