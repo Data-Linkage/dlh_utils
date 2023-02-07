@@ -6,7 +6,8 @@ import subprocess
 import os
 import re
 from pyspark.sql import SparkSession
-from pyspark.sql.types import *
+from pyspark.sql.types import TimestampType,LongType,IntegerType,DoubleType,\
+FloatType,StringType,StructType,StructField
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
 from dlh_utils import dataframes as da
@@ -81,17 +82,16 @@ def list_files(directory, walk=False):
 
         return files
 
-    else:
 
-        for file in files:
-            if len(files) == len(set(files)):
-                files.extend(list_files(file))
-            else:
-                break
+    for file in files:
+        if len(files) == len(set(files)):
+            files.extend(list_files(file))
+        else:
+            break
 
-        files = list(set(files))
+    files = list(set(files))
 
-        return files
+    return files
 
 ###############################################################################
 
@@ -942,8 +942,7 @@ def pandas_to_spark(pandas_df):
         if _format == 'float32':
             return FloatType()
 
-        else:
-            return StringType()
+        return StringType()
 
     def define_structure(string, format_type):
 

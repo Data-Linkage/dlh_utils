@@ -2,7 +2,7 @@
 Functions used to standardise and clean data prior to linkage.
 '''
 import pyspark.sql.functions as F
-from pyspark.sql.types import *
+from pyspark.sql.types import IntegerType
 from dlh_utils.dataframes import concat
 
 
@@ -1363,7 +1363,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
 ################################################################################
 
 
-def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
+def age_at(df, birth_date, *age_at_dates, in_date_format='yyyy-MM-dd'):
     """
     Calculates individuals' ages at specified dates.
 
@@ -1381,15 +1381,16 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
       Dataframe to which the function is applied.
     birth_date: string
       The original date of birth column needed to calculate age.
+    *age_at_dates: list of strings
+      The list of dates at which the user wants to calculate ages. Any
+      number of dates can be given. The dates need to be in the
+      following format: 'yyyy-MM-dd'.
     in_date_format: default = 'yyyy-MM-dd',string
       The date format of the date of birth column.
       It uses hyphens or forward slashes to split the date
       up and dd,MM,yyyy to show date month and year respectively.
       e.g. 'dd-MM-yyyy' , 'dd/MM/yyyy', 'yyyy-MM-dd'.
-    *age_at_dates: list of strings
-      The list of dates at which the user wants to calculate ages. Any
-      number of dates can be given. The dates need to be in the
-      following format: 'yyyy-MM-dd'.
+
 
     Returns
     -------

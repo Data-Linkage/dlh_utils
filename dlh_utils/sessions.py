@@ -55,7 +55,7 @@ def getOrCreateSparkSession(appName='DE_DL',
     # obtain spark UI url parameters
     url = 'spark-' + str(os.environ['CDSW_ENGINE_ID']) + \
         '.'+str(os.environ['CDSW_DOMAIN'])
-    spark_ui = display(HTML('<a href=http://%s>Spark UI</a>' % url))
+    spark_ui = display(HTML(f'<a href=http://{url}s>Spark UI</a>'))
 
     try:
 
@@ -75,26 +75,6 @@ def getOrCreateSparkSession(appName='DE_DL',
 
     if size == 'small':
 
-        """
-        Small Session
-
-        This session is similar to that used for DAPCATS training
-        It is the smallest session that is realistically used
-
-        Details:
-            Only 1g of memory and 3 executors
-            Only 1 core
-            Number of partitions are limited to 12, which can improve
-            performance with smaller data
-
-        Use case:
-            Simple data exploration of small survey data
-
-        Example of actual usage:
-            Used for DAPCATS PySpark training
-            Mostly simple calculations
-        """
-
         spark = (
             SparkSession.builder.appName(appName)
             .config("spark.executor.memory", "1g")
@@ -111,30 +91,6 @@ def getOrCreateSparkSession(appName='DE_DL',
         )
 
     if size == 'medium':
-
-        """
-        Medium Session
-
-        A standard session used for analysing survey or synthetic
-        datasets. Also used for some Production pipelines based on
-        survey and/or smaller administrative data.
-
-        Details:
-            6g of memory and 3 executors
-            3 cores
-            Number of partitions are limited to 18, which can improve
-            performance with smaller data
-
-        Use case:
-            Developing code in Dev Test
-            Data exploration in Production
-            Developing Production pipelines on a sample of data
-            Running smaller Production pipelines on mostly survey data
-
-        Example of actual usage:
-            Complex calculations, but on smaller synthetic data in
-                Dev Test
-        """
 
         spark = (
             SparkSession.builder.appName(appName)
@@ -153,28 +109,6 @@ def getOrCreateSparkSession(appName='DE_DL',
 
     if size == 'large':
 
-        """
-        Large Session
-
-        Session designed for running Production pipelines on large
-        administrative data, rather than just survey data. Will often
-        develop using a smaller session then change to this once the
-        pipeline is complete.
-
-        Details:
-            10g of memory and 5 executors
-            1g of memory overhead
-            5 cores, which is generally optimal on larger sessions
-
-        Use case:
-            Production pipelines on administrative data
-            Cannot be used in Dev Test, as 9 GB limit per executor
-
-        Example of actual usage:
-            One administrative dataset of 100 million rows
-            Many calculations
-        """
-
         spark = (
             SparkSession.builder.appName(appName)
             .config("spark.executor.memory", "10g")
@@ -192,32 +126,6 @@ def getOrCreateSparkSession(appName='DE_DL',
 
     if size == 'extra_large':
 
-        """
-        Extra Large session
-
-        Used for the most complex pipelines, with huge administrative
-        data sources and complex calculations. Uses a large amount of
-        resource on the cluster, so only use when running Production
-        pipelines
-
-        Details:
-            20g of memory and 12 executors
-            2g of memory overhead
-            5 cores; using too many cores can actually cause worse
-                performance on larger sessions
-
-        Use case:
-            Running large, complex pipelines in Production on mostly
-                administrative data
-            Do not use for development purposes; use a smaller session
-                and work on a sample of data or synthetic data
-
-        Example of actual usage:
-            Three administrative datasets of around 300 million rows
-            Significant calculations, including joins and writing/reading
-                to many intermediate tables
-        """
-
         spark = (
             SparkSession.builder.appName(appName)
             .config("spark.executor.memory", "20g")
@@ -234,10 +142,6 @@ def getOrCreateSparkSession(appName='DE_DL',
         )
 
     if size == 'custom':
-
-        """
-        Optional custom spark settings
-        """
 
         spark = (
             SparkSession.builder.appName(appName)

@@ -9,7 +9,7 @@ import py4j
 from pyspark.sql import SparkSession, Window
 import pyspark.sql.functions as F
 from pyspark.sql.types import StringType, FloatType
-from graphframes import *
+from graphframes import GraphFrame
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
 
@@ -546,7 +546,7 @@ def cluster_number(df, id_1, id_2):
             'Cluster_Number').drop('component')
 
         return df
-
+        
     except py4j.protocol.Py4JJavaError:
         print("""WARNING: A graphframes wrapper package installation has not been found!
         If you have not already done so, you will need to submit graphframes' JAR file 
@@ -845,6 +845,7 @@ def assert_unique_matches(linked_ids, *identifier_col):
                 ) == 1
 
 ###############################################################################
+
 
 def assert_unique(df, col):
     '''
