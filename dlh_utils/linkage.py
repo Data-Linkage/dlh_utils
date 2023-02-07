@@ -554,7 +554,8 @@ def cluster_number(df, id_1, id_2):
         \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/
         graphframes-0.6.0-spark2.3-s_2.11.jar\nOnce downloaded, 
         this can be submitted to your spark context via:
-        spark.conf.set('spark.jars', path_to_jar_file)
+        spark.conf.set('spark.jars', path_to_jar_file) or by starting a sparksession from the
+        sessions module of dlh_utils
         """)
 
 ###############################################################################
