@@ -11,6 +11,7 @@ from pyspark.sql.types import IntegerType, StringType
 from dlh_utils import utilities as ut
 from dlh_utils import dataframes as da
 
+###############################################################################
 
 def create_table_statements(database, regex=None, output_mode='spark'):
     '''
@@ -289,7 +290,7 @@ def df_describe(df, output_mode='pandas', approx_distinct=False, rsd=0.05):
 def value_counts(df, limit=20, output_mode='pandas'):
     '''
     Produces dataframes summarising the top and bottom distinct value counts within
-    a supplied spark dataframe,
+    a supplied spark dataframe.
 
     Parameters
     ----------

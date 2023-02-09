@@ -318,13 +318,13 @@ def concat(df, out_col, cols, sep=' '):
       The name, in string format, of the
       output column for the new concatenated
       strings to be stored in.
+    cols : list
+      The list of columns being concatenated into
+      one string
     sep : string, default = ' '
       This is the value used to seperate the
       strings in the different columns when
       combinging them into a single string.
-    cols : list
-      The list of columns being concatenated into
-      one string
 
     Returns
     -------
@@ -1462,7 +1462,7 @@ def literal_column(df, col_name, literal):
     col_name : string
       New column title.
     literal :data-type
-      Values populating the colName column.
+      Values populating the col_name column.
 
     Returns
     -------

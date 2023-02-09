@@ -639,10 +639,14 @@ def order_matchkeys(df_l, df_r, mks, chunk=10):
 
     Parameters
     ----------
-    df : dataframe
-      Dataframe the to which matchkeys will be applied.
-    mk : list
-      A list of join conditions (as specified in a matchkey(s)).
+    df_l : dataframe
+      Left dataframe to which matchkeys will be applied.
+    df_r : dataframe
+      Right dataframe to which matchkeys will be applied.
+    mks : list
+      A list of join conditions (as specified in a matchkey(s))
+    chunk, int
+      default = 10
 
     Returns
     -------

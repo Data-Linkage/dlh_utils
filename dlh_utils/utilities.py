@@ -392,6 +392,7 @@ def most_recent(path, filetype, regex=None):
 
 def write_format(df, write, path,
                 file_name=None, sep=",", header="true", mode='overwrite'):
+    
     """
     Writes dataframe in specified format
 
@@ -430,8 +431,9 @@ def write_format(df, write, path,
     -------
 
     > write_format(df = df, write = 'parquet', path = 'user/edwara5/simpsons.parquet',
-                  mode = 'overwrite')
-    """
+                  mode = 'overwrite') 
+    """ 
+
     spark = SparkSession.builder.getOrCreate()
     if file_name is None:
         if write == 'csv':
@@ -473,8 +475,6 @@ def read_format(read, path=None, file_name=None,
       specified separator for data in csv format
     header : {"true", "false"} (default = "true")
       Boolean indicating whether or not data will be read to include a header
-    mode : {overwrite, append}, default = overwrite
-      Choice to overwrite existing file or table or to append new data into it
     infer_schema : {"true", "false"}:
       Boolean indicating whether data should be read with infered data types and
       schema. If false, all data will read as string format.

@@ -5,6 +5,7 @@ import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType
 from dlh_utils.dataframes import concat
 
+###############################################################################
 
 def cast_type(df, subset=None, types='string'):
     """
@@ -160,7 +161,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     Data are then repartitioned on a specified unique identifier column for
     performance purposes.
 
-    Note - if either middle name or first_name column is not present in data set,
+    Note - if either middle_name or first_name column is not present in data set,
     this needs to be created as a null column before applying this function
 
     Parameters
@@ -509,7 +510,7 @@ def standardise_null(df, replace, subset=None, replace_with=None,
     ----------
     df : dataframe
       Dataframe to which the function is applied.
-    replace: data-type, default = None
+    replace: data-type
       These are the artificial null values
       that are being replaced.
     subset : str or list of str, default = None
