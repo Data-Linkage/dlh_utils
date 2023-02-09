@@ -546,7 +546,7 @@ def cluster_number(df, id_1, id_2):
             'Cluster_Number').drop('component')
 
         return df
-        
+  
     except py4j.protocol.Py4JJavaError:
         print("""WARNING: A graphframes wrapper package installation has not been found!
         If you have not already done so, you will need to submit graphframes' JAR file 
@@ -859,7 +859,7 @@ def assert_unique(df, col):
     '''
 
     if not isinstance(col,list):
-       col = [col]
+        col = [col]
 
     assert df.count() == df.dropDuplicates(subset=col).count()
 

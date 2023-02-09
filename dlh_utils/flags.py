@@ -356,7 +356,7 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
         flags = [
             column for column in df.columns if column.startswith(prefix)]
-    
+
     if len(flags) == 0:
         print("No flag columns found! Please specify which flag column to summarise\
         with the flags = argument, or specify the correct prefix")

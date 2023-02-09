@@ -392,7 +392,7 @@ def most_recent(path, filetype, regex=None):
 
 def write_format(df, write, path,
                 file_name=None, sep=",", header="true", mode='overwrite'):
-    
+
     """
     Writes dataframe in specified format
 
@@ -432,7 +432,7 @@ def write_format(df, write, path,
 
     > write_format(df = df, write = 'parquet', path = 'user/edwara5/simpsons.parquet',
                   mode = 'overwrite') 
-    """ 
+    """
 
     spark = SparkSession.builder.getOrCreate()
     if file_name is None:
