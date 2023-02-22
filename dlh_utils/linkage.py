@@ -796,7 +796,7 @@ def matchkey_dataframe(mks):
     mk_df = (spark.createDataFrame(
         pd.DataFrame(
             {
-                'matchkey': [x for x, y in enumerate(mks)],
+                'matchkey': [x for x, y in enumerate(mks, 1)],
                 'description': [str(x) for x in mks],
             }
         )[['matchkey', 'description']]
@@ -884,14 +884,11 @@ def matchkey_counts(linked_df):
 ###############################################################################
 
 
-def clerical_sample(linked_ids, mk_df, df_l, df_r,
-                    id_l, id_r, suffix_l='_l', suffix_r='_r',
-                    n_ids=100):
+def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
     """
     Suffixes left and right dataframes with specified suffix. Joins raw data
     to linked identifier output of deterministic linkage. Returns a number of
     examples for each matchkey as specified.
-
     Parameters
     ---------- 
     linked_ids : dataframe
@@ -914,16 +911,13 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
       suffix to be applied to right dataframe
     n_ids : int, default = 100
       The number of identifier pairs sampled for each matchkey
-
     Returns
     -------
     dataframe
       Dataframe of deterministic linkage samples by matchkey.
-
     Raises
     -------
       None at present.    
-
     See Also
     --------
     dataframes.union_all()
@@ -947,9 +941,8 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
     linked_ids = da.union_all(*linked_ids)
 
     review_df = (linked_ids
-                 .join(da.suffix_columns(df_l, suffix_l, exclude=id_l), id_l, 'inner')
-                 .join(da.suffix_columns(df_r, suffix_r, exclude=id_r),
-                       id_r, 'inner')
+                 .join(df_l, id_l , 'inner')
+                 .join(df_r, id_r , 'inner')
                  .join(mk_df, on='matchkey')
                  .sort('matchkey', id_l)
                  )
