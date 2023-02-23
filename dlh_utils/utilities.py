@@ -437,7 +437,10 @@ def write_format(df, write, path,
             df.write.format('csv').option('header', header).mode(
                 mode).option('sep', sep).save(f'{path}')
         if write == 'parquet':
-            df.write.parquet(path=f'{path}', mode=mode)
+            df.write.parquet(path=f'{path}', mode=mode)    
+        if write == 'hive':
+          df.write.mode('overwrite').saveAsTable(f'{path}')
+        
     else:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
@@ -521,6 +524,9 @@ def read_format(read, path=None, file_name=None,
                   .option('inferSchema', inferSchema)
                   .load(f"{path}")
                   )
+        if read == 'hive':
+            df = spark.sql(f"SELECT * FROM {path}")
+        
     else:
         if read == 'csv':
             df = (spark.read.format('csv')
