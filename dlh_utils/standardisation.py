@@ -368,6 +368,7 @@ def clean_forename(df, subset):
         'NAME',
         'FORENAME',
         'MS',
+        'MX',
         'MSTR',
         'PROF',
         'SIR',
