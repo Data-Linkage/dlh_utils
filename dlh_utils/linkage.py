@@ -16,7 +16,6 @@ from dlh_utils import utilities as ut
 
 # phonetic encoders
 
-
 def alpha_name(df, input_col, output_col):
     """
     Orders string columns alphabetically, also setting them to UPPER CASE.

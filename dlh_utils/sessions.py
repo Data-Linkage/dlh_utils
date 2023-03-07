@@ -1,7 +1,7 @@
 import os
 from IPython.core.display import display, HTML
 from pyspark.sql import SparkSession
-graphframes = __import__('graphframes-wrapper')
+import graphframes_jars as graphframes
 
 def getOrCreateSparkSession(appName='DE_DL',
                             size='large',
