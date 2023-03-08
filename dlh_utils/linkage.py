@@ -1223,6 +1223,63 @@ def deduplicate(df, record_id, mks, checkpoint = False):
 
 ############################################################################
 
+def hierarchical(df, record_id_l, record_id_r, matchkey_col):
+    """
+    Filters linked dataframe, returning matches made on the
+    minimum matchkey number.
+    
+    Parameters
+    ---------- 
+    df : dataframe
+      Pre-linked dataframe
+    record_id_l : string
+      Unique record ID for the left dataframe that has been pre-linked
+    record_id_r : string
+      Unique record ID for the right dataframe that has been pre-linked
+    matchkey_col : string
+      Name of column containing the matchkey number matches have been made on
+    Returns
+    -------
+    df
+      A filtered dataframe, retaining only matches made on the minimum matchkey number
+    Raises
+    -------
+      None at present.
+    Example
+    -------
+    > df.show()
+    
+    +---+----+--------+
+    | ID|ID_2|matchkey|
+    +---+----+--------+
+    |  4|   5|       3|
+    |  1|   3|       3|
+    |  2|   4|       3|
+    |  1|   2|       1|
+    |  2|   5|       3|
+    +---+----+--------+
+    
+    > hierarchical(df, 'ID', 'ID_2', 'matchkey').show()
+    
+    +---+----+--------+
+    | ID|ID_2|matchkey|
+    +---+----+--------+
+    |  4|   5|       3|
+    |  1|   3|       2|
+    |  2|   4|       3|
+    |  1|   2|       1|
+    |  2|   5|       3|
+    +---+----+--------+
+    """
+
+    df = df.withColumn('minimum_matchkey', F.min(matchkey_col).over(Window.partitionBy(record_id_l, record_id_r)))
+
+    df = df.filter(df[matchkey_col] == df.minimum_matchkey).drop('minimum_matchkey')
+
+    return df
+
+############################################################################
+
 def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     '''
     Performs determistic linkage of two dataframes given a list of matchkeys /
