@@ -1126,12 +1126,13 @@ def matchkeys_drop_duplicates(mks):
     out = list(out['mks'])
 
     return out
-
+      
 ############################################################################
 
-def deduplicate(df, record_id, mks):
+def deduplicate(df, record_id, mks, checkpoint = False):
     """
-    Filters out duplicate records from a supplied dataframe.
+    Matches a dataframe to itself on a specified set of matchkeys. Returns
+    either the unique records in your data, or the identified duplicates.
 
     Parameters
     ---------- 
@@ -1139,7 +1140,11 @@ def deduplicate(df, record_id, mks):
     record_id : string
       name of unique identifier column in data
     mks : list
-      list of matchkeys
+      either a single list of variables to match on, or a list of matchkeys
+    checkpoint: boolean, default = False
+      option to checkpoint the outputs (checkpointing will break up
+      the amount of computation spark will have to do at once, aka the
+      lineage, for efficiency) partway through matching
 
     Returns
     -------
@@ -1172,19 +1177,47 @@ def deduplicate(df, record_id, mks):
     # check to see if matchkeys are passed as a list of lists
     if any(isinstance(MK, list) for MK in mks) == False:
         mks = [mks]
+        
+    df2 = da.suffix_columns(df, suffix = '_2')
 
     for count, MK in enumerate(mks, 1):
 
+        print(f"\nLinking on matchkey number {count}")
+        
+        mk_df2 = [x + "_2" for x in MK]
+        
+        duplicates = df.join(df2, on = [df[x] == df2[y] for x, y in zip(MK, mk_df2)],
+                            how = 'inner')
+        
+        duplicates = duplicates.withColumn('matchkey', F.lit(count))
+        
+        
         if count == 1:
-
-            unique = df.dropDuplicates(MK)
+            matches = duplicates
 
         else:
-
-            unique = unique.dropDuplicates(MK)
+          matches = matches.union(duplicates)
+          
+        if checkpoint:
+          if (count % 20) == 0:
+            matches = matches.checkpoint
     
-    duplicates = df.join(unique, on = record_id, how = 'left_anti').dropDuplicates([record_id])
-
+    duplicates = matches.filter(f"{record_id} != {record_id}_2")
+    
+    duplicates = duplicates.withColumn(f"{record_id}_min",
+                                       F.least(*[f"{record_id}", f"{record_id}_2"]))\
+                           .withColumn(f"{record_id}_max",
+                                       F.greatest(*[f"{record_id}", f"{record_id}_2"]))
+      
+    duplicates = duplicates.selectExpr(f"{record_id}_min AS {record_id}",
+                                       f"{record_id}_max AS {record_id}_2",
+                                       "matchkey")
+    
+    duplicates = duplicates.drop_duplicates([f"{record_id}", f"{record_id}_2"])
+      
+    unique = df.join(duplicates, how = "left_anti",
+                     on = (df[f"{record_id}"] == duplicates[f"{record_id}"]) | \
+                          (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
 
     return unique, duplicates
 
