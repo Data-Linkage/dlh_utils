@@ -1129,7 +1129,7 @@ def matchkeys_drop_duplicates(mks):
       
 ############################################################################
 
-def deduplicate(df, record_id, mks, checkpoint = False, hierarchy = False):
+def deduplicate(df, record_id, mks, checkpoint = False):
     """
     Filters out duplicate records from a supplied dataframe.
 
@@ -1197,7 +1197,7 @@ def deduplicate(df, record_id, mks, checkpoint = False, hierarchy = False):
           if (count % 20) == 0:
             matches = matches.checkpoint
     
-    duplicates = matches.filter(f"{record+id} != {record_id}_2")
+    duplicates = matches.filter(f"{record_id} != {record_id}_2")
     
     duplicates = duplicates.withColumn(f"{record_id}_min",
                                        F.least(*[f"{record_id}", f"{record_id}_2"]))\
@@ -1211,8 +1211,8 @@ def deduplicate(df, record_id, mks, checkpoint = False, hierarchy = False):
     duplicates = duplicates.drop_duplicates([f"{record_id}", f"{record_id}_2"])
       
     unique = df.join(duplicates, how = "left_anti",
-                     on = (df[record_id] == duplicates[record_id] | \
-                          (df[record_id] == duplicates[f"{record_id}_2"])))
+                     on = (df[f"{record_id}"] == duplicates[f"{record_id}"]) | \
+                          (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
 
     return unique, duplicates
 
