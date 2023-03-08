@@ -1131,7 +1131,8 @@ def matchkeys_drop_duplicates(mks):
 
 def deduplicate(df, record_id, mks, checkpoint = False):
     """
-    Filters out duplicate records from a supplied dataframe.
+    Matches a dataframe to itself on a specified set of matchkeys. Returns
+    either the unique records in your data, or the identified duplicates.
 
     Parameters
     ---------- 
@@ -1139,7 +1140,11 @@ def deduplicate(df, record_id, mks, checkpoint = False):
     record_id : string
       name of unique identifier column in data
     mks : list
-      list of matchkeys
+      either a single list of variables to match on, or a list of matchkeys
+    checkpoint: boolean, default = False
+      option to checkpoint the outputs (checkpointing will break up
+      the amount of computation spark will have to do at once, aka the
+      lineage, for efficiency) partway through matching
 
     Returns
     -------
