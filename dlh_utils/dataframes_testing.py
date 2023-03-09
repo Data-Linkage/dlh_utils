@@ -1,14 +1,17 @@
+'''
+Pytesting on Dataframes functions
+'''
+
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.types import *
 import pandas as pd
-from dlh_utils.standardisation import *
-from dlh_utils.dataframes import *
 import chispa
 from chispa import assert_df_equality
 import pytest
-
+from dlh_utils.standardisation import *
+from dlh_utils.dataframes import *
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -51,9 +54,9 @@ class TestExplode(object):
 
 #############################################################################
 class TestConcat(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "firstname": [None, 'Claire', 'Josh', 'Bob'],
@@ -136,9 +139,9 @@ class TestSelect(object):
 
 ##########################################################################
 class TestCoalesced(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "lower": ['one', None, 'one', 'four', None],
@@ -172,7 +175,7 @@ class TestCoalesced(object):
 class TestCutOff(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "strings": ['1', '2', '3', '4', '5'],
@@ -206,7 +209,7 @@ class TestCutOff(object):
 
 
 class TestLiteralColumn(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -235,7 +238,7 @@ class TestLiteralColumn(object):
 ####################################################################
 
 class TestDropNulls(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -256,7 +259,7 @@ class TestDropNulls(object):
 
 
 class TestUnionAll(object):
-  
+
     def test_expected(self, spark):
 
         test_df1 = spark.createDataFrame(
@@ -357,7 +360,7 @@ class TestRenameColumns(object):
 class TestRenameColumns2(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "abefore": [['a', 'b', 'c'], None, ['b', 'c', 'd']],
@@ -381,7 +384,7 @@ class TestRenameColumns2(object):
 class TestPrefixColumns(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": [None, None, 'one', 'four', 'five'],
@@ -423,7 +426,7 @@ class TestSuffixColumns(object):
 class TestWindow(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": ['a', 'b', 'c', 'c', 'd', 'e', 'd'],
