@@ -1,67 +1,346 @@
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
+from pyspark.sql.types import *
 import pandas as pd
 from dlh_utils.flags import *
+from dlh_utils.dataframes import *
+import chispa
+from chispa import assert_df_equality
+import pytest
 
-##################################################################
+pytestmark = pytest.mark.usefixtures("spark")
 
+@pytest.fixture(scope="session")
+def spark(request):
+    """ fixture for creating a spark context
+    Args:
+        request: pytest.FixtureRequest object
+    """
+    spark = (SparkSession.builder.appName("dataframe_testing")
+            .config('spark.executor.memory', '5g')
+            .config('spark.yarn.excecutor.memoryOverhead', '2g')
+            .getOrCreate())
+    request.addfinalizer(lambda: spark.stop())
+    return spark
 
-def test_flag():
+###################################################################
+class TestFlag1(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25})))
+     
+    result_df = flag(test_df,
+                   ref_col='ref_col',
+                   condition='==',
+                   condition_value=25,
+                   condition_col=None,
+                   alias='test',
+                   prefix='FLAG',
+                   fill_null=None)
+      
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-    spark = SparkSession.builder.getOrCreate()
+    assert_df_equality(intended_df, 
+                         result_df, 
+                         allow_nan_equality=True)
+    
+#===================================================================    
+class TestFlag2(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25})))
+     
+    result_df = flag(test_df,
+                   ref_col='ref_col',
+                   condition='==',
+                   condition_value=None,
+                   condition_col='condition_col',
+                   alias='test',
+                   prefix='FLAG',
+                   fill_null=None)
+      
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "ref_col": [x for x in range(40)]+[None]*10,
-            "condition_col": 25
-        })))
-
-    assert (flag(df,
+    assert_df_equality(intended_df, 
+                         result_df, 
+                         allow_nan_equality=True)
+              
+#===================================================================
+class TestFlag3(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25})))
+    
+    result_df = flag(test_df,
+                    ref_col='ref_col',
+                    condition='!=',
+                    condition_value=25,
+                    condition_col=None,
+                    alias='test',
+                    prefix='FLAG',
+                    fill_null=None)
+    
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True]})))
+    
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True)
+    
+#===================================================================
+class TestFlag4(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
                  ref_col='ref_col',
-                 condition='==',
-                 condition_value=25,
-                 condition_col=None,
-                 alias='test',
-                 prefix='FLAG',
-                 fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 1
-
-    assert (flag(df,
-                 ref_col='ref_col',
-                 condition='==',
+                 condition='!=',
                  condition_value=None,
                  condition_col='condition_col',
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 1
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True]})))
 
-    assert (flag(df,
-                 ref_col='ref_col',
-                 condition='!=',
-                 condition_value=25,
-                 condition_col=None,
-                 alias='test',
-                 prefix='FLAG',
-                 fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 49
-
-    assert (flag(df,
-                 ref_col='ref_col',
-                 condition='!=',
-                 condition_value=None,
-                 condition_col='condition_col',
-                 alias='test',
-                 prefix='FLAG',
-                 fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 49
-
-    assert (flag(df,
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True)
+    
+#===================================================================
+class TestFlag5(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
                  ref_col='ref_col',
                  condition='isNull',
                  condition_value=None,
@@ -69,10 +348,77 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 10
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True]})))
 
-    assert (flag(df,
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True)
+      
+#===================================================================
+class TestFlag6(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+      
+    result_df = flag(test_df,
                  ref_col='ref_col',
                  condition='isNotNull',
                  condition_value=None,
@@ -80,23 +426,77 @@ def test_flag():
                  alias='test',
                  prefix='FLAG',
                  fill_null=None)
-            .where(F.col('test') == True)
-            ).count() == 40
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "test": [True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-##################################################################
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True)
 
+###################################################################
+class TestFlagSummary1(object):
+  def test_expected(self, spark):
 
-def test_flag_summary():
-
-    spark = SparkSession.builder.getOrCreate()
-
-    df = spark.createDataFrame(
-        (pd.DataFrame({
-            "ref_col": [x for x in range(40)]+[None]*10,
-            "condition_col": 25
-        })))
-
-    df = flag(df,
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
               ref_col='ref_col',
               condition='==',
               condition_value=25,
@@ -104,17 +504,157 @@ def test_flag_summary():
               alias=None,
               prefix='FLAG',
               fill_null=None)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "FLAG_ref_col==25": [False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-    df = flag(df,
-              ref_col='ref_col',
-              condition='!=',
-              condition_value=25,
-              condition_col=None,
-              alias=None,
-              prefix='FLAG',
-              fill_null=None)
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True,
+                         ignore_column_order=True)
+    
+#===================================================================
+class TestFlagSummary2(object):
+  def test_expected(self, spark):
 
-    df = flag(df,
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
+                ref_col='ref_col',
+                condition='!=',
+                condition_value=25,
+                condition_col=None,
+                alias=None,
+                prefix='FLAG',
+                fill_null=None)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "FLAG_ref_col!=25": [True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True]})))
+
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True,
+                         ignore_column_order=True)
+    
+#===================================================================
+class TestFlagSummary3(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
               ref_col='ref_col',
               condition='>=',
               condition_value=25,
@@ -122,8 +662,78 @@ def test_flag_summary():
               alias=None,
               prefix='FLAG',
               fill_null=None)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "FLAG_ref_col>=25": [False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True]})))
 
-    df = flag(df,
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True,
+                         ignore_column_order=True)
+
+#===================================================================
+class TestFlagSummary4(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
               ref_col='ref_col',
               condition='<=',
               condition_value=25,
@@ -131,8 +741,78 @@ def test_flag_summary():
               alias=None,
               prefix='FLAG',
               fill_null=None)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                  "FLAG_ref_col<=25":[True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-    df = flag(df,
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True,
+                         ignore_column_order=True)
+    
+#===================================================================
+class TestFlagSummary5(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
               ref_col='ref_col',
               condition='isNull',
               condition_value=25,
@@ -140,8 +820,78 @@ def test_flag_summary():
               alias=None,
               prefix='FLAG',
               fill_null=None)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "FLAG_ref_colisNull25": [False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            False,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True]})))
 
-    df = flag(df,
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True,
+                         ignore_column_order=True)
+      
+#===================================================================
+class TestFlagSummary6(object):
+  def test_expected(self, spark):
+
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)]+[None]*10,
+              "condition_col": 25
+                          })))
+    
+    result_df = flag(test_df,
               ref_col='ref_col',
               condition='isNotNull',
               condition_value=25,
@@ -150,124 +900,270 @@ def test_flag_summary():
               prefix='FLAG',
               fill_null=None)
 
-    assert list(flag_summary(df, [x for x in df.columns
-                                  if x.startswith('FLAG_')],
-                             pandas=True)['flag']) ==\
-        ['FLAG_ref_col==25',
-         'FLAG_ref_col!=25',
-         'FLAG_ref_col>=25',
-         'FLAG_ref_col<=25',
-         'FLAG_ref_colisNull25',
-         'FLAG_ref_colisNotNull25']
+    
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+                    "ref_col": [x for x in range(40)]+[None]*10,
+                    "condition_col": 25,
+                    "FLAG_ref_colisNotNull25": [True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              True,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False,
+                              False]})))
 
-    assert list(flag_summary(df, [x for x in df.columns
-                                  if x.startswith('FLAG_')],
-                             pandas=True)['percent_true']) ==\
-        [2.0, 98.0, 50.0, 52.0, 20.0, 80.0]
+    assert_df_equality(result_df,
+                       intended_df,
+                       allow_nan_equality=True,
+                       ignore_nullable=True,
+                       ignore_column_order=True)
+    
+    
+    
 
-    assert list(flag_summary(df, [x for x in df.columns
-                                  if x.startswith('FLAG_')],
-                             pandas=True)['percent_false']) ==\
-        [98.0, 2.0, 50.0, 48.0, 80.0, 20.0]
-
-####################################################################
-
-
-def test_flag_check():
-
-    spark = SparkSession.builder.getOrCreate()
-
-    df = spark.createDataFrame(
+###################################################################
+class TestFlagCheck1(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
         (pd.DataFrame({
-            "FLAG_1": ([True]*50)+([False]*50),
-        })))
+            "FLAG_1": ([True]*50)+([False]*50)})))
 
-    master = flag_check(df,
-                        prefix='FLAG_',
-                        flags=None,
-                        mode='master',
-                        summary=False)
-
-    assert master.count() == 100
-
-    assert (master
-            .where(F.col('FAIL') == True)
-            ).count() == 50
-
-    assert (master
-            .where(F.col('FAIL') == False)
-            ).count() == 50
-
-    pass_df = flag_check(df,
+    result_df = flag_check(test_df,
+                          prefix='FLAG_',
+                          flags=None,
+                          mode='master',
+                          summary=False)
+                                                          
+    intended_df1 = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([True]*50),
+            'flag_count' : [1]*50,
+            'FAIL' : [True]*50})))
+                             
+    intended_df2 = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([False]*50),
+            'flag_count' : [0]*50,
+            'FAIL' : [False]*50})))
+               
+    intended_df = intended_df1.unionAll(intended_df2)
+                             
+    assert_df_equality(result_df,
+                        intended_df,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+    
+#===================================================================  
+class TestFlagCheck2(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([True]*50)+([False]*50)})))
+    
+    result_df = flag_check(test_df,
                          prefix='FLAG_',
                          flags=None,
                          mode='pass',
                          summary=False)
-
-    assert pass_df.count() == 50
-
-    assert (pass_df
-            .where(F.col('FAIL') == True)
-            ).count() == 0
-
-    assert (pass_df
-            .where(F.col('FAIL') == False)
-            ).count() == 50
-
-    fail_df = flag_check(df,
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+            "FLAG_1": ([False]*50),
+            'flag_count' : [0]*50,
+            'FAIL' : [False]*50})))
+      
+      
+    assert_df_equality(result_df,
+                        intended_df,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+    
+#===================================================================  
+class TestFlagCheck3(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([True]*50)+([False]*50)})))
+    
+    result_df = flag_check(test_df,
                          prefix='FLAG_',
                          flags=None,
                          mode='fail',
                          summary=False)
+    
+    intended_df = spark.createDataFrame((pd.DataFrame({
+            "FLAG_1": ([True]*50),
+            'flag_count' : [1]*50,
+            'FAIL' : [True]*50})))
+      
+      
+    assert_df_equality(result_df,
+                        intended_df,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
 
-    assert fail_df.count() == 50
+#===================================================================  
+class TestFlagCheck4(object):
+  def test_expected(self, spark):    
+    
+    test_df = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([True]*50)+([False]*50)})))
 
-    assert (fail_df
-            .where(F.col('FAIL') == True)
-            ).count() == 50
+    result_df1, result_df2 = flag_check(test_df, 
+                           prefix='FLAG_',
+                          flags=None,
+                          mode='split',
+                          summary=False)
+    
+    intended_df = spark.createDataFrame(
+                                        (pd.DataFrame({
+                                            "FLAG_1": ([True]*50),
+                                            'flag_count' : [1]*50,
+                                            'FAIL' : [True]*50})))
+        
+    assert_df_equality(result_df2,
+                        intended_df,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+    
+#===================================================================  
+class TestFlagCheck5(object):
+  def test_expected(self, spark):    
+    
+    test_df = spark.createDataFrame(
+        (pd.DataFrame({
+            "FLAG_1": ([True]*50)+([False]*50),})))
 
-    assert (fail_df
-            .where(F.col('FAIL') == False)
-            ).count() == 0
 
-    pass_df, fail_df = flag_check(df,
-                                  prefix='FLAG_',
-                                  flags=None,
-                                  mode='split',
-                                  summary=False)
-
-    assert pass_df.count() == 50
-
-    assert (pass_df
-            .where(F.col('FAIL') == True)
-            ).count() == 0
-
-    assert (pass_df
-            .where(F.col('FAIL') == False)
-            ).count() == 50
-
-    assert fail_df.count() == 50
-
-    assert (fail_df
-            .where(F.col('FAIL') == True)
-            ).count() == 50
-
-    assert (fail_df
-            .where(F.col('FAIL') == False)
-            ).count() == 0
-
-    master, summary = flag_check(df,
+    result_df1, result_df2 = flag_check(test_df,
                                  prefix='FLAG_',
                                  flags=None,
                                  mode='master',
                                  summary=True)
+  
+  
+    intended_df1 = spark.createDataFrame(
+                    pd.concat([pd.DataFrame({
+                                "FLAG_1": [True]*50,
+                                'flag_count' : [1]*50,
+                                'FAIL' : [True]*50}),
+                               pd.DataFrame({
+                                "FLAG_1": [False]*50,
+                                'flag_count' : [0]*50,
+                                'FAIL' : [False]*50})]
+                               ))
 
-    summary = summary.toPandas() ==\
+    intended_df2 = spark.createDataFrame(
+        (pd.DataFrame({
+            "flag": ['FLAG_1', 'FAIL'],
+            'true' : [50]*2,
+            'false' : [50]*2,
+            'rows' : [100]*2,
+            'percent_true': [50.0]*2,
+            'percent_false': [50.0]*2
+            })))                     
+  
+    assert_df_equality(result_df1,
+                        intended_df1,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+
+    assert_df_equality(result_df2,
+                        intended_df2,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+  
+#===================================================================         
+class TestFlagCheck6(object):
+  def test_expected(self, spark):   
+    
+    pretest_df_orig = spark.createDataFrame(
+                      (pd.DataFrame({"FLAG_1": ([True]*50)+([False]*50),})))
+    
+    pretest_df1, pretest_df2 = flag_check(pretest_df_orig,
+                                 prefix='FLAG_',
+                                 flags=None,
+                                 mode='master',
+                                 summary=True)
+  
+    test_df = pretest_df2.toPandas() ==\
         spark.createDataFrame(
         [('FLAG_1', 50, 50, 100, 50.0, 50.0),
          ('FAIL', 50, 50, 100, 50.0, 50.0)],
         ['flag', 'true', 'false', 'rows', 'percent_true', 'percent_false']
     ).toPandas()
-
-    assert [summary[summary[variable] != True].shape[0]
-            for variable in list(summary)] == [0]*len(list(summary))
+      
+      
+    result_df = spark.createDataFrame(test_df)
+      
+    intended_df = spark.createDataFrame(pd.DataFrame({
+            "flag": [True]*2,
+            'true' : [True]*2,
+            'false' : [True]*2,
+            'rows' : [True]*2,
+            'percent_true': [True]*2,
+            'percent_false': [True]*2
+            }))
+                    
+                             
+    assert_df_equality(result_df,
+                        intended_df,
+                        ignore_nullable=True,
+                        ignore_column_order=True,
+                        ignore_schema=True)
+  
+###################################################################
+#END
