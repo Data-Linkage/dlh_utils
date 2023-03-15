@@ -1431,8 +1431,6 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
 
     """
     
-    from pysparl.sql.types import IntegerType
-
     df = standardise_date(df, reference_column, in_date_format, out_date_format='yyyy-MM-dd')
     for age_at_date in age_at_dates:
         df = df.withColumn(f"age_at_{age_at_date}", 
