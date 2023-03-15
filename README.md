@@ -19,8 +19,25 @@ DLH_utils supports Python 3.6+. To install the latest version, simply run:
 ```sh
 pip install dlh_utils
 ```
+Or, if using CDSW, in a terminal session run:
+```sh
+pip3 install dlh_utils
+```
 
-## Using the cluster function
+## Demo
+For a worked demonstration notebook of these functions being applied within a data linkage context, head over to our [separate demo repository](https://github.com/anthonye93/dlh_utils_demo)
+
+## Common issues
+
+### When using the jaro/jaro_winkler functions the error "no module called Jellyfish found" is thrown
+
+These functions are dependent on the Jellyfish package and this may not be installed on the executors used in your spark session.
+Try submitting Jellyfish to your sparkcontext via addPyFile() or by setting the following environmental variables in your CDSW engine settings (ONS only):
+
+* PYSPARK_DRIVER_PYTHON = /usr/local/bin/python3.6
+* PYSPARK_PYTHON = /opt/ons/virtualenv/miscMods_v4.04/bin/python3.6
+
+### Using the cluster function
 
 The cluster function uses Graphframes, which requires an extra JAR file dependency to be submitted to your spark context in order for it to run.
 

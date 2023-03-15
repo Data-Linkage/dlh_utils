@@ -117,30 +117,60 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
         df = df.withColumn(alias,
                            F.col(ref_col) == F.col(condition_col))
 
+    if (condition == '=='
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) == condition_value)
+
     if (condition == '>'
             and condition_col is not None):
         df = df.withColumn(alias,
                            F.col(ref_col) > F.col(condition_col))
+
+    if (condition == '>'
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) > condition_value)
 
     if (condition == '>='
             and condition_col is not None):
         df = df.withColumn(alias,
                            F.col(ref_col) >= F.col(condition_col))
 
+    if (condition == '>='
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) >= condition_value)
+
     if (condition == '<'
             and condition_col is not None):
         df = df.withColumn(alias,
                            F.col(ref_col) < F.col(condition_col))
+
+    if (condition == '<'
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) < condition_value)
 
     if (condition == '<='
             and condition_col is not None):
         df = df.withColumn(alias,
                            F.col(ref_col) <= F.col(condition_col))
 
+    if (condition == '<='
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) <= condition_value)
+
     if (condition == '!='
             and condition_col is not None):
         df = df.withColumn(alias,
                            F.col(ref_col) != F.col(condition_col))
+
+    if (condition == '!='
+            and condition_col is None):
+        df = df.withColumn(alias,
+                           F.col(ref_col) != condition_value)
 
     if condition == 'isNull':
         df = df.withColumn(alias,

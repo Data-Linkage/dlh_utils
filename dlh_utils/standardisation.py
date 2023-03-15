@@ -369,6 +369,7 @@ def clean_forename(df, subset):
         'NAME',
         'FORENAME',
         'MS',
+        'MX',
         'MSTR',
         'PROF',
         'SIR',
@@ -862,7 +863,7 @@ def standardise_case(df, subset=None, val='upper'):
       If None the function applies to the whole dataframe.
     val: {'upper','lower','title'}, default = 'upper'
       Takes three types of string values
-      and changes the values in the subset columns to the
+      and changes the values in the subset columns to the 
       case type respectively.
 
     Returns
@@ -998,7 +999,7 @@ def trim(df, subset=None):
 ##########################################################################
 
 
-def add_leading_zeros(df, cols, n):
+def add_leading_zeros(df, subset, n):
     """
     Adds leading zeros to the numeric characters of a string, until the
     length of the string equals n. For example if a string is 1 and n
@@ -1008,9 +1009,9 @@ def add_leading_zeros(df, cols, n):
     ----------
     df : dataframe
       Dataframe to which the function is applied.
-    cols : string or list of strings
-      Can take either one single string that is a column header
-      or a list of strings that are column headers.
+    subset : string or list of strings, default = None
+      The subset is the column(s) on which the function is applied.
+      If None the function applies to the whole dataframe.
     n: int
       This is the length to which the string is adjusted.
 
@@ -1039,7 +1040,7 @@ def add_leading_zeros(df, cols, n):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > add_leading_zeros(df,cols = 'ID',n = 3).show()
+    > add_leading_zeros(df,subset = 'ID',n = 3).show()
 
     +---+--------+----------+-------+----------+---+--------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
@@ -1052,10 +1053,11 @@ def add_leading_zeros(df, cols, n):
     |005|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
     """
-    if not isinstance(cols, list):
-        cols = [cols]
 
-    for col in cols:
+    if not isinstance(subset, list):
+        subset = [subset]
+
+    for col in subset:
 
         df = (df
               .withColumn(col,
@@ -1068,7 +1070,7 @@ def add_leading_zeros(df, cols, n):
 ##############################################################################
 
 
-def replace(df, cols, replace_dict):
+def replace(df, subset, replace_dict):
     """
     Replaces specific string values in given column(s) with specified values.
 
@@ -1076,9 +1078,9 @@ def replace(df, cols, replace_dict):
     ----------
     df : dataframe
       Dataframe to which the function is applied.
-    cols : string or list of strings
-      Can take either one single string that is a column header
-      or a list of strings that are column headers.
+    subset : string or list of strings
+      The subset is the column(s) on which the function is applied.
+      If None the function applies to the whole dataframe.
     replace_dict: dictionary
       Dictionary given needs to be in the format of
       value_to_be_replaced:value_to_replace_with.
@@ -1107,7 +1109,7 @@ def replace(df, cols, replace_dict):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > replace(df,cols = 'Forename',replace_dict = {'Bart': 'Turbo man'}).show()
+    > replace(df,subset = 'Forename',replace_dict = {'Bart': 'Turbo man'}).show()
 
     +---+---------+----------+-------+----------+---+--------+
     | ID| Forename|Middlename|Surname|       DoB|Sex|Postcode|
@@ -1121,10 +1123,10 @@ def replace(df, cols, replace_dict):
     +---+---------+----------+-------+----------+---+--------+
     """
 
-    if not isinstance(cols, list):
-        cols = [cols]
+    if not isinstance(subset, list):
+        subset = [subset]
 
-    for col in cols:
+    for col in subset:
 
         for before, after in replace_dict.items():
             df = (df
@@ -1364,34 +1366,28 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
 ################################################################################
 
 
-def age_at(df, birth_date, *age_at_dates, in_date_format='yyyy-MM-dd'):
+def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     """
-    Calculates individuals' ages at specified dates.
-
-
-    From a reference Date of Birth column, the function takes
-    a list of dates, and for each date creates a new column
+    Calculates individuals' ages at specified dates from a reference Date of Birth column
+    
+    The function takes a list of dates, and for each date creates a new column
     specifying an individual's age at that date.
-
-    Need to import the standardise_date function first.
-
 
     Parameters
     ----------
     df : dataframe
       Dataframe to which the function is applied.
-    birth_date: string
+    reference_column: string
       The original date of birth column needed to calculate age.
-    *age_at_dates: list of strings
-      The list of dates at which the user wants to calculate ages. Any
-      number of dates can be given. The dates need to be in the
-      following format: 'yyyy-MM-dd'.
     in_date_format: default = 'yyyy-MM-dd',string
       The date format of the date of birth column.
       It uses hyphens or forward slashes to split the date
       up and dd,MM,yyyy to show date month and year respectively.
       e.g. 'dd-MM-yyyy' , 'dd/MM/yyyy', 'yyyy-MM-dd'.
-
+    *age_at_dates: list of strings
+      The list of dates at which the user wants to calculate ages. Any
+      number of dates can be given. The dates need to be in the
+      following format: 'yyyy-MM-dd'.
 
     Returns
     -------
@@ -1431,10 +1427,10 @@ def age_at(df, birth_date, *age_at_dates, in_date_format='yyyy-MM-dd'):
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
 
     """
-
-    df = standardise_date(df, birth_date, in_date_format,
-                          out_date_format='yyyy-MM-dd')
+    
+    df = standardise_date(df, reference_column, in_date_format, out_date_format='yyyy-MM-dd')
     for age_at_date in age_at_dates:
-        df = df.withColumn(f"age_at_{age_at_date}", (F.months_between(
-            F.lit(age_at_date), F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
+        df = df.withColumn(f"age_at_{age_at_date}", 
+                           (F.months_between(F.lit(age_at_date), 
+                                             F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
     return df

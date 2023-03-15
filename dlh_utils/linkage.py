@@ -806,7 +806,7 @@ def matchkey_dataframe(mks):
     mk_df = (spark.createDataFrame(
         pd.DataFrame(
             {
-                'matchkey': [x for x, y in enumerate(mks)],
+                'matchkey': [x for x, y in enumerate(mks, 1)],
                 'description': [str(x) for x in mks],
             }
         )[['matchkey', 'description']]
@@ -852,16 +852,16 @@ def assert_unique_matches(linked_ids, *identifier_col):
 ###############################################################################
 
 
-def assert_unique(df, col):
+def assert_unique(df, column):
     '''
     Asserts whether a dataframe contains only one instance of each
     unique identifier, specified by the col argument.
     '''
 
-    if not isinstance(col,list):
+    if not isinstance(column,list):
         col = [col]
 
-    assert df.count() == df.dropDuplicates(subset=col).count()
+    assert df.count() == df.dropDuplicates(subset=column).count()
 
 ###############################################################################
 
@@ -898,14 +898,11 @@ def matchkey_counts(linked_df):
 ###############################################################################
 
 
-def clerical_sample(linked_ids, mk_df, df_l, df_r,
-                    id_l, id_r, suffix_l='_l', suffix_r='_r',
-                    n_ids=100):
+def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
     """
     Suffixes left and right dataframes with specified suffix. Joins raw data
     to linked identifier output of deterministic linkage. Returns a number of
     examples for each matchkey as specified.
-
     Parameters
     ----------
     linked_ids : dataframe
@@ -928,15 +925,13 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
       suffix to be applied to right dataframe
     n_ids : int, default = 100
       The number of identifier pairs sampled for each matchkey
-
     Returns
     -------
     dataframe
       Dataframe of deterministic linkage samples by matchkey.
-
     Raises
     -------
-      None at present.
+    None at present.    
 
     See Also
     --------
@@ -961,9 +956,8 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r,
     linked_ids = da.union_all(*linked_ids)
 
     review_df = (linked_ids
-                 .join(da.suffix_columns(df_l, suffix_l, exclude=id_l), id_l, 'inner')
-                 .join(da.suffix_columns(df_r, suffix_r, exclude=id_r),
-                       id_r, 'inner')
+                 .join(df_l, id_l , 'inner')
+                 .join(df_r, id_r , 'inner')
                  .join(mk_df, on='matchkey')
                  .sort('matchkey', id_l)
                  )
@@ -1148,12 +1142,13 @@ def matchkeys_drop_duplicates(mks):
     out = list(out['mks'])
 
     return out
-
+      
 ############################################################################
 
-def deduplicate(df, record_id, mks):
+def deduplicate(df, record_id, mks, checkpoint = False):
     """
-    Filters out duplicate records from a supplied dataframe.
+    Matches a dataframe to itself on a specified set of matchkeys. Returns
+    either the unique records in your data, or the identified duplicates.
 
     Parameters
     ----------
@@ -1161,7 +1156,11 @@ def deduplicate(df, record_id, mks):
     record_id : string
       name of unique identifier column in data
     mks : list
-      list of matchkeys
+      either a single list of variables to match on, or a list of matchkeys
+    checkpoint: boolean, default = False
+      option to checkpoint the outputs (checkpointing will break up
+      the amount of computation spark will have to do at once, aka the
+      lineage, for efficiency) partway through matching
 
     Returns
     -------
@@ -1194,19 +1193,47 @@ def deduplicate(df, record_id, mks):
     # check to see if matchkeys are passed as a list of lists
     if any(isinstance(matchkey, list) for matchkey in mks) is False:
         mks = [mks]
+        
+    df2 = da.suffix_columns(df, suffix = '_2')
 
     for count, matchkey in enumerate(mks, 1):
 
+        print(f"\nLinking on matchkey number {count}")
+        
+        mk_df2 = [x + "_2" for x in MK]
+        
+        duplicates = df.join(df2, on = [df[x] == df2[y] for x, y in zip(MK, mk_df2)],
+                            how = 'inner')
+        
+        duplicates = duplicates.withColumn('matchkey', F.lit(count))
+        
         if count == 1:
 
-            unique = df.dropDuplicates(matchkey)
+            matches = duplicates
 
         else:
-
-            unique = unique.dropDuplicates(matchkey)
-
-    duplicates = df.join(unique, on = record_id, how = 'left_anti').dropDuplicates([record_id])
-
+          matches = matches.union(duplicates)
+          
+        if checkpoint:
+          if (count % 20) == 0:
+            matches = matches.checkpoint
+    
+    duplicates = matches.filter(f"{record_id} != {record_id}_2")
+    
+    duplicates = duplicates.withColumn(f"{record_id}_min",
+                                       F.least(*[f"{record_id}", f"{record_id}_2"]))\
+                           .withColumn(f"{record_id}_max",
+                                       F.greatest(*[f"{record_id}", f"{record_id}_2"]))
+      
+    duplicates = duplicates.selectExpr(f"{record_id}_min AS {record_id}",
+                                       f"{record_id}_max AS {record_id}_2",
+                                       "matchkey")
+    
+    duplicates = duplicates.drop_duplicates([f"{record_id}", f"{record_id}_2"])
+      
+    unique = df.join(duplicates, how = "left_anti",
+                     on = (df[f"{record_id}"] == duplicates[f"{record_id}"]) | \
+                          (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
 
     return unique, duplicates
 

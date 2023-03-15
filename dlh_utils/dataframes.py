@@ -305,7 +305,7 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
 ###############################################################################
 
 
-def concat(df, out_col, cols, sep=' '):
+def concat(df, out_col, sep=' ', columns=[]):
     """
     Concatenates strings from specified columns into a single string and stores
     the new string value in a new column.
@@ -318,13 +318,13 @@ def concat(df, out_col, cols, sep=' '):
       The name, in string format, of the
       output column for the new concatenated
       strings to be stored in.
-    cols : list
-      The list of columns being concatenated into
-      one string
     sep : string, default = ' '
       This is the value used to seperate the
       strings in the different columns when
       combinging them into a single string.
+    columns : list, default = []
+      The list of columns being concatenated into
+      one string
 
     Returns
     -------
@@ -351,8 +351,7 @@ def concat(df, out_col, cols, sep=' '):
     |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
 
-    > concat(df, out_col = 'Full Name', sep = ' ', cols = ['Forename','Middlename','Surname'])
-            .show()
+    > concat(df,out_col = 'Full Name',sep = ' ',columns =['Forename','Middlename','Surname']).show()
     +---+--------+----------+-------+----------+---+--------+--------------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|           Full Name|
     +---+--------+----------+-------+----------+---+--------+--------------------+
@@ -368,7 +367,7 @@ def concat(df, out_col, cols, sep=' '):
 
     df = (df
           .withColumn(out_col,
-                      F.concat_ws(sep, *[F.col(x) for x in cols]))
+                      F.concat_ws(sep, *[F.col(x) for x in columns]))
           )
 
     if sep != '':
@@ -387,7 +386,7 @@ def concat(df, out_col, cols, sep=' '):
 #############################################################################
 
 
-def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
+def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
     """
     Splits a string column on specified separator (default=" ")
     and creates a new row for each element of the split string array
@@ -396,7 +395,7 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     Parameters
     ----------
     df: dataframe function is being applied to
-    col : string
+    column : string
       column to be exploded
     on : string, default = ' '
       This argument takes a string or regex value
@@ -438,8 +437,8 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+----------------------+
 
     e.g, if you wanted to separate the record's appearance from their personality description:
-    > explode(df,col = 'Description',on = ' ',retain = False,drop_duplicates = True, flag = None)
-              .show()
+    
+    > explode(df,column ='Description',on = ' ',retain =False,drop_duplicates=True,flag=None).show()
     +---+--------+----------+-------+----------+---+--------+------------+
     | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode| Description|
     +---+--------+----------+-------+----------+---+--------+------------+
@@ -456,8 +455,8 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     +---+--------+----------+-------+----------+---+--------+------------+
 
     if you wanted to also keep the original overall description:
-    > explode(df,col = 'Description',on = ' ',retain = True,drop_duplicates = True, flag = None)
-             .show()
+
+    > explode(df,column='Description',on=' ',retain=True,drop_duplicates=True,flag=None).show()
     +---+--------+----------+-------+----------+---+--------+----------------------+
     |ID |Forename|Middlename|Surname|DoB       |Sex|Postcode|Description           |
     +---+--------+----------+-------+----------+---+--------+----------------------+
@@ -482,13 +481,13 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
     if retain is False:
 
         df = (df
-              .where(F.col(col).rlike(on))
-              .select(*[x for x in df.columns if x != col],
-                      F.explode(F.split(F.col(col), on))
-                      .alias(col))
+              .where(F.col(column).rlike(on))
+              .select(*[x for x in df.columns if x != column],
+                      F.explode(F.split(F.col(column), on))
+                      .alias(column))
               .unionByName((df
-                           .where((F.col(col).rlike(on) is False)
-                                  | (F.col(col).rlike(on).isNull()))))
+                           .where((F.col(column).rlike(on) == False)
+                                  | (F.col(column).rlike(on).isNull()))))
               )
 
     if retain is True:
@@ -496,21 +495,21 @@ def explode(df, col, on=' ', retain=False, drop_duplicates=True, flag=None):
         if flag is None:
 
             df = (df
-                  .where(F.col(col).rlike(on))
-                  .select(*[x for x in df.columns if x != col],
-                          F.explode(F.split(F.col(col), on))
-                          .alias(col))
+                  .where(F.col(column).rlike(on))
+                  .select(*[x for x in df.columns if x != column],
+                          F.explode(F.split(F.col(column), on))
+                          .alias(column))
                   .unionByName(df)
                   )
 
         else:
 
             df = (df
-                  .where(F.col(col).rlike(on))
+                  .where(F.col(column).rlike(on))
                   .withColumn(flag, F.lit(True))
-                  .select(*[x for x in df.columns+[flag] if x != col],
-                          F.explode(F.split(F.col(col), on))
-                          .alias(col))
+                  .select(*[x for x in df.columns+[flag] if x != column],
+                          F.explode(F.split(F.col(column), on))
+                          .alias(column))
                   .unionByName(df.withColumn(flag, F.lit(False)))
                   )
 
@@ -581,7 +580,7 @@ def rename_columns(df, rename_dict):
 #############################################################################
 
 
-def prefix_columns(df, prefix, exclude):
+def prefix_columns(df, prefix, exclude = None):
     """
     Renames columns with specified prefix string.
 
@@ -591,7 +590,7 @@ def prefix_columns(df, prefix, exclude):
     prefix : string
       The prifix string that will be appended
       to column names.
-    exclude : string or list of strings
+    exclude : string or list of strings, default = None
       This argument either takes a list of column names
       or a string value that is a column name.
       These values are excluded from the renaming of
@@ -920,6 +919,8 @@ def window(df, window, target, mode, alias=None, drop_na=False):
     Adds window column for count, countDistinct, min, max, or sum operations
     over window
 
+    Need to import the union_all function first.
+
     Parameters
     ----------
     df : dataframe
@@ -1003,10 +1004,57 @@ def window(df, window, target, mode, alias=None, drop_na=False):
 
     > window(df = df,
              window = 'Sex',
-             target = 'age_at_2022-12-06',
-             mode = 'max',
-             alias= 'oldest_family_member',
+             target = 'age_at_2022-12-09',
+             mode = 'min',
+             alias= 'youngest_per_sex',
              drop_na=False).show()
+
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|youngest_per_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |  F|               1|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|               1|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|               1|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|              10|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|              10|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+
+    > window(df = df,
+             window = 'Sex',
+             target = 'age_at_2022-12-09',
+             mode = 'max',
+             alias= 'oldest_per_sex',
+             drop_na=False).show()
+
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|oldest_per_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
+    |  F|            39|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|            39|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|            39|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|            39|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|            39|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+--------------+---+--------+----------+-------+----------+-----------------+
+
+    > window(df = df,
+             window = 'Sex',
+             target = 'age_at_2022-12-09',
+             mode = 'sum',
+             alias= 'total_age_by_sex',
+             drop_na=False).show()
+
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |Sex|total_age_by_sex| ID|Forename|Middlename|Surname|       DoB|age_at_2022-12-09|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
+    |  F|              48|  2|   Marge|    Juliet|Simpson|1983-03-19|               39|
+    |  F|              48|  4|    Lisa|     Marie|Simpson|2014-05-09|                8|
+    |  F|              48|  5|  Maggie|      null|Simpson|2021-01-12|                1|
+    |  M|              59|  1|   Homer|       Jay|Simpson|1983-05-12|               39|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    |  M|              59|  3|    Bart|     Jo-Jo|Simpson|2012-04-01|               10|
+    +---+----------------+---+--------+----------+-------+----------+-----------------+
 
     See Also
     --------
@@ -1166,7 +1214,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     .select(window)
                     )
 
-            df = (union_all(df_1, df_2)
+            df = (union_all(df_1,df_2)
                   .select(window+[alias])
                   .dropDuplicates()
                   .join(df,
@@ -1417,33 +1465,33 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
             df = window(df,filter_window,target,mode,alias='value')
 
-            df = fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
             df = (df
-              .where(F.col(target)==F.col('value'))
-              .drop('value')
+                  .where(F.col(target)==F.col('value'))
+                  .drop('value')
                  )
 
-            df = (standardise_null(df = df,
-                                  replace = "^<<<>>>$",
-                                  subset = target)
-           )
+            df = (st.standardise_null(df = df,
+                                      replace = "^<<<>>>$",
+                                      subset = target)
+                 )
 
         else:
 
             df = window(df,filter_window,target,mode,alias='value')
 
-            df = fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
+            df = st.fill_nulls(df,fill='<<<>>>',subset=['value']+[target])
 
             df = (df
-              .where(F.col(target)!=F.col('value'))
-              .drop('value')
+                  .where(F.col(target)!=F.col('value'))
+                  .drop('value')
                  )
 
-            df = (standardise_null(df = df,
-                                  replace = "^<<<>>>$",
-                                  subset = target)
-                )
+            df = (st.standardise_null(df = df,
+                                      replace = "^<<<>>>$",
+                                      subset = target)
+                 )
 
     return df
 
