@@ -1364,7 +1364,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
 ################################################################################
 
 
-def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
+def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     """
     Calculates individuals' ages at specified dates.
 
@@ -1430,10 +1430,10 @@ def age_at(df, birth_date, in_date_format='yyyy-MM-dd', *age_at_dates):
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
 
     """
-
-    df = standardise_date(df, birth_date, in_date_format,
-                          out_date_format='yyyy-MM-dd')
+    
+    df = standardise_date(df, reference_column, in_date_format, out_date_format='yyyy-MM-dd')
     for age_at_date in age_at_dates:
-        df = df.withColumn(f"age_at_{age_at_date}", (F.months_between(
-            F.lit(age_at_date), F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
+        df = df.withColumn(f"age_at_{age_at_date}", 
+                           (F.months_between(F.lit(age_at_date), 
+                                             F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
     return df
