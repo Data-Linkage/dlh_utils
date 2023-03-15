@@ -17,7 +17,7 @@ def spark(request):
     Args:
         request: pytest.FixtureRequest object
     """
-    spark = (SparkSession.builder.appName("dataframe_testing")
+    spark = (SparkSession.builder.appName("flags_testing")
             .config('spark.executor.memory', '5g')
             .config('spark.yarn.excecutor.memoryOverhead', '2g')
             .getOrCreate())
@@ -30,7 +30,7 @@ class TestFlag1(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25})))
      
     result_df = flag(test_df,
@@ -42,59 +42,17 @@ class TestFlag1(object):
                    prefix='FLAG',
                    fill_null=None)
       
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "test": [False]*25\
+                            +[True] \
+                            +[False]*24})))
+
+    assert_df_equality(intended_df, 
+                         result_df, 
+                         allow_nan_equality=True)
 
     assert_df_equality(intended_df, 
                          result_df, 
@@ -106,71 +64,25 @@ class TestFlag2(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25})))
      
     result_df = flag(test_df,
-                   ref_col='ref_col',
-                   condition='==',
-                   condition_value=None,
-                   condition_col='condition_col',
-                   alias='test',
-                   prefix='FLAG',
-                   fill_null=None)
+                     ref_col='ref_col',
+                     condition='==',
+                     condition_value=None,
+                     condition_col='condition_col',
+                     alias='test',
+                     prefix='FLAG',
+                     fill_null=None)
       
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "test": [False]*25 \
+                            +[True] \
+                            +[False]*24})))
 
     assert_df_equality(intended_df, 
                          result_df, 
@@ -182,76 +94,29 @@ class TestFlag3(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25})))
     
     result_df = flag(test_df,
-                    ref_col='ref_col',
-                    condition='!=',
-                    condition_value=25,
-                    condition_col=None,
-                    alias='test',
-                    prefix='FLAG',
-                    fill_null=None)
+                      ref_col='ref_col',
+                      condition='!=',
+                      condition_value=25,
+                      condition_col=None,
+                      alias='test',
+                      prefix='FLAG',
+                      fill_null=None)
     
-    
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True]})))
+                    "test": [True]*25 \
+                            +[False] \
+                            +[True]*24})))
     
     assert_df_equality(result_df,
-                         intended_df,
-                         allow_nan_equality=True)
+                       intended_df,
+                       allow_nan_equality=True)
     
 #===================================================================
 class TestFlag4(object):
@@ -259,7 +124,7 @@ class TestFlag4(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -272,59 +137,13 @@ class TestFlag4(object):
                  prefix='FLAG',
                  fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True]})))
+                    "test": [True]*25 \
+                            +[False] \
+                            +[True]*24})))
 
     assert_df_equality(result_df,
                          intended_df,
@@ -336,7 +155,7 @@ class TestFlag5(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -349,59 +168,12 @@ class TestFlag5(object):
                  prefix='FLAG',
                  fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True]})))
+                    "test": [False]*40 \
+                            +[True]*10})))    
 
     assert_df_equality(result_df,
                          intended_df,
@@ -414,7 +186,7 @@ class TestFlag6(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
       
@@ -427,59 +199,12 @@ class TestFlag6(object):
                  prefix='FLAG',
                  fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "test": [True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "test": [True]*40 \
+                            +[False]*10})))  
 
     assert_df_equality(result_df,
                          intended_df,
@@ -492,7 +217,7 @@ class TestFlagSummary1(object):
 
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -505,59 +230,13 @@ class TestFlagSummary1(object):
               prefix='FLAG',
               fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "FLAG_ref_col==25": [False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "FLAG_ref_col==25": [False]*25 \
+                                        +[True] \
+                                        +[False]*24})))
 
     assert_df_equality(result_df,
                          intended_df,
@@ -571,7 +250,7 @@ class TestFlagSummary2(object):
 
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -584,59 +263,13 @@ class TestFlagSummary2(object):
                 prefix='FLAG',
                 fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "FLAG_ref_col!=25": [True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True]})))
+                    "FLAG_ref_col!=25": [True]*25 \
+                                        +[False] \
+                                        +[True]*24})))
 
     assert_df_equality(result_df,
                          intended_df,
@@ -650,7 +283,7 @@ class TestFlagSummary3(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -663,59 +296,12 @@ class TestFlagSummary3(object):
               prefix='FLAG',
               fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "FLAG_ref_col>=25": [False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True]})))
+                    "FLAG_ref_col>=25": [False]*25 \
+                                        +[True]*25})))    
 
     assert_df_equality(result_df,
                          intended_df,
@@ -729,7 +315,7 @@ class TestFlagSummary4(object):
     
     test_df = spark.createDataFrame(
              (pd.DataFrame({
-              "ref_col": [x for x in range(40)]+[None]*10,
+              "ref_col": [x for x in range(40)] + [None]*10,
               "condition_col": 25
                           })))
     
@@ -742,59 +328,12 @@ class TestFlagSummary4(object):
               prefix='FLAG',
               fill_null=None)
     
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                  (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                  "FLAG_ref_col<=25":[True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "FLAG_ref_col<=25": [True]*26 \
+                                        +[False]*24})))    
 
     assert_df_equality(result_df,
                          intended_df,
@@ -820,60 +359,13 @@ class TestFlagSummary5(object):
               alias=None,
               prefix='FLAG',
               fill_null=None)
-    
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+        
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "FLAG_ref_colisNull25": [False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            False,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True]})))
+                    "FLAG_ref_colisNull25": [False]*40 \
+                                            +[True]*10})))    
 
     assert_df_equality(result_df,
                          intended_df,
@@ -900,69 +392,19 @@ class TestFlagSummary6(object):
               prefix='FLAG',
               fill_null=None)
 
-    
-    
-    intended_df = spark.createDataFrame((pd.DataFrame({
-                    "ref_col": [x for x in range(40)]+[None]*10,
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
                     "condition_col": 25,
-                    "FLAG_ref_colisNotNull25": [True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              True,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False,
-                              False]})))
+                    "FLAG_ref_colisNotNull25": [True]*40 \
+                                               +[False]*10})))        
 
     assert_df_equality(result_df,
                        intended_df,
                        allow_nan_equality=True,
                        ignore_nullable=True,
                        ignore_column_order=True)
-    
-    
+      
     
 
 ###################################################################
@@ -1056,8 +498,8 @@ class TestFlagCheck4(object):
   def test_expected(self, spark):    
     
     test_df = spark.createDataFrame(
-        (pd.DataFrame({
-            "FLAG_1": ([True]*50)+([False]*50)})))
+              (pd.DataFrame({"FLAG_1": [True]*50 
+                                      + [False]*50})))
 
     result_df1, result_df2 = flag_check(test_df, 
                            prefix='FLAG_',
@@ -1066,11 +508,11 @@ class TestFlagCheck4(object):
                           summary=False)
     
     intended_df = spark.createDataFrame(
-                                        (pd.DataFrame({
-                                            "FLAG_1": ([True]*50),
-                                            'flag_count' : [1]*50,
-                                            'FAIL' : [True]*50})))
-        
+                    (pd.DataFrame({
+                      "FLAG_1": ([True]*50),
+                      "flag_count" : [1]*50,
+                      "FAIL" : [True]*50})))
+    
     assert_df_equality(result_df2,
                         intended_df,
                         ignore_nullable=True,
@@ -1082,9 +524,8 @@ class TestFlagCheck5(object):
   def test_expected(self, spark):    
     
     test_df = spark.createDataFrame(
-        (pd.DataFrame({
-            "FLAG_1": ([True]*50)+([False]*50),})))
-
+              (pd.DataFrame({"FLAG_1": [True]*50 
+                                      + [False]*50})))
 
     result_df1, result_df2 = flag_check(test_df,
                                  prefix='FLAG_',
@@ -1131,7 +572,8 @@ class TestFlagCheck6(object):
   def test_expected(self, spark):   
     
     pretest_df_orig = spark.createDataFrame(
-                      (pd.DataFrame({"FLAG_1": ([True]*50)+([False]*50),})))
+                      (pd.DataFrame({"FLAG_1": [True]*50
+                                               +[False]*50})))
     
     pretest_df1, pretest_df2 = flag_check(pretest_df_orig,
                                  prefix='FLAG_',
@@ -1139,26 +581,24 @@ class TestFlagCheck6(object):
                                  mode='master',
                                  summary=True)
   
-    test_df = pretest_df2.toPandas() ==\
-        spark.createDataFrame(
-        [('FLAG_1', 50, 50, 100, 50.0, 50.0),
-         ('FAIL', 50, 50, 100, 50.0, 50.0)],
-        ['flag', 'true', 'false', 'rows', 'percent_true', 'percent_false']
-    ).toPandas()
-      
+    test_df = pretest_df2.toPandas() == \
+              spark.createDataFrame(
+              [('FLAG_1', 50, 50, 100, 50.0, 50.0),
+               ('FAIL', 50, 50, 100, 50.0, 50.0)],
+              ['flag', 'true', 'false', 'rows', 'percent_true', 'percent_false']
+              ).toPandas()
       
     result_df = spark.createDataFrame(test_df)
       
     intended_df = spark.createDataFrame(pd.DataFrame({
-            "flag": [True]*2,
-            'true' : [True]*2,
-            'false' : [True]*2,
-            'rows' : [True]*2,
-            'percent_true': [True]*2,
-            'percent_false': [True]*2
-            }))
+                      "flag": [True]*2,
+                      'true' : [True]*2,
+                      'false' : [True]*2,
+                      'rows' : [True]*2,
+                      'percent_true': [True]*2,
+                      'percent_false': [True]*2
+      }))
                     
-                             
     assert_df_equality(result_df,
                         intended_df,
                         ignore_nullable=True,
