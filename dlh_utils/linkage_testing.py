@@ -12,6 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.usefixtures("spark")
 
+
 @pytest.fixture(scope="session")
 def spark(request):
     """ fixture for creating a spark context
@@ -19,9 +20,9 @@ def spark(request):
         request: pytest.FixtureRequest object
     """
     spark = (SparkSession.builder.appName("dataframe_testing")
-            .config('spark.executor.memory', '5g')
-            .config('spark.yarn.excecutor.memoryOverhead', '2g')
-            .getOrCreate())
+             .config('spark.executor.memory', '5g')
+             .config('spark.yarn.excecutor.memoryOverhead', '2g')
+             .getOrCreate())
     request.addfinalizer(lambda: spark.stop())
     return spark
 
@@ -29,415 +30,424 @@ def spark(request):
 #############################################################################
 
 class TestOrderMatchkeys(object):
-  
-  def test_expected(self,spark):
-    
-      dfo = spark.createDataFrame(
-          (pd.DataFrame({
-              "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
 
-              "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-                             'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+    def test_expected(self, spark):
 
-              "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                            'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-          })))
+        dfo = spark.createDataFrame(
+            (pd.DataFrame({
+                "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
 
-      dffn = spark.createDataFrame(
-          (pd.DataFrame({
-              "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+                "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-              "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-                             'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-              "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                            'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-          })))
+        dffn = spark.createDataFrame(
+            (pd.DataFrame({
+                "uprn": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
 
-      mks = [
-          [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
-           F.substring(dfo['last_name'], 1, 1) == F.substring(dffn['last_name'], 1, 1)],
+                "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-          [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
-              dfo['last_name'] == dffn['last_name']],
-          [dfo['first_name'] == dffn['first_name'],
-              dfo['last_name'] == dffn['last_name']]
-      ]
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-      testDf = pd.DataFrame({
-          'mks': mks,
-          'count': [(dfo.join(dffn, on=mk, how='inner')).count()
-                    for mk in mks]
-      })
-      
-      intended_list = [
-          [dfo['first_name'] == dffn['first_name'],dfo['last_name'] == dffn['last_name']],          
-          [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
-              dfo['last_name'] == dffn['last_name']],
-          [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
-           F.substring(dfo['last_name'], 1, 1) == F.substring(dffn['last_name'], 1, 1)]
-       ]   
+        mks = [
+            [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
+             F.substring(dfo['last_name'], 1, 1) == F.substring(dffn['last_name'], 1, 1)],
 
-      result_list = order_matchkeys(dfo, dffn, mks)
+            [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
+                dfo['last_name'] == dffn['last_name']],
+            [dfo['first_name'] == dffn['first_name'],
+                dfo['last_name'] == dffn['last_name']]
+        ]
 
-      assert result_list[0] and intended_list[0]
-      assert result_list[1] and intended_list[1] 
-      assert result_list[2] and intended_list[2]      
+        testDf = pd.DataFrame({
+            'mks': mks,
+            'count': [(dfo.join(dffn, on=mk, how='inner')).count()
+                      for mk in mks]
+        })
+
+        intended_list = [
+            [dfo['first_name'] == dffn['first_name'],
+                dfo['last_name'] == dffn['last_name']],
+            [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
+                dfo['last_name'] == dffn['last_name']],
+            [F.substring(dfo['first_name'], 1, 1) == F.substring(dffn['first_name'], 1, 1),
+             F.substring(dfo['last_name'], 1, 1) == F.substring(dffn['last_name'], 1, 1)]
+        ]
+
+        result_list = order_matchkeys(dfo, dffn, mks)
+
+        assert result_list[0] and intended_list[0]
+        assert result_list[1] and intended_list[1]
+        assert result_list[2] and intended_list[2]
 
 ##############################################################################
 
+
 class TestMatchkeyJoin(object):
-  
-  def test_expected(self,spark):
-    
-    test_df_1 = spark.createDataFrame(
-        (pd.DataFrame({
-            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
-                     '14', '15', '16', '17', '18', '19', '20'],
 
-            "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+    def test_expected(self, spark):
 
-            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-        })))
+        test_df_1 = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                         '14', '15', '16', '17', '18', '19', '20'],
 
-    test_df_2 = spark.createDataFrame(
-        (pd.DataFrame({
-            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
-                     '14', '15', '16', '17', '18', '19', '20'],
+                "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-            "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-        })))
+        test_df_2 = spark.createDataFrame(
+            (pd.DataFrame({
+                "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
+                         '14', '15', '16', '17', '18', '19', '20'],
 
-    mks = [
-        [test_df_1['first_name'] == test_df_2['first_name'],
-         test_df_1['last_name'] == test_df_2['last_name']],
+                "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-        [F.substring(test_df_1['first_name'], 1, 1) == F.substring(test_df_2['first_name'], 1, 1),
-            test_df_1['last_name'] == test_df_2['last_name']],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-        [F.substring(test_df_1['first_name'], 1, 1) == F.substring(test_df_2['first_name'], 1, 1),
-            F.substring(test_df_1['last_name'], 1, 1) == F.substring(test_df_2['last_name'], 1, 1)]
-    ]
-    
-    intended_schema = StructType([
-                StructField("l_id",StringType(),True),
-                StructField("r_id",StringType(),True),
-                StructField("matchkey",IntegerType(),False)
-    ])
-    
-    intended_data =[['7', '7', 1], 
-                    ['15', '15', 1],
-                    ['8', '8', 1],
-                    ['5', '5', 1],
-                    ['18', '18', 1],
-                    ['9', '9', 1],
-                    ['10', '10', 1],
-                    ['12', '12', 1],
-                    ['13', '13', 1],
-                    ['14', '14', 1]]     
-    
-    intended_df = spark.createDataFrame(intended_data, intended_schema)
-    
-    result_df = matchkey_join(test_df_1, test_df_2, 'l_id', 'r_id', mks[2], 1)
-    
-    assert_df_equality(intended_df,result_df)
-    
+        mks = [
+            [test_df_1['first_name'] == test_df_2['first_name'],
+             test_df_1['last_name'] == test_df_2['last_name']],
+
+            [F.substring(test_df_1['first_name'], 1, 1) == F.substring(test_df_2['first_name'], 1, 1),
+                test_df_1['last_name'] == test_df_2['last_name']],
+
+            [F.substring(test_df_1['first_name'], 1, 1) == F.substring(test_df_2['first_name'], 1, 1),
+                F.substring(test_df_1['last_name'], 1, 1) == F.substring(test_df_2['last_name'], 1, 1)]
+        ]
+
+        intended_schema = StructType([
+            StructField("l_id", StringType(), True),
+            StructField("r_id", StringType(), True),
+            StructField("matchkey", IntegerType(), False)
+        ])
+
+        intended_data = [['7', '7', 1],
+                         ['15', '15', 1],
+                         ['8', '8', 1],
+                         ['5', '5', 1],
+                         ['18', '18', 1],
+                         ['9', '9', 1],
+                         ['10', '10', 1],
+                         ['12', '12', 1],
+                         ['13', '13', 1],
+                         ['14', '14', 1]]
+
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        result_df = matchkey_join(
+            test_df_1, test_df_2, 'l_id', 'r_id', mks[2], 1)
+
+        assert_df_equality(intended_df, result_df)
+
 
 #####################################################################
 
 class TestExtractMkVariables():
-  
-  def test_expected(self,spark):
 
-      test_df_l = spark.createDataFrame(
-          (pd.DataFrame({
-              "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+    def test_expected(self, spark):
 
-              "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-                             'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+        test_df_l = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
 
-              "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                            'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-          })))
+                "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-      test_df_r = spark.createDataFrame(
-          (pd.DataFrame({
-              "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-              "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-                             'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+        test_df_r = spark.createDataFrame(
+            (pd.DataFrame({
+                "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
 
-              "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                            'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-          })))    
+                "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-      mks = [
-          [test_df_l['first_name'] == test_df_r['first_name'],
-           test_df_l['last_name'] == test_df_r['last_name']],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-          [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'], 1, 1),
-              test_df_l['last_name'] == test_df_r['last_name']],
+        mks = [
+            [test_df_l['first_name'] == test_df_r['first_name'],
+             test_df_l['last_name'] == test_df_r['last_name']],
 
-          [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'], 1, 1),
-              F.substring(test_df_l['last_name'], 1, 1) == F.substring(test_df_r['last_name'], 1, 1)]
-      ]
+            [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'], 1, 1),
+                test_df_l['last_name'] == test_df_r['last_name']],
 
-      intended_list = sorted(['first_name','last_name'])
+            [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'], 1, 1),
+                F.substring(test_df_l['last_name'], 1, 1) == F.substring(test_df_r['last_name'], 1, 1)]
+        ]
 
-      result_list = sorted(extract_mk_variables(test_df_l, mks))
+        intended_list = sorted(['first_name', 'last_name'])
 
-      assert result_list == intended_list 
-    
+        result_list = sorted(extract_mk_variables(test_df_l, mks))
+
+        assert result_list == intended_list
+
 ###################################################################
 
+
 class TestDemographics():
-  
-  def test_expected(self,spark):
 
-      test_df_raw = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(40)],
-              "sex": (['M']*20)+(['F']*20),
-              "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
-          }))).select('id','sex','age_group')
+    def test_expected(self, spark):
 
-      intended_data_raw = spark.createDataFrame(
-          (pd.DataFrame({
-              'variable': ['age_group','age_group','age_group','age_group','sex','sex'],
-              'value': ['10-20','20-30','30-40','50-60','F','M'],
-              'count': [10,10,10,10,20,20],
-              'total_count': [40,40,40,40,40,40]
-          }))).select('variable','value','count','total_count')
+        test_df_raw = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(40)],
+                "sex": (['M']*20)+(['F']*20),
+                "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
+            }))).select('id', 'sex', 'age_group')
 
-      result_df_raw = demographics(*['sex', 'age_group'],
-                             df=test_df_raw, identifier='id')
-      
-      assert_df_equality(intended_data_raw,result_df_raw,ignore_nullable = True, ignore_schema = True)      
+        intended_data_raw = spark.createDataFrame(
+            (pd.DataFrame({
+                'variable': ['age_group', 'age_group', 'age_group', 'age_group', 'sex', 'sex'],
+                'value': ['10-20', '20-30', '30-40', '50-60', 'F', 'M'],
+                'count': [10, 10, 10, 10, 20, 20],
+                'total_count': [40, 40, 40, 40, 40, 40]
+            }))).select('variable', 'value', 'count', 'total_count')
 
-      test_df_linked = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(20)],
-              "sex": (['M']*10)+(['F']*10),
-              "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
-          }))).select('id','sex','age_group')
-      
-      intended_data_linked = spark.createDataFrame(
-          (pd.DataFrame({
-              'variable': ['age_group','age_group','age_group','age_group','sex','sex'],
-              'value': ['10-20','20-30','30-40','50-60','F','M'],
-              'count': [5,5,5,5,10,10],
-              'total_count': [20,20,20,20,20,20]
-          }))).select('variable','value','count','total_count')     
-      
-      result_df_linked = demographics(*['sex', 'age_group'],
-                                df=test_df_linked, identifier='id')
-      
-      assert_df_equality(intended_data_linked,result_df_linked,ignore_nullable = True, ignore_schema = True)
+        result_df_raw = demographics(*['sex', 'age_group'],
+                                     df=test_df_raw, identifier='id')
+
+        assert_df_equality(intended_data_raw, result_df_raw,
+                           ignore_nullable=True, ignore_schema=True)
+
+        test_df_linked = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(20)],
+                "sex": (['M']*10)+(['F']*10),
+                "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
+            }))).select('id', 'sex', 'age_group')
+
+        intended_data_linked = spark.createDataFrame(
+            (pd.DataFrame({
+                'variable': ['age_group', 'age_group', 'age_group', 'age_group', 'sex', 'sex'],
+                'value': ['10-20', '20-30', '30-40', '50-60', 'F', 'M'],
+                'count': [5, 5, 5, 5, 10, 10],
+                'total_count': [20, 20, 20, 20, 20, 20]
+            }))).select('variable', 'value', 'count', 'total_count')
+
+        result_df_linked = demographics(*['sex', 'age_group'],
+                                        df=test_df_linked, identifier='id')
+
+        assert_df_equality(intended_data_linked, result_df_linked,
+                           ignore_nullable=True, ignore_schema=True)
 
 ####################################################################
 
+
 class TestDemographicsCompare():
-  
-  def test_expected(self,spark):
 
-      spark = SparkSession.builder.getOrCreate()
+    def test_expected(self, spark):
 
-      df_raw = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(40)],
-              "sex": (['M']*20)+(['F']*20),
-              "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
-          })))
+        spark = SparkSession.builder.getOrCreate()
 
-      df_linked = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(20)],
-              "sex": (['M']*10)+(['F']*10),
-              "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
-          })))
+        df_raw = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(40)],
+                "sex": (['M']*20)+(['F']*20),
+                "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
+            })))
 
-      test_raw = demographics(*['sex', 'age_group'],
-                             df=df_raw, identifier='id')
+        df_linked = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(20)],
+                "sex": (['M']*10)+(['F']*10),
+                "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
+            })))
 
-      test_linked = demographics(*['sex', 'age_group'],
-                                df=df_linked, identifier='id')
-    
-      intended_data = spark.createDataFrame(
-          (pd.DataFrame({
-              'variable': ['age_group','age_group','age_group','age_group','sex','sex'],
-              'value': ['10-20','20-30','30-40','50-60','F','M'],
-              'count_raw': [10,10,10,10,20,20],
-              'total_count_raw': [40,40,40,40,40,40],
-              'count_linked': [5,5,5,5,10,10],
-              'total_count_linked': [20,20,20,20,20,20],
-              'match_rate': [0.5,0.5,0.5,0.5,0.5,0.5],
-              'proportional_count': [5,5,5,5,10,10],
-              'proportional_discrepency': [0.0,0.0,0.0,0.0,0.0,0.0]
-          }))).select('variable','value','count_raw','total_count_raw','count_linked',
-                      'total_count_linked','match_rate','proportional_count','proportional_discrepency')     
-    
-      result_df = demographics_compare(test_raw, test_linked)
+        test_raw = demographics(*['sex', 'age_group'],
+                                df=df_raw, identifier='id')
 
-      assert_df_equality(intended_data,result_df,ignore_nullable = True,ignore_schema = True)
+        test_linked = demographics(*['sex', 'age_group'],
+                                   df=df_linked, identifier='id')
 
-      df_raw = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(40)],
-              "sex": (['M']*20)+(['F']*20),
-              "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
-          })))
+        intended_data = spark.createDataFrame(
+            (pd.DataFrame({
+                'variable': ['age_group', 'age_group', 'age_group', 'age_group', 'sex', 'sex'],
+                'value': ['10-20', '20-30', '30-40', '50-60', 'F', 'M'],
+                'count_raw': [10, 10, 10, 10, 20, 20],
+                'total_count_raw': [40, 40, 40, 40, 40, 40],
+                'count_linked': [5, 5, 5, 5, 10, 10],
+                'total_count_linked': [20, 20, 20, 20, 20, 20],
+                'match_rate': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                'proportional_count': [5, 5, 5, 5, 10, 10],
+                'proportional_discrepency': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            }))).select('variable', 'value', 'count_raw', 'total_count_raw', 'count_linked',
+                        'total_count_linked', 'match_rate', 'proportional_count', 'proportional_discrepency')
 
-      df_linked = spark.createDataFrame(
-          (pd.DataFrame({
-              "id": [x for x in range(20)],
-              "sex": (['M']*15)+(['F']*5),
-              "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
-          })))
+        result_df = demographics_compare(test_raw, test_linked)
 
-      test_dem_raw1 = demographics(*['sex', 'age_group'],
-                             df=df_raw, identifier='id')
+        assert_df_equality(intended_data, result_df,
+                           ignore_nullable=True, ignore_schema=True)
 
-      test_dem_linked1 = demographics(*['sex', 'age_group'],
-                                df=df_linked, identifier='id')
-    
-      intended_data1 = spark.createDataFrame(
-          (pd.DataFrame({
-              'variable': ['age_group','age_group','age_group','age_group','sex','sex'],
-              'value': ['10-20','20-30','30-40','50-60','F','M'],
-              'count_raw': [10,10,10,10,20,20],
-              'total_count_raw': [40,40,40,40,40,40],
-              'count_linked': [5,5,5,5,5,15],
-              'total_count_linked': [20,20,20,20,20,20],
-              'match_rate': [0.5,0.5,0.5,0.5,0.5,0.5],
-              'proportional_count': [5,5,5,5,10,10],
-              'proportional_discrepency': [0.0,0.0,0.0,0.0,-0.5,0.5]
-          }))).select('variable','value','count_raw','total_count_raw','count_linked',
-                      'total_count_linked','match_rate','proportional_count','proportional_discrepency')     
-    
-    
-      result_df1 = demographics_compare(test_dem_raw1, test_dem_linked1)
+        df_raw = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(40)],
+                "sex": (['M']*20)+(['F']*20),
+                "age_group": (['10-20']*10)+(['20-30']*10)+(['30-40']*10)+(['50-60']*10),
+            })))
 
-      assert_df_equality(intended_data1,result_df1,ignore_nullable = True,ignore_schema = True)
+        df_linked = spark.createDataFrame(
+            (pd.DataFrame({
+                "id": [x for x in range(20)],
+                "sex": (['M']*15)+(['F']*5),
+                "age_group": (['10-20']*5)+(['20-30']*5)+(['30-40']*5)+(['50-60']*5),
+            })))
+
+        test_dem_raw1 = demographics(*['sex', 'age_group'],
+                                     df=df_raw, identifier='id')
+
+        test_dem_linked1 = demographics(*['sex', 'age_group'],
+                                        df=df_linked, identifier='id')
+
+        intended_data1 = spark.createDataFrame(
+            (pd.DataFrame({
+                'variable': ['age_group', 'age_group', 'age_group', 'age_group', 'sex', 'sex'],
+                'value': ['10-20', '20-30', '30-40', '50-60', 'F', 'M'],
+                'count_raw': [10, 10, 10, 10, 20, 20],
+                'total_count_raw': [40, 40, 40, 40, 40, 40],
+                'count_linked': [5, 5, 5, 5, 5, 15],
+                'total_count_linked': [20, 20, 20, 20, 20, 20],
+                'match_rate': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                'proportional_count': [5, 5, 5, 5, 10, 10],
+                'proportional_discrepency': [0.0, 0.0, 0.0, 0.0, -0.5, 0.5]
+            }))).select('variable', 'value', 'count_raw', 'total_count_raw', 'count_linked',
+                        'total_count_linked', 'match_rate', 'proportional_count', 'proportional_discrepency')
+
+        result_df1 = demographics_compare(test_dem_raw1, test_dem_linked1)
+
+        assert_df_equality(intended_data1, result_df1,
+                           ignore_nullable=True, ignore_schema=True)
 
 ###############################################################
 
 
 class TestAssertUniqueMatches():
-  
-  def test_expected(self,spark):
 
-      test_df = spark.createDataFrame(
-          (pd.DataFrame({
-              "id_l": ['1', '2', '3', '4', '5'],
-              "id_r": ['a', 'b', 'c', 'd', 'e'],
-          })))
+    def test_expected(self, spark):
 
-      intended_df = None
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "id_l": ['1', '2', '3', '4', '5'],
+                "id_r": ['a', 'b', 'c', 'd', 'e'],
+            })))
 
-      result_df = assert_unique_matches(test_df, 'id_l', 'id_r')
-      
-      assert result_df == intended_df
+        intended_df = None
 
-      x = 0
-      try:
-          assert_unique_matches(test_df, 'id_l', 'id_r')
-      except:
-          x = 1
-      assert x == 0
+        result_df = assert_unique_matches(test_df, 'id_l', 'id_r')
 
-      df = spark.createDataFrame(
-          (pd.DataFrame({
-              "id_l": ['1', '1', '3', '4', '5'],
-              "id_r": ['a', 'b', 'c', 'd', 'd'],
-          })))
+        assert result_df == intended_df
 
-      x = 0
-      try:
-          assert_unique_matches(df, 'id_l', 'id_r')
-      except:
-          x = 1
-      assert x == 1
+        x = 0
+        try:
+            assert_unique_matches(test_df, 'id_l', 'id_r')
+        except:
+            x = 1
+        assert x == 0
+
+        df = spark.createDataFrame(
+            (pd.DataFrame({
+                "id_l": ['1', '1', '3', '4', '5'],
+                "id_r": ['a', 'b', 'c', 'd', 'd'],
+            })))
+
+        x = 0
+        try:
+            assert_unique_matches(df, 'id_l', 'id_r')
+        except:
+            x = 1
+        assert x == 1
 
 ###############################################################
+
 
 class TestMatchkeyCounts(object):
-  
-  def test_expected(self,spark):
 
-      test_df = spark.createDataFrame(
-          (pd.DataFrame({
-              "matchkey": ['1', '1', '3', '4', '4'],
-              "id_r": ['a', 'b', 'c', 'd', 'e'],
-          }))).select("matchkey","id_r")
-      
-      intended_df = spark.createDataFrame(
-          (pd.DataFrame({
-              "matchkey": ['1', '4', '3'],
-              "count": [2,2,1]
-          }))).select("matchkey","count")
-      
+    def test_expected(self, spark):
 
-      result_df = (matchkey_counts(test_df)
-            )
-      
-      assert_df_equality(intended_df,result_df, ignore_nullable = True, ignore_row_order = True)
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "matchkey": ['1', '1', '3', '4', '4'],
+                "id_r": ['a', 'b', 'c', 'd', 'e'],
+            }))).select("matchkey", "id_r")
+
+        intended_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "matchkey": ['1', '4', '3'],
+                "count": [2, 2, 1]
+            }))).select("matchkey", "count")
+
+        result_df = (matchkey_counts(test_df)
+                     )
+
+        assert_df_equality(intended_df, result_df,
+                           ignore_nullable=True, ignore_row_order=True)
 
 ###############################################################
 
+
 class TestMatchkeyDataframe(object):
-  
-  def test_expected(self,spark):
 
-      df_l = spark.createDataFrame(
-          (pd.DataFrame({
-              "first_name": ['test']*10,
-              "last_name": ['test']*10,
-              "uprn": ['test']*10,
-              "date_of_birth": ['test']*10,
-          })))
+    def test_expected(self, spark):
 
-      df_r = spark.createDataFrame(
-          (pd.DataFrame({
-              "first_name": ['test']*10,
-              "last_name": ['test']*10,
-              "uprn": ['test']*10,
-              "date_of_birth": ['test']*10,
-          })))
+        df_l = spark.createDataFrame(
+            (pd.DataFrame({
+                "first_name": ['test']*10,
+                "last_name": ['test']*10,
+                "uprn": ['test']*10,
+                "date_of_birth": ['test']*10,
+            })))
 
-      mks = [
-          [
-              df_l['first_name'] == df_r['first_name'],
-              df_l['last_name'] == df_r['last_name'],
-              df_l['uprn'] == df_r['uprn'],
-              df_l['date_of_birth'] == df_r['date_of_birth'],
-          ],
-          [
-              F.substring(df_l['first_name'], 0, 2) == F.substring(
-                  df_r['first_name'], 0, 2),
-              F.substring(df_l['last_name'], 0, 2) == F.substring(
-                  df_r['last_name'], 0, 2),
-              df_l['uprn'] == df_r['uprn'],
-              df_l['date_of_birth'] == df_r['date_of_birth'],
-          ]
-      ]
+        df_r = spark.createDataFrame(
+            (pd.DataFrame({
+                "first_name": ['test']*10,
+                "last_name": ['test']*10,
+                "uprn": ['test']*10,
+                "date_of_birth": ['test']*10,
+            })))
 
-      intended_schema = StructType([
-                  StructField("matchkey",LongType(),True),
-                  StructField("description",StringType(),True)
-      ])
+        mks = [
+            [
+                df_l['first_name'] == df_r['first_name'],
+                df_l['last_name'] == df_r['last_name'],
+                df_l['uprn'] == df_r['uprn'],
+                df_l['date_of_birth'] == df_r['date_of_birth'],
+            ],
+            [
+                F.substring(df_l['first_name'], 0, 2) == F.substring(
+                    df_r['first_name'], 0, 2),
+                F.substring(df_l['last_name'], 0, 2) == F.substring(
+                    df_r['last_name'], 0, 2),
+                df_l['uprn'] == df_r['uprn'],
+                df_l['date_of_birth'] == df_r['date_of_birth'],
+            ]
+        ]
 
-      intended_data = [[1, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),(date_of_birth=date_of_birth)]'],
-                       [2, '[(substring(first_name,0,2)=substring(first_name,0,2)),(substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),(date_of_birth=date_of_birth)]']]
+        intended_schema = StructType([
+            StructField("matchkey", LongType(), True),
+            StructField("description", StringType(), True)
+        ])
 
-      intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_data = [[1, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),(date_of_birth=date_of_birth)]'],
+                         [2, '[(substring(first_name,0,2)=substring(first_name,0,2)),(substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),(date_of_birth=date_of_birth)]']]
 
-      result_df = matchkey_dataframe(mks)
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
 
-      assert_df_equality(intended_df,result_df)
-      
+        result_df = matchkey_dataframe(mks)
+
+        assert_df_equality(intended_df, result_df)

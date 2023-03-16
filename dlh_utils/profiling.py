@@ -13,6 +13,7 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
+
 def create_table_statements(database, regex=None, output_mode='spark'):
     '''
     Returns a dataframe summarising the SQL CREATE TABLE statement that
@@ -460,9 +461,9 @@ def hive_variable_matrix(database, regex=None, output_mode='spark'):
                       for table in tables]
 
     all_variables = list({y[0] for y in
-                              [item for sublist in
-                               [x[1] for x in variable_types]
-                               for item in sublist]})
+                          [item for sublist in
+                           [x[1] for x in variable_types]
+                           for item in sublist]})
 
     out = pd.DataFrame({'variable': all_variables})
 

@@ -11,6 +11,7 @@ import pytest
 
 pytestmark = pytest.mark.usefixtures("spark")
 
+
 @pytest.fixture(scope="session")
 def spark(request):
     """ fixture for creating a spark context
@@ -47,10 +48,12 @@ class TestExplode(object):
         assert_df_equality(intended_df, result_df)
 
 #############################################################################
+
+
 class TestConcat(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "firstname": [None, 'Claire', 'Josh', 'Bob'],
@@ -86,6 +89,8 @@ class TestConcat(object):
                 "lastname"])
 
 ##############################################################################
+
+
 class TestDropColumns(object):
 
     def test_expected(self, spark):
@@ -106,6 +111,7 @@ class TestDropColumns(object):
         assert_df_equality(intended_df, result_df)
 
 ##############################################################################
+
 
 class TestSelect(object):
     def test_expected(self, spark):
@@ -131,9 +137,9 @@ class TestSelect(object):
 
 ##########################################################################
 class TestCoalesced(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "lower": ['one', None, 'one', 'four', None],
@@ -163,10 +169,11 @@ class TestCoalesced(object):
 
 #################################################################
 
+
 class TestCutOff(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "strings": ['1', '2', '3', '4', '5'],
@@ -198,8 +205,9 @@ class TestCutOff(object):
 
 ####################################################################
 
+
 class TestLiteralColumn(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -226,8 +234,9 @@ class TestLiteralColumn(object):
 
 ####################################################################
 
+
 class TestDropNulls(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -248,7 +257,7 @@ class TestDropNulls(object):
 
 
 class TestUnionAll(object):
-  
+
     def test_expected(self, spark):
 
         test_df1 = spark.createDataFrame(
@@ -349,7 +358,7 @@ class TestRenameColumns(object):
 class TestRenameColumns2(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "abefore": [['a', 'b', 'c'], None, ['b', 'c', 'd']],
@@ -373,7 +382,7 @@ class TestRenameColumns2(object):
 class TestPrefixColumns(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": [None, None, 'one', 'four', 'five'],
@@ -411,10 +420,11 @@ class TestSuffixColumns(object):
         assert_df_equality(intended_df, result_df)
 #######################################################################
 
+
 class TestWindow(object):
 
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": ['a', 'b', 'c', 'c', 'd', 'e', 'd'],
@@ -541,6 +551,7 @@ class TestWindow(object):
 
 ###############################################################################
 
+
 class TestSplit(object):
 
     def test_expected(self, spark):
@@ -560,6 +571,7 @@ class TestSplit(object):
         assert_df_equality(intended_df, result_df)
 
 ###############################################################################
+
 
 class IndexSelectTesting(object):
 

@@ -6,8 +6,8 @@ import subprocess
 import os
 import re
 from pyspark.sql import SparkSession
-from pyspark.sql.types import TimestampType,LongType,IntegerType,DoubleType,\
-FloatType,StringType,StructType,StructField
+from pyspark.sql.types import TimestampType, LongType, IntegerType, DoubleType,\
+    FloatType, StringType, StructType, StructField
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
 from dlh_utils import dataframes as da
@@ -81,7 +81,6 @@ def list_files(directory, walk=False):
     if walk is False:
 
         return files
-
 
     for file in files:
         if len(files) == len(set(files)):
@@ -330,7 +329,7 @@ def most_recent(path, filetype, regex=None):
 
             except Exception as exc:
 
-                raise FileNotFoundError(filetype + " file, matching this regular expression: " +\
+                raise FileNotFoundError(filetype + " file, matching this regular expression: " +
                                         regex + " not found in this directory: " + path) from exc
 
         # if filetype != hive
@@ -363,8 +362,8 @@ def most_recent(path, filetype, regex=None):
                 except Exception as exc:
 
                     raise FileNotFoundError(filetype +
-                                            " file, matching this regular expression: " +\
-                                            regex + " not found in this directory: " +\
+                                            " file, matching this regular expression: " +
+                                            regex + " not found in this directory: " +
                                             path) from exc
 
             elif filetype == 'parquet':
@@ -381,8 +380,8 @@ def most_recent(path, filetype, regex=None):
                 except Exception as exc:
 
                     raise FileNotFoundError(filetype +
-                                            " file, matching this regular expression: " +\
-                                            regex + " not found in this directory: " +\
+                                            " file, matching this regular expression: " +
+                                            regex + " not found in this directory: " +
                                             path) from exc
 
     return most_recent_filepath, filetype
@@ -391,8 +390,7 @@ def most_recent(path, filetype, regex=None):
 
 
 def write_format(df, write, path,
-                file_name=None, sep=",", header="true", mode='overwrite'):
-
+                 file_name=None, sep=",", header="true", mode='overwrite'):
     """
     Writes dataframe in specified format
 
@@ -440,10 +438,10 @@ def write_format(df, write, path,
             df.write.format('csv').option('header', header).mode(
                 mode).option('sep', sep).save(f'{path}')
         if write == 'parquet':
-            df.write.parquet(path=f'{path}', mode=mode)    
+            df.write.parquet(path=f'{path}', mode=mode)
         if write == 'hive':
-          df.write.mode('overwrite').saveAsTable(f'{path}')
-        
+            df.write.mode('overwrite').saveAsTable(f'{path}')
+
     else:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
@@ -457,7 +455,7 @@ def write_format(df, write, path,
 
 
 def read_format(read, path=None, file_name=None,
-               sep=",", header="true", infer_schema="True"):
+                sep=",", header="true", infer_schema="True"):
     """
     Reads dataframe from specified format.
 
@@ -527,7 +525,7 @@ def read_format(read, path=None, file_name=None,
                   )
         if read == 'hive':
             df = spark.sql(f"SELECT * FROM {path}")
-        
+
     else:
         if read == 'csv':
             df = (spark.read.format('csv')
@@ -700,6 +698,7 @@ def describe_metrics(df, output_mode='pandas'):
     return decribe_df
 
 ###############################################################################
+
 
 def value_counts(df, limit=20, output_mode='pandas'):
     """

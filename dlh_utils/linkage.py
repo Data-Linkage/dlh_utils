@@ -17,6 +17,7 @@ from dlh_utils import utilities as ut
 
 # phonetic encoders
 
+
 def alpha_name(df, input_col, output_col):
     """
     Orders string columns alphabetically, also setting them to UPPER CASE.
@@ -511,8 +512,8 @@ def cluster_number(df, id_1, id_2):
     +---+---+--------------+
     """
     # Check variable types
-    if not ((isinstance(df.schema[id_1].dataType, StringType))\
-    and (isinstance(df.schema[id_2].dataType, StringType))):
+    if not ((isinstance(df.schema[id_1].dataType, StringType))
+            and (isinstance(df.schema[id_2].dataType, StringType))):
         raise TypeError('ID variables must be strings')
 
     # Set up spark checkpoint settings
@@ -546,7 +547,7 @@ def cluster_number(df, id_1, id_2):
             'Cluster_Number').drop('component')
 
         return df
-  
+
     except py4j.protocol.Py4JJavaError:
         print("""WARNING: A graphframes wrapper package installation has not been found!
         If you have not already done so, you will need to submit graphframes' JAR file 
@@ -747,11 +748,11 @@ def matchkey_join(df_l, df_r, id_l, id_r, match_key, mk_n=0):
     --------
     mk_dropna()
     """
-    #variables_l = extract_mk_variables(df_l,match_key)
-    #variables_r = extract_mk_variables(df_r,match_key)
+    # variables_l = extract_mk_variables(df_l,match_key)
+    # variables_r = extract_mk_variables(df_r,match_key)
 
-    #df_l = df_l.dropna(subset=variables_l)
-    #df_r = df_r.dropna(subset=variables_r)
+    # df_l = df_l.dropna(subset=variables_l)
+    # df_r = df_r.dropna(subset=variables_r)
 
     df_l = mk_dropna(df_l, match_key)
     df_r = mk_dropna(df_r, match_key)
@@ -774,7 +775,7 @@ def matchkey_join(df_l, df_r, id_l, id_r, match_key, mk_n=0):
 def chunk_list(_list, _num):
     '''splits a list into a specified number of chunks'''
     return [_list[i * _num:(i + 1) * _num]
-     for i in range((len(_list) + _num - 1) // _num)]
+            for i in range((len(_list) + _num - 1) // _num)]
 
 ###############################################################################
 
@@ -858,7 +859,7 @@ def assert_unique(df, column):
     unique identifier, specified by the col argument.
     '''
 
-    if not isinstance(column,list):
+    if not isinstance(column, list):
         col = [col]
 
     assert df.count() == df.dropDuplicates(subset=column).count()
@@ -956,8 +957,8 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
     linked_ids = da.union_all(*linked_ids)
 
     review_df = (linked_ids
-                 .join(df_l, id_l , 'inner')
-                 .join(df_r, id_r , 'inner')
+                 .join(df_l, id_l, 'inner')
+                 .join(df_r, id_r, 'inner')
                  .join(mk_df, on='matchkey')
                  .sort('matchkey', id_l)
                  )
@@ -1142,10 +1143,11 @@ def matchkeys_drop_duplicates(mks):
     out = list(out['mks'])
 
     return out
-      
+
 ############################################################################
 
-def deduplicate(df, record_id, mks, checkpoint = False):
+
+def deduplicate(df, record_id, mks, checkpoint=False):
     """
     Matches a dataframe to itself on a specified set of matchkeys. Returns
     either the unique records in your data, or the identified duplicates.
@@ -1193,51 +1195,52 @@ def deduplicate(df, record_id, mks, checkpoint = False):
     # check to see if matchkeys are passed as a list of lists
     if any(isinstance(matchkey, list) for matchkey in mks) is False:
         mks = [mks]
-        
-    df2 = da.suffix_columns(df, suffix = '_2')
+
+    df2 = da.suffix_columns(df, suffix='_2')
 
     for count, matchkey in enumerate(mks, 1):
 
         print(f"\nLinking on matchkey number {count}")
-        
+
         mk_df2 = [x + "_2" for x in MK]
-        
-        duplicates = df.join(df2, on = [df[x] == df2[y] for x, y in zip(MK, mk_df2)],
-                            how = 'inner')
-        
+
+        duplicates = df.join(df2, on=[df[x] == df2[y] for x, y in zip(MK, mk_df2)],
+                             how='inner')
+
         duplicates = duplicates.withColumn('matchkey', F.lit(count))
-        
+
         if count == 1:
 
             matches = duplicates
 
         else:
-          matches = matches.union(duplicates)
-          
+            matches = matches.union(duplicates)
+
         if checkpoint:
-          if (count % 20) == 0:
-            matches = matches.checkpoint
-    
+            if (count % 20) == 0:
+                matches = matches.checkpoint
+
     duplicates = matches.filter(f"{record_id} != {record_id}_2")
-    
+
     duplicates = duplicates.withColumn(f"{record_id}_min",
                                        F.least(*[f"{record_id}", f"{record_id}_2"]))\
-                           .withColumn(f"{record_id}_max",
-                                       F.greatest(*[f"{record_id}", f"{record_id}_2"]))
-      
+        .withColumn(f"{record_id}_max",
+                    F.greatest(*[f"{record_id}", f"{record_id}_2"]))
+
     duplicates = duplicates.selectExpr(f"{record_id}_min AS {record_id}",
                                        f"{record_id}_max AS {record_id}_2",
                                        "matchkey")
-    
+
     duplicates = duplicates.drop_duplicates([f"{record_id}", f"{record_id}_2"])
-      
-    unique = df.join(duplicates, how = "left_anti",
-                     on = (df[f"{record_id}"] == duplicates[f"{record_id}"]) | \
-                          (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
+
+    unique = df.join(duplicates, how="left_anti",
+                     on=(df[f"{record_id}"] == duplicates[f"{record_id}"]) |
+                     (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
 
     return unique, duplicates
 
 ############################################################################
+
 
 def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     '''
@@ -1346,7 +1349,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             # reads previous matches
             # used in left anti join to ignore matched records
             matches = ut.read_format('parquet',
-                                    f"{out_dir}/linked_identifiers")
+                                     f"{out_dir}/linked_identifiers")
 
             last_count = count
             count = matches.count()
@@ -1368,7 +1371,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
 
     # reads and returns final matches
     matches = ut.read_format('parquet',
-                            f"{out_dir}/linked_identifiers")
+                             f"{out_dir}/linked_identifiers")
 
     last_count = count
     count = matches.count()

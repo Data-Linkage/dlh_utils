@@ -257,7 +257,7 @@ def flag_summary(df, flags=None, pandas=False):
         flags = [
             column for column in df.columns if column.startswith('FLAG_')]
 
-    if not isinstance(flags,list):
+    if not isinstance(flags, list):
         flags = [flags]
 
     rows = df.count()

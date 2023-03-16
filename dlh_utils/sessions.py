@@ -7,6 +7,7 @@ from IPython.core.display import display, HTML
 from pyspark.sql import SparkSession
 import graphframes_jars as graphframes
 
+
 def getOrCreateSparkSession(appName='DE_DL',
                             size='large',
                             showConsoleProgress='false',

@@ -7,6 +7,7 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
+
 def cast_type(df, subset=None, types='string'):
     """
     Casts specific dataframe columns to a specified type.
@@ -193,8 +194,8 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     dataframes.concat()
     """
 
-    out = df.where((F.col(first_name).contains(sep) == False) \
-                    | (F.col(first_name).isNull()))
+    out = df.where((F.col(first_name).contains(sep) == False)
+                   | (F.col(first_name).isNull()))
     df = df.where(F.col(first_name).contains(sep))
 
     df = da.concat(df, 'align_forenames', sep, [
@@ -906,7 +907,7 @@ def standardise_case(df, subset=None, val='upper'):
     if subset is None:
         subset = df.columns
 
-    if not isinstance(subset,list):
+    if not isinstance(subset, list):
         subset = [subset]
 
     for col in subset:
@@ -1202,8 +1203,10 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     |  5|  Maggie|      null|Simpson|12/01/2021|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
     """
-    df = df.withColumn(col_name, F.unix_timestamp(F.col(col_name), in_date_format))
-    df = df.withColumn(col_name, F.from_unixtime(F.col(col_name), out_date_format))
+    df = df.withColumn(col_name, F.unix_timestamp(
+        F.col(col_name), in_date_format))
+    df = df.withColumn(col_name, F.from_unixtime(
+        F.col(col_name), out_date_format))
     return df
 
 ##############################################################################
@@ -1369,7 +1372,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
 def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     """
     Calculates individuals' ages at specified dates from a reference Date of Birth column
-    
+
     The function takes a list of dates, and for each date creates a new column
     specifying an individual's age at that date.
 
@@ -1427,10 +1430,11 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
 
     """
-    
-    df = standardise_date(df, reference_column, in_date_format, out_date_format='yyyy-MM-dd')
+
+    df = standardise_date(df, reference_column,
+                          in_date_format, out_date_format='yyyy-MM-dd')
     for age_at_date in age_at_dates:
-        df = df.withColumn(f"age_at_{age_at_date}", 
-                           (F.months_between(F.lit(age_at_date), 
+        df = df.withColumn(f"age_at_{age_at_date}",
+                           (F.months_between(F.lit(age_at_date),
                                              F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
     return df
