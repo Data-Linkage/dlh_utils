@@ -337,14 +337,14 @@ class TestAlignForenames(object):
 
         intended_df = spark.createDataFrame(
             (pd.DataFrame({
-                "identifier": [1, 3, 2, 4],
-                "firstName": ["robert", "carlos", "andrew", "john"],
-                "middleName": ["green", "senior", "hog", "wick"]
+                "identifier": [1, 2, 3, 4],
+                "firstName": ["robert", "andrew","carlos",  "john"],
+                "middleName": ["green",  "hog", "senior", "wick"]
             })))
 
         result_df = align_forenames(
             test_df, "firstName", "middleName", "identifier")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 ##############################################################################
 
 
@@ -590,7 +590,7 @@ class TestRegReplace(object):
                 "col2": [None, "bond street", 'queen street', "queen avenue"]
             })))
 
-        result_df = reg_replace(test_df, dic={'street': '\\bstr\\b|\\bstrt\\b',
+        result_df = reg_replace(test_df, replace_dict={'street': '\\bstr\\b|\\bstrt\\b',
                                               'avenue': 'road',
                                               "bond": "hello",
                                               "queen": "king"})
