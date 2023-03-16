@@ -922,6 +922,58 @@ def standardise_case(df, subset=None, val='upper'):
 
 ##########################################################################
 
+def identify_date_formats(df, cut_off = 0.6):
+  """
+  """
+  
+  date_format_dict = {
+    "yyyy.MM.dd": "^[1-2]\d{3}[.][0-1]\d[.][0-3]\d$",
+    "yyyy/MM/dd": "^[1-2]\d{3}[\/][0-1]\d[\/][0-3]\d$",
+    "yyyy-MM-dd": "^[1-2]\d{3}[-][0-1]\d[-][0-3]\d$",
+    "yyyyMMdd": "^[1-2]\d{3}[0-1]\d[0-3]\d$",
+    "dd.MM.yyyy": "^[0-3]\d[.][0-1]\d[.][1-2]\d{3}$",
+    "dd/MM/yyyy": "^[0-3]\d[\/][0-1]\d[\/][1-2]\d{3}$",
+    "dd-MM-yyyy": "^[0-3]\d[-][0-1]\d[-][1-2]\d{3}$",
+    "ddMMyyyy": "^[0-3]\d[0-1]\d[1-2]\d{3}$",
+    "dd.MM.yy": "^[0-3]\d[.][0-1]\d[.]\d{2}$",
+    "dd/MM/yy": "^[0-3]\d[\/][0-1]\d[\/]\d{2}$",
+    "dd-MM-yy": "^[0-3]\d[-][0-1]\d[-]\d{2}$"
+  }
+  
+  date_regex = "|".join(list(date_format_dict.values()))
+  
+  date_format_columns = ut.regex_match(df, regex = date_regex,
+                                      limit = min(df.count(), 10000),
+                                      cut_off = cut_off
+                                      )
+  
+  return {
+    col: sorted(
+    [
+      (df.where(F.col(col).rlike(regex)).count(), format_)
+      for format_, regex in date_format_dict.items()
+    ]
+    )[-1][1]
+    for col in date_format_columns
+  }
+
+##########################################################################
+
+def auto_standardise_dates(df, cast_format = "yyyy-MM-dd"):
+  """
+  """
+  
+  identify_date_formats_out = identify_date_formats(df)
+  
+  for column, current_format in identify_date_formats_out.items():
+    
+    df = standardise_date(df, column,
+                          in_date_format = current_format,
+                          out_date_format = cast_format
+                         )
+  return df
+
+##########################################################################
 
 def trim(df, subset=None):
     """
