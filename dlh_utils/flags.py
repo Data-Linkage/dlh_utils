@@ -181,7 +181,7 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
     if condition == 'isNotNull':
         df = df.withColumn(alias,
                            (F.col(ref_col).isNotNull()) & (
-                               F.isnan(F.col(ref_col)) is False)
+                               F.isnan(F.col(ref_col)) == False)
                            )
 
     if fill_null is not None:
@@ -268,7 +268,7 @@ def flag_summary(df, flags=None, pandas=False):
 
         flags_out.append((df
                           .select(col)
-                         .where(F.col(col) is True)
+                         .where(F.col(col) == True)
 
                           .count()
                           ))
@@ -397,7 +397,7 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
         df = (df
               .withColumn('flag_count',
-                          F.when(F.col(flag) is True,
+                          F.when(F.col(flag) == True,
                                  F.col('flag_count')+1)
                           .otherwise(F.col('flag_count')))
               )
@@ -416,16 +416,16 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
                     summary_df)
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') is False)),
-                    (df.where(F.col('Fail') is True)),
+            return ((df.where(F.col('Fail') == False)),
+                    (df.where(F.col('Fail') == True)),
                     summary_df)
 
         if mode == 'pass':
-            return (df.where(F.col('Fail') is False),
+            return (df.where(F.col('Fail') == False),
                     summary_df)
 
         if mode == 'fail':
-            return (df.where(F.col('Fail') is True),
+            return (df.where(F.col('Fail') == True),
                     summary_df)
 
     else:
@@ -433,11 +433,11 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
             return df
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') is False)),
-                    (df.where(F.col('Fail') is True)))
+            return ((df.where(F.col('Fail') == False)),
+                    (df.where(F.col('Fail') == True)))
 
         if mode == 'pass':
-            return df.where(F.col('Fail') is False)
+            return df.where(F.col('Fail') == False)
 
         if mode == 'fail':
-            return df.where(F.col('Fail') is True)
+            return df.where(F.col('Fail') == True)
