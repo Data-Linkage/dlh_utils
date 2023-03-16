@@ -1,6 +1,7 @@
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
+from pyspark.sql.types import StringType, IntegerType, StructType, StructField, LongType
 import pandas as pd
 from dlh_utils.standardisation import *
 from dlh_utils.dataframes import *
@@ -193,57 +194,6 @@ class TestExtractMkVariables():
 
       assert result_list == intended_list 
     
-#############################################################################
-#
-# unable to do pytest on the following code as function 'deterministic_linkage()' is missing the argument 'out_dir'
-#
-#def test_deterministic_linkage():
-#   spark = SparkSession.builder.getOrCreate()
-#    df_l = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
-#
-#            "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-#                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
-#
-#            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-#                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-#        })))
-#
-#    df_r = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
-#
-#            "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-#                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
-#
-#            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-#                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-#        })))
-#
-#    mks = [
-#        [df_l['first_name'] == df_r['first_name'],
-#         df_l['last_name'] == df_r['last_name']],
-#
-#        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-#            df_l['last_name'] == df_r['last_name']],
-#
-#        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-#            F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
-#    ]
-#    
-#    result_df = deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks).filter(F.col('l_id') <= 5).where(F.col('matchkey') == 1).count()==5
-#
-#    assert ((deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks)
-#             .filter(F.col('l_id') <= 5))
-#            .where(F.col('matchkey') == 1)
-#            .count() == 5)
-#
-#    assert ((deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks)
-#             .filter(F.col('l_id') > 5))
-#            .where(F.col('matchkey') == 0)
-#            .count() == 15)
-#
 ###################################################################
 
 class TestDemographics():
@@ -376,7 +326,7 @@ class TestDemographicsCompare():
       assert_df_equality(intended_data1,result_df1,ignore_nullable = True,ignore_schema = True)
 
 ###############################################################
-#
+
 
 class TestAssertUniqueMatches():
   
@@ -413,8 +363,7 @@ class TestAssertUniqueMatches():
       except:
           x = 1
       assert x == 1
-#
-#
+
 ###############################################################
 
 class TestMatchkeyCounts(object):
@@ -483,8 +432,8 @@ class TestMatchkeyDataframe(object):
                   StructField("description",StringType(),True)
       ])
 
-      intended_data = [[0, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),(date_of_birth=date_of_birth)]'],
-                       [1, '[(substring(first_name,0,2)=substring(first_name,0,2)),(substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),(date_of_birth=date_of_birth)]']]
+      intended_data = [[1, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),(date_of_birth=date_of_birth)]'],
+                       [2, '[(substring(first_name,0,2)=substring(first_name,0,2)),(substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),(date_of_birth=date_of_birth)]']]
 
       intended_df = spark.createDataFrame(intended_data, intended_schema)
 
@@ -492,50 +441,3 @@ class TestMatchkeyDataframe(object):
 
       assert_df_equality(intended_df,result_df)
       
-
-# unable to do pytest on the following code as function 'deterministic_linkage()' is missing the argument 'out_dir'
-#
-#    df_l = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "id_l": [-1, -2, -3],
-#            "first_name": ['AMY', 'AMY', 'AMY'],
-#            "last_name": ['SMITH', 'SMITH', 'SMITH'],
-#            "date_of_birth": ['a', None, 'b'],
-#            "uprn": ['a', 'b', None],
-#            "sex": ['F', 'F', 'F']
-#        })))
-#
-#    df_r = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "id_r": [-1, -2, -3],
-#            "first_name": ['AMY', 'AMY', 'AMY'],
-#            "last_name": ['SMITH', 'SMITH', 'SMITH'],
-#            "date_of_birth": ['a', None, 'b'],
-#            "uprn": ['a', 'b', None],
-#            "sex": ['F', 'F', 'F']
-#        })))
-#
-#    mks = [
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['uprn'] == df_r['uprn'],
-#            df_l['date_of_birth'] == df_r['date_of_birth'],
-#        ],
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['uprn'] == df_r['uprn'],
-#        ],
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['date_of_birth'] == df_r['date_of_birth'],
-#        ],
-#    ]
-#
-#    assert (li.deterministic_linkage(df_l, df_r, 'id_l', 'id_r', mks)
-#            .where(F.col('id_l') != F.col('id_r'))).count() == 0

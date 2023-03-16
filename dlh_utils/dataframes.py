@@ -1317,7 +1317,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                         how='right')
                   )
 
-    df = standardise_null(df, "^<<<>>>$", subset=window)
+    df = st.standardise_null(df, "^<<<>>>$", subset=window)
 
     return df
 
