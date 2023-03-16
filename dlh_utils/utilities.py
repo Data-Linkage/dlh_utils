@@ -17,19 +17,25 @@ from dlh_utils import utilities as ut
 ###############################################################################
 
 
-def list_files(directory, walk=False):
+def list_files(file_path, walk=False, regex = None, full_path = True):
     """
     Lists files in a given HDFS directory, and/or all of that directory's
-    subfolders if specified
+    subfolders if walk is set to True.
 
 
     Parameters
     ----------
-    directory : str
+    file_path : str
       String path of directory
     walk : boolean {True, False}
       Lists files only in immediate directory specified if walk = False.
       Lists all files in immediate directory and all subfolders if Walk = True
+    regex
+      Option to filter the list of files against a specified regular
+      expression
+    full_path
+      Option to return a full filepath or only the file's name and it's
+      extension e.g. test.csv
 
     Returns
     -------
@@ -44,57 +50,59 @@ def list_files(directory, walk=False):
     -------
     > list_files(directory = '/dev/kicktyres/',walk=False)
 
-    ['hdfs://prod1/dev/kicktyres/hive_tables',
+    ['hdfs:///dev/kicktyres/hive_tables',
      'hdfs://prod1/dev/kicktyres/shakes',
      'hdfs://prod1/dev/kicktyres/shakes_count',
      'hdfs://prod1/dev/kicktyres/timings_tables']
 
     > list_files(directory = '/dev/kicktyres/',walk=True)
 
-    ['hdfs://prod1/dev/kicktyres/shakes_count/part-r-00111',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00164',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00190',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00039',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00202',
-     'hdfs://prod1/dev/kicktyres/shakes',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00036',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00183',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00193',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00128',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00005',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00057',
+    ['hdfs://dev/kicktyres/shakes_count/part-r-00111',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00164',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00190',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00039',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00202',
+     'hdfs://dev/kicktyres/shakes',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00036',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00183',
+     'hdfs:///dev/kicktyres/shakes_count/part-r-00193',
+     'hdfs:///dev/kicktyres/shakes_count/part-r-00128',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00005',
+     'hdfs://dev/kicktyres/shakes_count/part-r-00057',
      ... and all other files contained within these sub-directories
 
     """
 
-    URI = sc._gateway.jvm.java.net.URI
-    Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
-    FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
-    Configuration = sc._gateway.jvm.org.apache.hadoop.conf.Configuration
-
-    host = 'user'
-
-    fs = FileSystem.get(URI(host), Configuration())
-
-    status = fs.listStatus(Path(directory))
-
-    files = [str(fileStatus.getPath()) for fileStatus in status]
-
-    if walk == False:
-
-        return files
-
+    list_of_filenames = []
+    
+    if walk:
+      process = subprocess.Popen(["hadoop", "fs", "-ls", "-R", file_path],
+                                 stdout = subprocess.PIPE,
+                                 stderr = subprocess.PIPE)
     else:
-
-        for file in files:
-            if len(files) == len(set(files)):
-                files.extend(list_files(file))
-            else:
-                break
-
-        files = list(set(files))
-
-        return files
+      process = subprocess.Popen(["hadoop", "fs", "-ls", "-C", file_path],
+                                 stdout = subprocess.PIPE,
+                                 stderr = subprocess.PIPE)
+    
+    std_out, std_error = process.communicate()
+    std_out = str(std_out).split("\\n")[:-1]
+    std_out[0] = std_out[0].strip("b'")
+    
+    if full_path:
+      for i in std_out:
+        file_name = str(i).split(" ")[-1]
+        list_of_filenames.append(file_name)
+        
+    else:
+      for i in std_out:
+        file_name = str(i).split("/")[-1]
+        list_of_filenames.append(file_name)
+        
+    if regex:
+      list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+      
+    return list_of_filenames
+      
 
 ###############################################################################
 
@@ -122,7 +130,7 @@ def list_checkpoints(checkpoint):
 
     > list_checkpoints(checkpoint = '/user/edwara5/checkpoints')
 
-['hdfs://prod1/user/edwara5/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
+['hdfs://user/checkpoints/0299d46e-96ad/connected-components-985ca288']
     """
 
     return list_files(
@@ -131,7 +139,7 @@ def list_checkpoints(checkpoint):
 ###############################################################################
 
 
-def list_tables(database):
+def list_tables(database, regex = None):
     """
     Returns the tables in a database from hive, it takes an argument of the
     database name as a string. It then returns a dataframe listing the tables
@@ -146,6 +154,9 @@ def list_tables(database):
     -------
     list
       List of tables in database
+    regex
+      Option to filter the list of tables against a specified regular
+      expression
 
     Raises
     -------
@@ -167,10 +178,15 @@ def list_tables(database):
     spark = SparkSession.builder.getOrCreate()
 
     df = spark.sql(f"SHOW TABLES IN {database}")
-    return list((df
-                 .select("tableName")
-                 .toPandas()
-                 )["tableName"])
+    listing =  list((df
+                     .select("tableName")
+                     .toPandas()
+                    )["tableName"])
+    
+    if regex:
+      listing = list(filter(re.compile(regex).search, listing))
+      
+    return listing
 
 ###############################################################################
 

@@ -36,9 +36,9 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
     ref_col : string
       The column title that the conditions are
       performing checks upon.
-    condition : {'==','!=','>','>=',<=','<','isNull','isNotNull'}
+    condition : {'==','!=','>','>=',<=','<','isNull','isNotNull', 'regex'}
       Conditional statements used to compare values to the
-      ref_col.
+      ref_col. If regex, a regular expression pattern can be used.
     condition_value : data-types, default = None
       The value the ref_col is being compared against.
     condition_col : data-types, default = None
@@ -183,6 +183,11 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
                            (F.col(ref_col).isNotNull()) & (
                                F.isnan(F.col(ref_col)) == False)
                            )
+        
+    if condition == 'regex':
+        df = df.withColumn(alias,
+                          (F.col(ref_col).rlike(condition_value))
+                          )
 
     if fill_null is not None:
         df = (df

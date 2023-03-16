@@ -210,7 +210,38 @@ class TestFlag6(object):
                          intended_df,
                          allow_nan_equality=True,
                          ignore_nullable=True)
+    
+#===================================================================
+class TestFlag7(object):
+  def test_expected(self, spark):
+    
+    test_df = spark.createDataFrame(
+             (pd.DataFrame({
+              "ref_col": [x for x in range(40)] + [None]*10,
+              "condition_col": 25
+                          })))
+      
+    result_df = flag(test_df,
+                 ref_col='ref_col',
+                 condition='regex',
+                 condition_value='[0-9]',
+                 condition_col=None,
+                 alias='test',
+                 prefix='FLAG',
+                 fill_null=None)
+    
+    intended_df = spark.createDataFrame(
+                    (pd.DataFrame({
+                    "ref_col": [x for x in range(40)] + [None]*10,
+                    "condition_col": 25,
+                    "test": [True]*40 \
+                            +[False]*10})))  
 
+    assert_df_equality(result_df,
+                         intended_df,
+                         allow_nan_equality=True,
+                         ignore_nullable=True)
+    
 ###################################################################
 class TestFlagSummary1(object):
   def test_expected(self, spark):
