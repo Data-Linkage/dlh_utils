@@ -12,20 +12,7 @@ from pyspark.sql.types import *
 
 pytestmark = pytest.mark.usefixtures("spark")
 
-
-@pytest.fixture(scope="session")
-def spark(request):
-    """ fixture for creating a spark context
-    Args:
-        request: pytest.FixtureRequest object
-    """
-    spark = (SparkSession.builder.appName("dataframe_testing")
-             .config('spark.executor.memory', '5g')
-             .config('spark.yarn.excecutor.memoryOverhead', '2g')
-             .getOrCreate())
-    request.addfinalizer(lambda: spark.stop())
-    return spark
-
+#############################################################################
 
 class TestCastType(object):
   
