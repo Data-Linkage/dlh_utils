@@ -505,8 +505,11 @@ class TestMatchkeyDataframe(object):
                     StructField("description",StringType(),True)
         ])
 
-        intended_data = [[1, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),(date_of_birth=date_of_birth)]'],
-                         [2, '[(substring(first_name,0,2)=substring(first_name,0,2)),(substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),(date_of_birth=date_of_birth)]']]
+        intended_data = [[1, '[(first_name=first_name),(last_name=last_name),(uprn=uprn),\
+                          (date_of_birth=date_of_birth)]'],
+                         [2, '[(substring(first_name,0,2)=substring(first_name,0,2)),\
+                          (substring(last_name,0,2)=substring(last_name,0,2)),(uprn=uprn),\
+                          (date_of_birth=date_of_birth)]']]
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
