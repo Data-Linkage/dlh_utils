@@ -1,23 +1,31 @@
+'''
+Pytesting on Standardisation functions
+'''
+
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
+from pyspark.sql.types import StructType,StructField,StringType,IntegerType
 import pandas as pd
-from dlh_utils.standardisation import *
-from dlh_utils.dataframes import *
 import chispa
 from chispa import assert_df_equality
 import pytest
-from pyspark.sql.types import *
-
+from dlh_utils.standardisation import cast_type,standardise_white_space,remove_punct,\
+trim,standardise_case,standardise_date,max_hyphen,max_white_space,align_forenames,\
+add_leading_zeros,group_single_characters,clean_hyphens,standardise_null,fill_nulls,\
+replace,clean_forename,clean_surname,reg_replace,cast_geography_null
 
 pytestmark = pytest.mark.usefixtures("spark")
 
 #############################################################################
 
+#############################################################################
+
+
 class TestCastType(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": [None, '2', '3', '4', '5'],
@@ -54,11 +62,12 @@ class TestCastType(object):
         # check if columns are the same after various conversions
         result_df2 = cast_type(test_df, subset='before', types='int')
         assert_df_equality(intended_df2, result_df2, allow_nan_equality=True)
+
 ##############################################################################
 
 
 class TestStandardiseWhiteSpace(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -96,8 +105,9 @@ class TestStandardiseWhiteSpace(object):
 
 ##############################################################################
 
+
 class TestRemovePunct(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -122,7 +132,7 @@ class TestRemovePunct(object):
 
 
 class TestTrim(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -148,8 +158,9 @@ class TestTrim(object):
 
 ##############################################################################
 
+
 class TestStandardiseCase(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -183,7 +194,7 @@ class TestStandardiseCase(object):
 
 
 class TestStandardiseDate(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -239,9 +250,9 @@ class TestStandardiseDate(object):
 
 
 class TestMaxHyphen(object):
-  
+
     def test_expected(self, spark):
-      
+
         # max hyphen gets rid of any hyphens that does not match
         # or is under the limit
         test_df = spark.createDataFrame(
@@ -276,7 +287,7 @@ class TestMaxHyphen(object):
 
 
 class TestMaxWhiteSpace(object):
-  
+
     def test_expected(self, spark):
 
         # max_white_space gets rid of any whitespace that does not match
@@ -315,9 +326,9 @@ class TestMaxWhiteSpace(object):
 
 
 class TestAlignForenames(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "identifier": [1, 2, 3, 4],
@@ -359,7 +370,7 @@ class TestAddLeadingZeros(object):
 
 
 class TestGroupSingleCharacters(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -383,9 +394,9 @@ class TestGroupSingleCharacters(object):
 ##############################################################################
 
 class TestCleanHyphens(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before1": [None, '', 'th- ree', '--fo - ur', 'fi -ve-'],
@@ -408,9 +419,9 @@ class TestCleanHyphens(object):
 
 
 class TestStandardiseNull(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before1": [None, '', '  ', '-999', '####', 'KEEP'],
@@ -449,9 +460,9 @@ class TestStandardiseNull(object):
 
 
 class TestFillNulls(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['abcd', None, 'fg', ''],
@@ -475,7 +486,7 @@ class TestFillNulls(object):
 
 
 class TestReplace(object):
-  
+
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -521,9 +532,9 @@ class TestReplace(object):
 
 
 class TestCleanForename(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['MISS Maddie', 'MR GEORGE', 'DR Paul', 'NO NAME'],
@@ -544,9 +555,9 @@ class TestCleanForename(object):
 
 
 class TestCleanSurname(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "before": ['O Leary', 'VAN DER VAL', 'SURNAME', 'MC CREW'],
@@ -566,9 +577,9 @@ class TestCleanSurname(object):
 
 
 class TestRegReplace(object):
-  
+
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (pd.DataFrame({
                 "col1": [None, "hello str", 'king strt', 'king road'],
