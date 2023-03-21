@@ -1,8 +1,12 @@
+'''
+Pytesting on Flags functions
+'''
+
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 import pandas as pd
-from dlh_utils.flags import *
+from dlh_utils.flags import flag,flag_summary,flag_check
 
 ##################################################################
 
