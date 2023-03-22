@@ -5,7 +5,7 @@ Pytesting on Standardisation functions
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,IntegerType
+from pyspark.sql.types import StructType,StructField,StringType,IntegerType,DoubleType
 import pandas as pd
 import chispa
 from chispa import assert_df_equality
