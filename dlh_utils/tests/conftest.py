@@ -16,9 +16,6 @@ def spark():
 
      Generally, "session" will be chosen as the fixture only needs
          to be set up once and this will make the tests run faster
-
-    Args:
-         request: pytest.FixtureRequest object
     """
 
     spark_session = (SparkSession.builder.appName("dlh_utils_tests")
