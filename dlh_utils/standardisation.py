@@ -1433,7 +1433,7 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     
     df = standardise_date(df, reference_column, in_date_format, out_date_format='yyyy-MM-dd')
     for age_at_date in age_at_dates:
-        df = df.withColumn(f"age_at_{age_at_date}", 
+        df = df.withColumn(f"{reference_column}_age_at_{age_at_date}", 
                            (F.months_between(F.lit(age_at_date), 
-                                             F.col(birth_date),)/F.lit(12)).cast(IntegerType()))
+                                             F.col(reference_column),)/F.lit(12)).cast(IntegerType()))
     return df
