@@ -2797,7 +2797,7 @@ def cast_geography_null(df, target_col, regex, geo_cols=None):
 ################################################################################
 
 
-def age_at(df, reference_col, in_date_format='yyyy-MM-dd', *age_at_dates):
+def age_at(df, reference_col, in_date_format="yyyy-MM-dd", *age_at_dates):
     """
     Calculates individuals' ages at specified dates.
 
@@ -2852,7 +2852,7 @@ def age_at(df, reference_col, in_date_format='yyyy-MM-dd', *age_at_dates):
     > dates = ['2022-11-03','2020-12-25']
     > age_at(df,'DoB','yyyy-MM-dd',*dates).show()
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-11-03|DoB_age_at_2020-12-25|
+    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
     |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|               37|
     |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|               37|
@@ -2863,17 +2863,25 @@ def age_at(df, reference_col, in_date_format='yyyy-MM-dd', *age_at_dates):
     +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
 
     """
-    
-    df = df.withColumn(f"{reference_col}_fmt", 
-                       F.unix_timestamp(F.col(reference_col), in_date_format))\
-           .withColumn(f"{reference_col}_fmt", 
-                       F.from_unixtime(F.col(f"{reference_col}_fmt"), 'yyyy-MM-dd'))
+
+    df = df.withColumn(
+        f"{reference_col}_fmt", F.unix_timestamp(F.col(reference_col), in_date_format)
+    ).withColumn(
+        f"{reference_col}_fmt",
+        F.from_unixtime(F.col(f"{reference_col}_fmt"), "yyyy-MM-dd"),
+    )
 
     for age_at_date in age_at_dates:
-      
-        df = df.withColumn(f"{reference_col}_age_at_{age_at_date}", 
-                           (F.months_between(F.lit(age_at_date), 
-                                             F.col(f"{reference_col}_fmt"),)/F.lit(12)).cast(IntegerType()))\
-                .drop((f"{reference_col}_fmt"))
+
+        df = df.withColumn(
+            f"{reference_col}_age_at_{age_at_date}",
+            (
+                F.months_between(
+                    F.lit(age_at_date),
+                    F.col(f"{reference_col}_fmt"),
+                )
+                / F.lit(12)
+            ).cast(IntegerType()),
+        ).drop((f"{reference_col}_fmt"))
     return df
 
