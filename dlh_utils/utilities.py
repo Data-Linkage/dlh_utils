@@ -13,11 +13,12 @@ import errno
 import re
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
+import subprocess
 
 ###############################################################################
 
 
-def list_files(directory, walk=False):
+def list_files(file_path, walk=False, regex=None, full_path=True):
     """
     Lists files in a given HDFS directory, and/or all of that directory's
     subfolders if specified
@@ -25,77 +26,50 @@ def list_files(directory, walk=False):
 
     Parameters
     ----------
-    directory : str
+    file_path : str
       String path of directory
     walk : boolean {True, False}
       Lists files only in immediate directory specified if walk = False.
       Lists all files in immediate directory and all subfolders if Walk = True
+    regex : str
+      use regex rexpression to find certain words within the listed files
+    full_path : boolean
+      show full file path is full_path = True
+      show just files if full_path = False
 
     Returns
     -------
     list
       List of files
 
-    Raises
-    -------
-      None at present.
-
-    Example
-    -------
-    > list_files(directory = '/dev/kicktyres/',walk=False)
-
-    ['hdfs://prod1/dev/kicktyres/hive_tables',
-     'hdfs://prod1/dev/kicktyres/shakes',
-     'hdfs://prod1/dev/kicktyres/shakes_count',
-     'hdfs://prod1/dev/kicktyres/timings_tables']
-
-    > list_files(directory = '/dev/kicktyres/',walk=True)
-
-    ['hdfs://prod1/dev/kicktyres/shakes_count/part-r-00111',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00164',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00190',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00039',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00202',
-     'hdfs://prod1/dev/kicktyres/shakes',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00036',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00183',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00193',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00128',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00005',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00057',
-     ... and all other files contained within these sub-directories
 
     """
-
-    URI = sc._gateway.jvm.java.net.URI
-    Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
-    FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
-    Configuration = sc._gateway.jvm.org.apache.hadoop.conf.Configuration
-
-    host = 'user'
-
-    fs = FileSystem.get(URI(host), Configuration())
-
-    status = fs.listStatus(Path(directory))
-
-    files = [str(fileStatus.getPath()) for fileStatus in status]
-
-    if walk == False:
-
-        return files
-
+    list_of_filenames = []
+    list_of_filename = []
+    
+    if walk == True:
+       process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-
-        for file in files:
-            if len(files) == len(set(files)):
-                files.extend(list_files(file))
-            else:
-                break
-
-        files = list(set(files))
-
-        return files
-
+       process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)  
+        
+    std_out, std_error = process.communicate()
+    std_out = str(std_out).split("\\n")[:-1]
+    std_out[0] = std_out[0].strip("b'")
+    
+    if full_path == True:
+       for i in std_out:
+          file_name = str(i).split(' ')[-1]
+          list_of_filenames.append(file_name)
+          
+    elif full_path == False:
+       for i in std_out:
+          file_name = str(i).split('/')[-1]
+          list_of_filenames.append(file_name)      
+          
+    if regex != None:
+       list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+        
+    return list_of_filenames    
 ###############################################################################
 
 
