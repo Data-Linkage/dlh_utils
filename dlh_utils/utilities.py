@@ -48,9 +48,11 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
     list_of_filename = []
     
     if walk == True:
-       process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+       process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path]\
+                                  ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-       process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)  
+       process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path]\
+                                  ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)  
         
     std_out, std_error = process.communicate()
     std_out = str(std_out).split("\\n")[:-1]
