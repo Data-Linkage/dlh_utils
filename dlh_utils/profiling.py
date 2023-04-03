@@ -13,6 +13,7 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
+
 def create_table_statements(database, regex=None, output_mode='spark'):
     '''
     Returns a dataframe summarising the SQL CREATE TABLE statement that
@@ -290,7 +291,7 @@ def df_describe(df, output_mode='pandas', approx_distinct=False, rsd=0.05):
 def value_counts(df, limit=20, output_mode='pandas'):
     '''
     Produces dataframes summarising the top and bottom distinct value counts within
-    a supplied spark dataframe,
+    a supplied spark dataframe.
 
     Parameters
     ----------
@@ -459,10 +460,10 @@ def hive_variable_matrix(database, regex=None, output_mode='spark'):
     variable_types = [(table, hive_dtypes(database, table))
                       for table in tables]
 
-    all_variables = list(set([y[0] for y in
-                              [item for sublist in
-                               [x[1] for x in variable_types]
-                               for item in sublist]]))
+    all_variables = list({y[0] for y in
+                          [item for sublist in
+                           [x[1] for x in variable_types]
+                           for item in sublist]})
 
     out = pd.DataFrame({'variable': all_variables})
 
