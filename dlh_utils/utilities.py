@@ -43,32 +43,32 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
     """
     list_of_filenames = []
     list_of_filename = []
-    
+
     if walk == True:
-       process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path]\
-                                  ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path]\
+                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-       process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path]\
-                                  ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)  
-        
+        process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path]\
+                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     std_out, std_error = process.communicate()
     std_out = str(std_out).split("\\n")[:-1]
     std_out[0] = std_out[0].strip("b'")
-    
+
     if full_path == True:
-       for i in std_out:
-          file_name = str(i).split(' ')[-1]
-          list_of_filenames.append(file_name)
-          
+        for i in std_out:
+            file_name = str(i).split(' ')[-1]
+            list_of_filenames.append(file_name)
+
     elif full_path == False:
-       for i in std_out:
-          file_name = str(i).split('/')[-1]
-          list_of_filenames.append(file_name)      
-          
+        for i in std_out:
+            file_name = str(i).split('/')[-1]
+            list_of_filenames.append(file_name)      
+
     if regex != None:
-       list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
-        
-    return list_of_filenames    
+        list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+
+    return list_of_filenames
 
 ###############################################################################
 
@@ -96,7 +96,8 @@ def list_checkpoints(checkpoint):
 
     > list_checkpoints(checkpoint = '/user/edwara5/checkpoints')
 
-    ['hdfs://prod1/user/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
+    ['hdfs://prod1/user/checkpoints/0299d46e-96ad-4d3a-9908-\
+    c99b9c6a7509/connected-components-985ca288']
     """
 
     return list_files(
@@ -407,7 +408,7 @@ def write_format(df, write, path,
     -------
 
     > write_format(df = df, write = 'parquet', path = 'user/edwara5/simpsons.parquet',
-                  mode = 'overwrite') 
+                  mode = 'overwrite')
     """
 
     spark = SparkSession.builder.getOrCreate()
