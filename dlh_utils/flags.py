@@ -11,7 +11,7 @@ import pandas as pd
 ###############################################################################
 
 
-def flag(df, ref_col, condition, condition_value=None, condition_col=None,
+def flag(df, ref_col, condition = None, condition_value=None, condition_col=None,
          alias=None, prefix='FLAG', fill_null=None):
     """
     Adds True or False flags to supplied dataframe that can then be used for
@@ -36,7 +36,7 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
     ref_col : string
       The column title that the conditions are
       performing checks upon.
-    condition : {'==','!=','>','>=',<=','<','isNull','isNotNull'}
+    condition : {'==','!=','>','>=',<=','<','isNull','isNotNull','regex'}
       Conditional statements used to compare values to the
       ref_col.
     condition_value : data-types, default = None
@@ -183,7 +183,7 @@ def flag(df, ref_col, condition, condition_value=None, condition_col=None,
                            (F.col(ref_col).isNotNull()) & (
                                F.isnan(F.col(ref_col)) == False)
                            )
-        
+  
     if condition == 'regex':
         df = df.withColumn(alias,
                            (F.col(ref_col).rlike(condition_value)
