@@ -35,6 +35,7 @@ def spark(request):
     request.addfinalizer(lambda: spark.stop())
     return spark
 
+#############################################################################
 
 class TestCastType(object):
     def test_expected(self, spark):
