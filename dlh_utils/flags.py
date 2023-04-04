@@ -2,11 +2,11 @@
 Flag functions, used to quickly highlight anomalous values within data
 '''
 from operator import add
+from functools import reduce
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType
 import pyspark.sql.functions as F
 import pandas as pd
-from functools import reduce
 
 ###############################################################################
 
@@ -261,7 +261,7 @@ def flag_summary(df, flags=None, pandas=False):
         flags = [
             column for column in df.columns if column.startswith('FLAG_')]
 
-    if type(flags) != list:
+    if not isinstance(flags, list):
         flags = [flags]
 
     rows = df.count()
@@ -295,7 +295,7 @@ def flag_summary(df, flags=None, pandas=False):
         'percent_false'
     ]]
 
-    if pandas == False:
+    if pandas is False:
 
         out = (spark
                .createDataFrame(out)
@@ -387,12 +387,13 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
     In all instances summary will be the last component returned e.g. master,summary
     """
     if flags is None:
-        try:
-            flags = [
-                column for column in df.columns if column.startswith(prefix)]
-        except:
-            print("No flag columns found! Please specify which flag column to summarise\
-            with the flags = argument, or specify the correct prefix")
+
+        flags = [
+            column for column in df.columns if column.startswith(prefix)]
+
+    if len(flags) == 0:
+        print("No flag columns found! Please specify which flag column to summarise\
+        with the flags = argument, or specify the correct prefix")
 
     df = df.withColumn('flag_count', F.lit(0))
 
@@ -410,7 +411,7 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
                                     for flag in flags]))
     df = df.withColumn('FAIL', F.col('FAIL') > 0)
 
-    if summary == True:
+    if summary is True:
 
         summary_df = flag_summary(df, flags+['FAIL'], pandas=False)
 

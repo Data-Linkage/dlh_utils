@@ -3,21 +3,19 @@ Utility functions used to ease difficulty in querying databases and produce desc
 metrics about a dataframe
 '''
 import subprocess
+import os
+import re
 from pyspark.sql import SparkSession
-from pyspark.sql.types import *
+from pyspark.sql.types import TimestampType, LongType, IntegerType, DoubleType,\
+    FloatType, StringType, StructType, StructField
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
-import pandas as pd
-import os
-import errno
-import re
 from dlh_utils import dataframes as da
-from dlh_utils import utilities as ut
 
 ###############################################################################
 
 
-def list_files(directory, walk=False):
+def list_files(file_path, walk=False, regex=None, full_path=True):
     """
     Lists files in a given HDFS directory, and/or all of that directory's
     subfolders if specified
@@ -25,76 +23,52 @@ def list_files(directory, walk=False):
 
     Parameters
     ----------
-    directory : str
+    file_path : str
       String path of directory
     walk : boolean {True, False}
       Lists files only in immediate directory specified if walk = False.
       Lists all files in immediate directory and all subfolders if Walk = True
+    regex : str
+      use regex rexpression to find certain words within the listed files
+    full_path : boolean
+      show full file path is full_path = True
+      show just files if full_path = False
 
     Returns
     -------
     list
       List of files
 
-    Raises
-    -------
-      None at present.
-
-    Example
-    -------
-    > list_files(directory = '/dev/kicktyres/',walk=False)
-
-    ['hdfs://prod1/dev/kicktyres/hive_tables',
-     'hdfs://prod1/dev/kicktyres/shakes',
-     'hdfs://prod1/dev/kicktyres/shakes_count',
-     'hdfs://prod1/dev/kicktyres/timings_tables']
-
-    > list_files(directory = '/dev/kicktyres/',walk=True)
-
-    ['hdfs://prod1/dev/kicktyres/shakes_count/part-r-00111',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00164',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00190',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00039',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00202',
-     'hdfs://prod1/dev/kicktyres/shakes',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00036',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00183',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00193',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00128',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00005',
-     'hdfs://prod1/dev/kicktyres/shakes_count/part-r-00057',
-     ... and all other files contained within these sub-directories
 
     """
+    list_of_filenames = []
+    list_of_filename = []
 
-    URI = sc._gateway.jvm.java.net.URI
-    Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
-    FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
-    Configuration = sc._gateway.jvm.org.apache.hadoop.conf.Configuration
-
-    host = 'user'
-
-    fs = FileSystem.get(URI(host), Configuration())
-
-    status = fs.listStatus(Path(directory))
-
-    files = [str(fileStatus.getPath()) for fileStatus in status]
-
-    if walk == False:
-
-        return files
-
+    if walk == True:
+        process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path]\
+                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
+        process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path]\
+                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        for file in files:
-            if len(files) == len(set(files)):
-                files.extend(list_files(file))
-            else:
-                break
+    std_out, std_error = process.communicate()
+    std_out = str(std_out).split("\\n")[:-1]
+    std_out[0] = std_out[0].strip("b'")
 
-        files = list(set(files))
+    if full_path == True:
+        for i in std_out:
+            file_name = str(i).split(' ')[-1]
+            list_of_filenames.append(file_name)
 
-        return files
+    elif full_path == False:
+        for i in std_out:
+            file_name = str(i).split('/')[-1]
+            list_of_filenames.append(file_name)      
+
+    if regex != None:
+        list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+
+    return list_of_filenames
 
 ###############################################################################
 
@@ -122,7 +96,8 @@ def list_checkpoints(checkpoint):
 
     > list_checkpoints(checkpoint = '/user/edwara5/checkpoints')
 
-['hdfs://prod1/user/edwara5/checkpoints/0299d46e-96ad-4d3a-9908-c99b9c6a7509/connected-components-985ca288']
+    ['hdfs://prod1/user/checkpoints/0299d46e-96ad-4d3a-9908-\
+    c99b9c6a7509/connected-components-985ca288']
     """
 
     return list_files(
@@ -215,7 +190,7 @@ def most_recent(path, filetype, regex=None):
     # pass spark context to function
     spark = SparkSession.builder.getOrCreate()
 
-    if regex == None:
+    if regex is None:
 
         if filetype == 'hive':
 
@@ -233,24 +208,24 @@ def most_recent(path, filetype, regex=None):
                 filepaths = list(filepaths.select('path').toPandas()['path'])
 
                 # initialise empty dictionary
-                filepath_dict = dict()
+                filepath_dict = {}
 
                 # loop through paths, appending path and time to dictionary
-                for path in filepaths:
+                for filepath in filepaths:
 
                     time = spark.sql(
-                        f"SHOW tblproperties {path} ('transient_lastDdlTime')").collect()[0][0]
+                        f"SHOW tblproperties {filepath} ('transient_lastDdlTime')").collect()[0][0]
 
-                    filepath_dict.update({path: time})
+                    filepath_dict.update({filepath: time})
 
                 # sort by max time since epoch and return corresponding path
                 most_recent_filepath = max(
                     filepath_dict, key=filepath_dict.get)
 
-            except:
+            except Exception as exc:
 
                 raise FileNotFoundError(
-                    filetype + " file not found in this directory: " + path)
+                    filetype + " file not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
@@ -273,10 +248,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(
-                        filetype + " file not found in this directory: " + path)
+                        filetype + " file not found in this directory: " + path) from exc
 
             elif filetype == 'parquet':
 
@@ -288,10 +263,10 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
                     raise FileNotFoundError(
-                        filetype + " file not found in this directory: " + path)
+                        filetype + " file not found in this directory: " + path) from exc
 
     # if regex argument specified:
     else:
@@ -317,24 +292,24 @@ def most_recent(path, filetype, regex=None):
                     filtered_filepaths.select('path').toPandas()['path'])
 
                 # initialise empty dictionary
-                filepath_dict = dict()
+                filepath_dict = {}
 
                 # loop through paths, appending path and time to dict
-                for path in filtered_filepaths:
+                for filepath in filtered_filepaths:
 
                     time = spark.sql(
-                        f"SHOW tblproperties {path} ('transient_lastDdlTime')").collect()[0][0]
+                        f"SHOW tblproperties {filepath} ('transient_lastDdlTime')").collect()[0][0]
 
-                    filepath_dict.update({path: time})
+                    filepath_dict.update({filepath: time})
 
                 # sort by max time since epoch and return corresponding path
                 most_recent_filepath = max(
                     filepath_dict, key=filepath_dict.get)
 
-            except:
+            except Exception as exc:
 
-                raise FileNotFoundError(filetype + " file, matching this regular expression: " + 
-                                        regex + " not found in this directory: " + path)
+                raise FileNotFoundError(filetype + " file, matching this regular expression: " +
+                                        regex + " not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
@@ -363,10 +338,12 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " 
-                                            + regex + " not found in this directory: " + path)
+                    raise FileNotFoundError(filetype +
+                                            " file, matching this regular expression: " +
+                                            regex + " not found in this directory: " +
+                                            path) from exc
 
             elif filetype == 'parquet':
 
@@ -379,10 +356,12 @@ def most_recent(path, filetype, regex=None):
                     # return path up until last '/'
                     most_recent_filepath = re.search('.*\/', result).group(0)
 
-                except:
+                except Exception as exc:
 
-                    raise FileNotFoundError(filetype + " file, matching this regular expression: " 
-                                            + regex + " not found in this directory: " + path)
+                    raise FileNotFoundError(filetype +
+                                            " file, matching this regular expression: " +
+                                            regex + " not found in this directory: " +
+                                            path) from exc
 
     return most_recent_filepath, filetype
 
@@ -390,7 +369,7 @@ def most_recent(path, filetype, regex=None):
 
 
 def write_format(df, write, path,
-                file_name=None, sep=",", header="true", mode='overwrite'):
+                 file_name=None, sep=",", header="true", mode='overwrite'):
     """
     Writes dataframe in specified format
 
@@ -431,13 +410,17 @@ def write_format(df, write, path,
     > write_format(df = df, write = 'parquet', path = 'user/edwara5/simpsons.parquet',
                   mode = 'overwrite')
     """
+
     spark = SparkSession.builder.getOrCreate()
-    if file_name == None:
+    if file_name is None:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
                 mode).option('sep', sep).save(f'{path}')
         if write == 'parquet':
             df.write.parquet(path=f'{path}', mode=mode)
+        if write == 'hive':
+            df.write.mode('overwrite').saveAsTable(f'{path}')
+
     else:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
@@ -451,7 +434,7 @@ def write_format(df, write, path,
 
 
 def read_format(read, path=None, file_name=None,
-               sep=",", header="true", inferSchema="True"):
+                sep=",", header="true", infer_schema="True"):
     """
     Reads dataframe from specified format.
 
@@ -472,9 +455,7 @@ def read_format(read, path=None, file_name=None,
       specified separator for data in csv format
     header : {"true", "false"} (default = "true")
       Boolean indicating whether or not data will be read to include a header
-    mode : {overwrite, append}, default = overwrite
-      Choice to overwrite existing file or table or to append new data into it
-    inferSchema : {"true", "false"}:
+    infer_schema : {"true", "false"}:
       Boolean indicating whether data should be read with infered data types and
       schema. If false, all data will read as string format.
 
@@ -491,7 +472,7 @@ def read_format(read, path=None, file_name=None,
     -------
 
     > df = read_format(read = 'parquet', path = '/user/edwara5/simpsons.parquet',
-                      file_name = None, header= "true", inferSchema = "True")
+                      file_name = None, header= "true", infer_schema = "True")
 
     > df.show()
 
@@ -507,32 +488,35 @@ def read_format(read, path=None, file_name=None,
     +---+--------+----------+-------+----------+---+--------+
     """
     spark = SparkSession.builder.getOrCreate()
-    if file_name == None:
+    if file_name is None:
         if read == 'csv':
             df = (spark.read.format('csv')
                   .option('sep', sep)
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}")
                   )
         if read == 'parquet':
             df = (spark.read.format('parquet')
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}")
                   )
+        if read == 'hive':
+            df = spark.sql(f"SELECT * FROM {path}")
+
     else:
         if read == 'csv':
             df = (spark.read.format('csv')
                   .option('sep', sep)
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}/{file_name}")
                   )
         if read == 'parquet':
             df = (spark.read.format('parquet')
                   .option('header', header)
-                  .option('inferSchema', inferSchema)
+                  .option('inferSchema', infer_schema)
                   .load(f"{path}/{file_name}")
                   )
         if read == 'hive':
@@ -578,7 +562,7 @@ def search_files(path, string):
 
     for file in files_in_dir:
         count = 0
-        countList = []
+        count_list = []
 
         try:
             with open(f'{path}/{file}') as f:
@@ -588,11 +572,11 @@ def search_files(path, string):
                 count = count + 1
 
                 if string in line:
-                    countList.append(count)
+                    count_list.append(count)
 
-            if len(countList) != 0:
-                diction[file] = countList
-        except:
+            if len(count_list) != 0:
+                diction[file] = count_list
+        except IsADirectoryError:
             continue
 
     return diction
@@ -632,17 +616,17 @@ def describe_metrics(df, output_mode='pandas'):
     -------
     > describe_metrics(df = df,output_mode='spark').show()
 
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
-    |  variable|  type|count|distinct|  percent_distinct|null|      percent_null|not_null| percent_not_null|
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
-    |        ID|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |  Forename|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |Middlename|string|    6|       4| 66.66666666666666|   1|16.666666666666664|       5|83.33333333333334|
-    |   Surname|string|    6|       1|16.666666666666664|   0|               0.0|       6|            100.0|
-    |       DoB|string|    6|       5| 83.33333333333334|   0|               0.0|       6|            100.0|
-    |       Sex|string|    6|       2| 33.33333333333333|   0|               0.0|       6|            100.0|
-    |  Postcode|string|    6|       1|16.666666666666664|   0|               0.0|       6|            100.0|
-    +----------+------+-----+--------+------------------+----+------------------+--------+-----------------+
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
+    |  variable|  type|count|distinct|percent_distinct|null|percent_null|not_null|percent_not_null|
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
+    |        ID|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |  Forename|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |Middlename|string|    6|       4| 66.666666666666|   1|16.666666664|       5| 83.333333333334|
+    |   Surname|string|    6|       1|16.6666666666664|   0|         0.0|       6|           100.0|
+    |       DoB|string|    6|       5| 83.333333333334|   0|         0.0|       6|           100.0|
+    |       Sex|string|    6|       2| 33.333333333333|   0|         0.0|       6|           100.0|
+    |  Postcode|string|    6|       1|16.6666666666664|   0|         0.0|       6|           100.0|
+    +----------+------+-----+--------+----------------+----+------------+--------+----------------+
     """
 
     spark = SparkSession.builder.getOrCreate()
@@ -688,7 +672,7 @@ def describe_metrics(df, output_mode='pandas'):
     ]]
 
     if output_mode == 'spark':
-        decribe_df = ut.pandas_to_spark(decribe_df)
+        decribe_df = pandas_to_spark(decribe_df)
 
     return decribe_df
 
@@ -1011,32 +995,31 @@ def pandas_to_spark(pandas_df):
     ------
     None at present.
     """
-    def equivalent_type(f):
+    def equivalent_type(_format):
 
-        if f == 'datetime64[ns]':
+        if _format == 'datetime64[ns]':
             return TimestampType()
 
-        elif f == 'int64':
+        if _format == 'int64':
             return LongType()
 
-        elif f == 'int32':
+        if _format == 'int32':
             return IntegerType()
 
-        elif f == 'float64':
+        if _format == 'float64':
             return DoubleType()
 
-        elif f == 'float32':
+        if _format == 'float32':
             return FloatType()
 
-        else:
-            return StringType()
+        return StringType()
 
     def define_structure(string, format_type):
 
         try:
             vartype = equivalent_type(format_type)
 
-        except:
+        except TypeError:
             vartype = StringType()
 
         return StructField(string, vartype)
