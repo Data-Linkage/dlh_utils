@@ -459,6 +459,40 @@ class TestFlagSummary1:
             ignore_nullable=True,
             ignore_column_order=True,
         )
+        
+# ===================================================================        
+        
+    @staticmethod
+    def test_expected13(spark):
+        """Test the expected functionality"""
+
+        test_df = spark.createDataFrame((pd.DataFrame(
+            {"ref_col": list(range(40)) + [None] * 10,
+             "condition_col": 25})))
+
+        result_df = flag(
+            test_df,
+            ref_col="ref_col",
+            condition="regex",
+            condition_value="^1",
+            condition_col=None,
+            alias="test",
+            prefix="FLAG",
+            fill_null=None)
+
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "ref_col": list(range(40)) + [None] * 10,
+                        "condition_col": 25,
+                        "test": [False] * 25 + [True] + [False] * 24,
+                    }
+                )
+            )
+        )
+
+        assert_df_equality(intended_df, result_df, allow_nan_equality=True)
 
 
 ###################################################################
@@ -466,7 +500,7 @@ class TestFlagCheck1:
     """Test for flag_check function"""
 
     @staticmethod
-    def test_expected13(spark):
+    def test_expected14(spark):
         """Test the expected functionality"""
 
         test_df = spark.createDataFrame(
@@ -514,7 +548,7 @@ class TestFlagCheck1:
 
 # ===================================================================
     @staticmethod
-    def test_expected14(spark):
+    def test_expected15(spark):
         """Test the expected functionality"""
 
         test_df = spark.createDataFrame(
@@ -548,7 +582,7 @@ class TestFlagCheck1:
 
 # ===================================================================
     @staticmethod
-    def test_expected15(spark):
+    def test_expected16(spark):
         """Test the expected functionality"""
 
         test_df = spark.createDataFrame(
@@ -582,7 +616,7 @@ class TestFlagCheck1:
 
 # ===================================================================
     @staticmethod
-    def test_expected16(spark):
+    def test_expected17(spark):
         """Test the expected functionality"""
 
         test_df = spark.createDataFrame(
@@ -615,7 +649,7 @@ class TestFlagCheck1:
 
 # ===================================================================
     @staticmethod
-    def test_expected17(spark):
+    def test_expected18(spark):
         """Test the expected functionality"""
 
         test_df = spark.createDataFrame(
@@ -681,7 +715,7 @@ class TestFlagCheck1:
 
 # ===================================================================
     @staticmethod
-    def test_expected18(spark):
+    def test_expected19(spark):
         """Test the expected functionality"""
 
         pretest_df_orig = spark.createDataFrame(
