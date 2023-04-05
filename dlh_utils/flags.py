@@ -19,7 +19,7 @@ def flag(df, ref_col, condition = None, condition_value=None, condition_col=None
 
     Conditions can be set in comparison to columns or specific values
     (e.g. == column, ==1).  Conditions covered are equals, not equals,
-    greater/less than, is/is not null. Optional TRUE/FALSE
+    greater/less than, is/is not null, and regex. Optional TRUE/FALSE
     fill for null outputs of comparision. Designed for use in conjunction with
     flag_summary() and flag_check() functions.
 
