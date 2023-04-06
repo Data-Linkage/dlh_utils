@@ -23,6 +23,10 @@ Or, if using CDSW, in a terminal session run:
 ```sh
 pip3 install dlh_utils
 ```
+The -U argument can be used to upgrade the package to its newest version:
+```sh
+pip3 -U install dlh_utils
+```
 
 ## Demo
 For a worked demonstration notebook of these functions being applied within a data linkage context, head over to our [separate demo repository](https://github.com/anthonye93/dlh_utils_demo)
@@ -57,3 +61,7 @@ spark.conf.set('spark.jars', path_to_jar_file)
 ## Thanks
 
 Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology at ONS that have contributed towards this repository.
+
+## Any questions?
+
+If you need any additional help, or have any feedback on the package, please contact Jenna Hart (Jenna.Hart@ons.gov.uk) or the Data Linkage Hub at Linkage.Hub@ons.gov.uk . 
