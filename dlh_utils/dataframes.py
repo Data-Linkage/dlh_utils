@@ -1555,7 +1555,7 @@ def literal_column(df, col_name, literal):
 ###########################################################################
 
 
-def coalesced(df, subset=None, output_col="coalesced_col"):
+def coalesced(df, subset=None, output_col="coalesced_col", drop=False):
     """
     Produces a new column from a supplied dataframe, that contains the first
     non-null value from each row.
@@ -1571,6 +1571,9 @@ def coalesced(df, subset=None, output_col="coalesced_col"):
     output_col : string, default = 'coalesced_col'
       Name of the output column for results of
       the coalesced columns.
+    drop : boolean, default = False
+      If drop = True, the columns that were coalesced 
+      will be dropped from the dataframe.
 
     Returns
     -------
@@ -1604,6 +1607,16 @@ def coalesced(df, subset=None, output_col="coalesced_col"):
     |   1|null|           1 |
     |null|   2|           2 |
     +----+----+-------------+
+
+    > dataframes.coalesced(df3,subset = None, output_col="coalesced_col", drop=True).show()
+
+    +-------------+
+    |coalesced_col|
+    +-------------+
+    |        null |
+    |           1 |
+    |           2 |
+    +-------------+
     """
 
     if subset is None:
@@ -1611,6 +1624,10 @@ def coalesced(df, subset=None, output_col="coalesced_col"):
 
     df = df.withColumn(output_col,
                        F.coalesce(*[F.col(x) for x in subset]))
+    
+    if drop:
+      df = drop_columns(df, subset=subset, drop_duplicates=False)
+
     return df
 
 ##############################################################################

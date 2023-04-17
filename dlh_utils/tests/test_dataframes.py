@@ -207,10 +207,48 @@ class TestCoalesced(object):
             ["FO+ UR", "four", "four", "FOU  R", 4, "FO+ UR"],
             [None, None, None, None, 5, "5"],
         ]
-        intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_df = spark.createDataFrame(
+          intended_data, intended_schema
+          ).select(
+            test_df.columns
+          )
 
         result_df = coalesced(test_df)
         assert_df_equality(intended_df, result_df)
+
+    def test_expected_with_drop(self, spark):
+
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "lower": ["one", None, "one", "four", None],
+                        "value": [1, 2, 3, 4, 5],
+                        "extra": [None, None, None, "FO+ UR", None],
+                        "lowerNulls": ["one", "two", None, "four", None],
+                        "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
+                    }
+                )
+            )
+        )
+
+        intended_schema = StructType(
+            [
+                StructField("coalesced_col", StringType(), True),
+            ]
+        )
+        intended_data = [
+            ["one"],
+            ["2"],
+            ["one"],
+            ["four"],
+            ["5"]
+        ]
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        result_df = coalesced(test_df, drop=True)
+        assert_df_equality(intended_df, result_df)
+
 
 
 #################################################################
