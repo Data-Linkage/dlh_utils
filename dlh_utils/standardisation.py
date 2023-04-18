@@ -418,7 +418,7 @@ def group_single_characters(df, subset=None, include_terminals=False):
       If False, single characters in the first and last
       positions will not be grouped; for example, "a bc d" will
       be returned as "a bc d" without grouping the "a" and "d"
-      If True, single characters at in the first and last
+      If True, single characters in the first and last
       positions will be grouped; for example, "a bc d" will
       be grouped as "abcd"
 
