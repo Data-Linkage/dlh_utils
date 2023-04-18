@@ -239,7 +239,7 @@ class TestCoalesced(object):
             ["one"],
             ["four"],
             ["5"]
-        ]
+        ] 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
         result_df = coalesced(test_df, drop=True)
