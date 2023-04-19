@@ -394,7 +394,7 @@ def clean_forename(df, subset):
 ##########################################################################
 
 
-def group_single_characters(df, subset=None):
+def group_single_characters(df, subset=None, include_terminals=False):
     """
     Remove spaces between single characters
 
@@ -414,6 +414,13 @@ def group_single_characters(df, subset=None):
       columns. If the user gives a string value it
       is converted to a list of one column.
       It can also take a list of strings.
+    include_terminals : boolean, default = False
+      If False, single characters in the first and last
+      positions will not be grouped; for example, "a bc d" will
+      be returned as "a bc d" without grouping the "a" and "d"
+      If True, single characters in the first and last
+      positions will be grouped; for example, "a bc d" will
+      be grouped as "abcd"
 
     Returns
     -------
@@ -433,12 +440,16 @@ def group_single_characters(df, subset=None):
     if not isinstance(subset, list):
         subset = [subset]
 
+    regex = r"(?<= \w|^\w|^)[ ]+(?=\w |\w$|$)"
+    if include_terminals:
+      regex += r"|(?<=^\w)[ ]+(?=\w)"   # Initial single letter
+      regex += r"|(?<=\w)[ ]+(?=\w$)"   # Final single letter
+
     for col in subset:
 
         df = (df
               .withColumn(col,
-                          F.regexp_replace(F.col(col),
-                                           "(?<= \\w|^\\w|^) (?=\\w |\\w$|$)", "")
+                          F.regexp_replace(F.col(col), regex, "")
                           )
               )
 

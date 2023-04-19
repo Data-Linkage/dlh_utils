@@ -616,9 +616,9 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h r e e", "four", "f i v e"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e"],
-                        "after": [None, "", "-t-h ree", "four", "five"],
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
                     }
                 )
             )
@@ -628,15 +628,46 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h ree", "four", "five"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e"],
-                        "after": [None, "", "-t-h ree", "four", "five"],
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
+                    }
+                )
+            )
+        )
+        result_df = group_single_characters(test_df, subset="before1")
+        assert_df_equality(intended_df, result_df)
+
+    def test_expected_include_terminals(self, spark):
+
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
                     }
                 )
             )
         )
 
-        result_df = group_single_characters(test_df, subset="before1")
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
+                    }
+                )
+            )
+        )
+        result_df = group_single_characters(
+          test_df, 
+          subset="before1", 
+          include_terminals=True
+        )
         assert_df_equality(intended_df, result_df)
 
 
