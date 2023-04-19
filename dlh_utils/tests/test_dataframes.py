@@ -235,9 +235,9 @@ class TestCoalesced(object):
         )
         intended_data = [
             ["one"],
-            ["2"],
+            ["two"],
             ["one"],
-            ["four"],
+            ["FO+ UR"],
             ["5"]
         ] 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
