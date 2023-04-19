@@ -341,7 +341,7 @@ def clean_surname(df, subset):
 
 def clean_forename(df, subset):
     '''
-    Removes common invalid responses/forename prefixes from a specified column.
+    Removes common forename prefixes from a specified column.
 
     Parameters
     ----------
@@ -1332,88 +1332,6 @@ def fill_nulls(df, fill, subset=None):
                   | (F.isnan(F.col(col))), fill)
                   .otherwise(F.col(col)))
               )
-
-    return df
-
-################################################################################
-
-
-def cast_geography_null(df, target_col, regex, geo_cols=None):
-    """
-    Casts a target geography variable value, and if specified corresponding values in
-    additional geography variables, to null (None type) where target geography value
-    meets regex.
-
-    Parameters
-    ----------
-    df : dataframe
-      Dataframe to which the function is applied.
-    target_col : str
-      The target reference column
-   regex: str
-      The regex conditions defining null postcode (default postcodes beginning
-      zz999 case insensitive)
-    geo_cols: str or list of str, default = None
-      Additional geography variables to be cast to null.
-
-    Returns
-    -------
-    dataframe
-      Dataframe with null postcodes and respective geographies cast to true null
-      None type
-
-    Raises
-    -------
-    None at present.
-
-    Example
-    -------
-
-    >df.show()
-
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ZZ99 9SZ|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ZZ99 5GB|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ZZ99 2SP|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ZZ99 2FA|
-    +---+--------+----------+-------+----------+---+--------+
-
-    > cast_geography_null(df,target_col = 'Postcode',geo_cols = None,regex = "^ZZ99").show()
-
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|    null|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|    null|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|    null|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|    null|
-    +---+--------+----------+-------+----------+---+--------+
-
-    """
-    if geo_cols is not None:
-
-        if not isinstance(geo_cols, list):
-            geo_cols = [geo_cols]
-
-        for col in geo_cols:
-
-            df = (df
-                  .withColumn(col,
-                              F.when(F.col(target_col).rlike(regex), None)
-                              .otherwise(F.col(col)))
-                  )
-
-    df = (df
-          .withColumn(target_col,
-                      F.when(F.col(target_col).rlike(regex), None)
-                      .otherwise(F.col(target_col)))
-          )
 
     return df
 
