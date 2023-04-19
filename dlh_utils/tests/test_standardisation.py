@@ -13,7 +13,7 @@ import pytest
 from dlh_utils.standardisation import cast_type,standardise_white_space,remove_punct,\
 trim,standardise_case,standardise_date,max_hyphen,max_white_space,align_forenames,\
 add_leading_zeros,group_single_characters,clean_hyphens,standardise_null,fill_nulls,\
-replace,clean_forename,clean_surname,reg_replace,cast_geography_null
+replace,clean_forename,clean_surname,reg_replace
 
 
 pytestmark = pytest.mark.usefixtures("spark")
