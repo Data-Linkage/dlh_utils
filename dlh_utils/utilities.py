@@ -63,7 +63,7 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
     elif full_path == False:
         for i in std_out:
             file_name = str(i).split('/')[-1]
-            list_of_filenames.append(file_name)      
+            list_of_filenames.append(file_name)  
 
     if regex != None:
         list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))

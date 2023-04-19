@@ -211,7 +211,7 @@ class TestCoalesced(object):
 
         result_df = coalesced(test_df)
         assert_df_equality(intended_df, result_df)
-        
+
     def test_expected_with_drop(self, spark):
 
         test_df = spark.createDataFrame(
@@ -239,7 +239,7 @@ class TestCoalesced(object):
             ["one"],
             ["FO+ UR"],
             ["5"]
-        ] 
+        ]
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
         result_df = coalesced(test_df, drop=True)

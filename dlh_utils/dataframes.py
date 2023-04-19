@@ -1624,9 +1624,9 @@ def coalesced(df, subset=None, output_col="coalesced_col", drop=False):
 
     df = df.withColumn(output_col,
                        F.coalesce(*[F.col(x) for x in subset]))
-    
+
     if drop:
-      df = drop_columns(df, subset=subset, drop_duplicates=False)
+        df = drop_columns(df, subset=subset, drop_duplicates=False)
 
     return df
 

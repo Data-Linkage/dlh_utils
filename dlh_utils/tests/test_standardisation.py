@@ -616,9 +616,12 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                                  " seven", "eigh t", "n ine", "ten", "e leve n"],
                     }
                 )
             )
@@ -628,9 +631,12 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eigh t", "n ine", "ten", "e leve n"],
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ",\
+                                    " seven", "eigh t", "n ine", "ten", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                                  " seven", "eigh t", "n ine", "ten", "e leve n"],
                     }
                 )
             )
@@ -644,9 +650,12 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                                  " seven", "eight", "nine", "ten", "eleven"],
                     }
                 )
             )
@@ -656,16 +665,19 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ", " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ", " seven", "eight", "nine", "ten", "eleven"],
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ",\
+                                    " seven", "eight", "nine", "ten", "eleven"],
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                                    " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                                  " seven", "eight", "nine", "ten", "eleven"],
                     }
                 )
             )
         )
         result_df = group_single_characters(
-          test_df, 
-          subset="before1", 
+          test_df,
+          subset="before1",
           include_terminals=True
         )
         assert_df_equality(intended_df, result_df)

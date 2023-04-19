@@ -442,8 +442,8 @@ def group_single_characters(df, subset=None, include_terminals=False):
 
     regex = r"(?<= \w|^\w|^)[ ]+(?=\w |\w$|$)"
     if include_terminals:
-      regex += r"|(?<=^\w)[ ]+(?=\w)"   # Initial single letter
-      regex += r"|(?<=\w)[ ]+(?=\w$)"   # Final single letter
+        regex += r"|(?<=^\w)[ ]+(?=\w)"   # Initial single letter
+        regex += r"|(?<=\w)[ ]+(?=\w$)"   # Final single letter
 
     for col in subset:
 
@@ -1258,16 +1258,16 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
      
     """
     if null_counts:
-      null_before = df.where(F.col(col_name).isNull()).count()
-    
+        null_before = df.where(F.col(col_name).isNull()).count()
+
     df = df.withColumn(col_name, F.unix_timestamp(F.col(col_name), in_date_format))
     df = df.withColumn(col_name, F.from_unixtime(F.col(col_name), out_date_format))
-    
+
     if null_counts:
-      null_after = df.where(F.col(col_name).isNull()).count()
-      
-      return df,(null_before,null_after)
-    
+        null_after = df.where(F.col(col_name).isNull()).count()
+
+        return df,(null_before,null_after)
+
     else:
       return df
 
@@ -1416,6 +1416,7 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
     for age_at_date in age_at_dates:
         df = df.withColumn(f"{reference_column}_age_at_{age_at_date}",
                            (F.months_between(F.lit(age_at_date),
-                                             F.col(reference_column),)/F.lit(12)).cast(IntegerType()))
+                                             F.col(reference_column),)/F.lit(12))\
+                                              .cast(IntegerType()))
 
     return df
