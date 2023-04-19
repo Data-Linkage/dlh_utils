@@ -25,7 +25,7 @@ pip3 install dlh_utils
 ```
 The -U argument can be used to upgrade the package to its newest version:
 ```sh
-pip3 -U install dlh_utils
+pip3 install -U dlh_utils
 ```
 
 ## Demo
