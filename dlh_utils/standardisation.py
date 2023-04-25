@@ -7,7 +7,6 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
-
 def cast_type(df, subset=None, types='string'):
     """
     Casts specific dataframe columns to a specified type.
@@ -1429,6 +1428,8 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
                 )
                 / F.lit(12)
             ).cast(IntegerType()),
-        ).drop((f"{reference_col}_fmt"))
+        )
+        
+    df = df.drop(f"{reference_col}_fmt")
         
     return df
