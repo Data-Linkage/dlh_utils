@@ -7,7 +7,6 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
-
 def cast_type(df, subset=None, types='string'):
     """
     Casts specific dataframe columns to a specified type.
@@ -1349,7 +1348,7 @@ def fill_nulls(df, fill, subset=None):
 ################################################################################
 
 
-def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
+def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
     """
     Calculates individuals' ages at specified dates from a reference Date of Birth column
 
@@ -1362,7 +1361,7 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
       Dataframe to which the function is applied.
     reference_column: string
       The original date of birth column needed to calculate age.
-    in_date_format: default = 'yyyy-MM-dd',string
+    in_date_format: default = 'dd-MM-yyyy',string
       The date format of the date of birth column.
       It uses hyphens or forward slashes to split the date
       up and dd,MM,yyyy to show date month and year respectively.
@@ -1398,25 +1397,39 @@ def age_at(df, reference_column, in_date_format='yyyy-MM-dd', *age_at_dates):
 
     > dates = ['2022-11-03','2020-12-25']
     > age_at(df,'DoB','yyyy-MM-dd',*dates).show()
-    +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|age_at_2022-11-03|age_at_2020-12-25|
-    +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|               39|               37|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|               39|               37|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|                8|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|               10|                8|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                8|                6|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                1|                0|
-    +---+--------+----------+-------+----------+---+--------+-----------------+-----------------+
+    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
+    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
+    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
+    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|                   39|                   37|
+    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|                   39|                   37|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
+    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
+    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                    8|                    6|
+    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                    1|                    0|
+    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
 
     """
 
-    df = standardise_date(df, reference_column,
-                          in_date_format, out_date_format='yyyy-MM-dd')
-    for age_at_date in age_at_dates:
-        df = df.withColumn(f"{reference_column}_age_at_{age_at_date}",
-                           (F.months_between(F.lit(age_at_date),
-                                             F.col(reference_column),)/F.lit(12))\
-                                              .cast(IntegerType()))
+    df = df.withColumn(
+        f"{reference_col}_fmt", F.unix_timestamp(F.col(reference_col), in_date_format)
+    ).withColumn(
+        f"{reference_col}_fmt",
+        F.from_unixtime(F.col(f"{reference_col}_fmt"), "yyyy-MM-dd"),
+    )
 
+    for age_at_date in age_at_dates:
+
+        df = df.withColumn(
+            f"{reference_col}_age_at_{age_at_date}",
+            (
+                F.months_between(
+                    F.lit(age_at_date),
+                    F.col(f"{reference_col}_fmt"),
+                )
+                / F.lit(12)
+            ).cast(IntegerType()),
+        )
+        
+    df = df.drop(f"{reference_col}_fmt")
+        
     return df
