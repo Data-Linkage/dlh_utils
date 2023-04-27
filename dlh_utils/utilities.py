@@ -939,7 +939,7 @@ def regex_match(df, regex, limit=10000, cut_off=0.75):
                  .limit(limit)
                  ).persist()
 
-    sample_df.count()
+    row_count = sample_df.count()
 
     counts_df = (sample_df
                  .groupBy()
@@ -963,7 +963,7 @@ def regex_match(df, regex, limit=10000, cut_off=0.75):
                  )
 
     counts_df['match_rate'] = \
-        counts_df['count']/limit
+        counts_df['count']/row_count
 
     counts_df = (counts_df
                  [counts_df['match_rate'] >= cut_off]
