@@ -1460,38 +1460,27 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
                   )
 
     if mode in ['min', 'max']:
-
+      
+        dt_target = [dtype for name, dtype in df.dtypes if name == target][0]
+        df = window(df, filter_window, target, mode, alias='value')
+        df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
+        
         if condition:
-
-            df = window(df, filter_window, target, mode, alias='value')
-
-            df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
-
             df = (df
                   .where(F.col(target) == F.col('value'))
                   .drop('value')
                   )
-
-            df = (st.standardise_null(df=df,
-                                      replace="^<<<>>>$",
-                                      subset=target)
-                  )
-
         else:
-
-            df = window(df, filter_window, target, mode, alias='value')
-
-            df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
-
             df = (df
                   .where(F.col(target) != F.col('value'))
                   .drop('value')
                   )
-
-            df = (st.standardise_null(df=df,
-                                      replace="^<<<>>>$",
-                                      subset=target)
-                  )
+            
+        df = (st.standardise_null(df=df,
+                                  replace="^<<<>>>$",
+                                  subset=target)
+              )
+        df = df.withColumn(target, F.col(target).cast(dt_target))
 
     return df
 
