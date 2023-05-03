@@ -82,10 +82,10 @@ class TestConcat(object):
                 )
             )
         )
-        
+
         #Pandas replaces None with NaN in a numeric column. Convert back to Null:
         test_df = test_df.replace(float('nan'), None)
-        
+
         intended_schema = StructType(
             [
                 StructField("firstname", StringType(), True),
@@ -249,7 +249,8 @@ class TestCoalesced(object):
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
         result_df2 = coalesced(test_df2, drop=True)
-        assert_df_equality(intended_df2, result_df2, ignore_row_order=True, ignore_column_order=True)
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True,\
+                           ignore_column_order=True)
 
 
 
@@ -905,14 +906,16 @@ class TestFilterWindow(object):
 
 
 class TestDateDiff(object):
-    def test_expected(self, spark): 
-      
+    def test_expected(self, spark):
+
         test_df = spark.createDataFrame(
               (
                   pd.DataFrame(
                       {
-                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01', '2012-04-01', '2014-05-09','2021-01-12'],
-                          "today": ['2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02'],
+                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01',\
+                                  '2012-04-01', '2014-05-09','2021-01-12'],
+                          "today": ['2023-05-02','2023-05-02','2023-05-02',\
+                                    '2023-05-02','2023-05-02','2023-05-02'],
                       }
                   )
               )
@@ -922,8 +925,10 @@ class TestDateDiff(object):
               (
                   pd.DataFrame(
                       {
-                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01', '2012-04-01', '2014-05-09','2021-01-12'],
-                          "today": ['2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02'],
+                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01',\
+                                  '2012-04-01', '2014-05-09','2021-01-12'],
+                          "today": ['2023-05-02','2023-05-02','2023-05-02',\
+                                    '2023-05-02','2023-05-02','2023-05-02'],
                           "Difference": [14600.0, 14593.0, 4019.0, 4019.0, 3280.0, 720.0],
                       }
                   )

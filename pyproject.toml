@@ -16,6 +16,7 @@ graphframes-jars = "^0.5"
 jellyfish = "^0.9"
 pandas = ">=0.20.3"
 importlib_metadata =  "^4.8.3"
+numpy = ">=1.15.4"
 
 [tool.poetry.group.dev.dependencies]
 pyspark = "^2.4.0"

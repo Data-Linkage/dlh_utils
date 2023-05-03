@@ -932,7 +932,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
       Dataframe of deterministic linkage samples by matchkey.
     Raises
     -------
-    None at present. 
+    None at present.
 
     See Also
     --------

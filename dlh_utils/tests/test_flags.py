@@ -459,7 +459,7 @@ class TestFlagSummary1:
             ignore_nullable=True,
             ignore_column_order=True,
         )
-        
+
 # ===================================================================
     @staticmethod
     def test_expected13(spark):
