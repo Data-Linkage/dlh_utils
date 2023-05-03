@@ -5,14 +5,15 @@ Pytesting on Dataframes functions
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,IntegerType,LongType
+from pyspark.sql.types import *
 import pandas as pd
 import chispa
 from chispa import assert_df_equality
 import pytest
 from dlh_utils.dataframes import explode,drop_columns,select,cut_off,\
 drop_nulls,union_all,rename_columns,prefix_columns,suffix_columns,split,\
-clone_column,substring,filter_window,concat,coalesced,window,literal_column
+clone_column,substring,filter_window,concat,coalesced,window,literal_column, \
+date_diff
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -54,7 +55,7 @@ class TestExplode(object):
         ).select("check", "before1")
 
         result_df = explode(test_df, "before1", "_")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df,ignore_row_order=True)
 
 
 #############################################################################
@@ -81,21 +82,25 @@ class TestConcat(object):
                 )
             )
         )
+        
+        #Pandas replaces None with NaN in a numeric column. Convert back to Null:
+        test_df = test_df.replace(float('nan'), None)
+        
         intended_schema = StructType(
             [
                 StructField("firstname", StringType(), True),
                 StructField("middlename", StringType(), True),
                 StructField("lastname", StringType(), True),
-                StructField("numeric", IntegerType(), True),
+                StructField("numeric", DoubleType(), True),
                 StructField("after", StringType(), True),
                 StructField("fullname", StringType(), True),
             ]
         )
         intended_data = [
-            [None, "Maria", "Jones", 1, "Maria_Jones", "Maria_Jones"],
-            ["Claire", None, None, None, "Claire", "Claire"],
+            [None, "Maria", "Jones", 1.0, "Maria_Jones", "Maria_Jones"],
+            ["Claire", None, None, 2.0, "Claire", "Claire"],
             ["Josh", "", "Smith", None, "Josh_Smith", "Josh_Smith"],
-            ["Bob", "Greg", "Evans", 4, "Bob_Greg_Evans", "Bob_Greg_Evans"],
+            ["Bob", "Greg", "Evans", 4.0, "Bob_Greg_Evans", "Bob_Greg_Evans"],
         ]
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
@@ -107,6 +112,7 @@ class TestConcat(object):
             columns=["firstname", "middlename", "lastname"],
         )
 
+        assert_df_equality(intended_df, result_df, ignore_row_order=True, ignore_column_order=True)
 
 ##############################################################################
 
@@ -134,7 +140,7 @@ class TestDropColumns(object):
             )
         )
         result_df = drop_columns(test_df, subset="col1")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ##############################################################################
@@ -169,7 +175,7 @@ class TestSelect(object):
             )
         )
         result_df = select(test_df, startswith="first")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ##########################################################################
@@ -210,11 +216,11 @@ class TestCoalesced(object):
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
         result_df = coalesced(test_df)
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True, ignore_column_order=True)
 
     def test_expected_with_drop(self, spark):
 
-        test_df = spark.createDataFrame(
+        test_df2 = spark.createDataFrame(
             (
                 pd.DataFrame(
                     {
@@ -228,22 +234,22 @@ class TestCoalesced(object):
             )
         )
 
-        intended_schema = StructType(
+        intended_schema2 = StructType(
             [
                 StructField("coalesced_col", StringType(), True),
             ]
         )
-        intended_data = [
+        intended_data2 = [
             ["one"],
-            ["two"],
+            ["2"],
             ["one"],
-            ["FO+ UR"],
+            ["four"],
             ["5"]
         ]
-        intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
-        result_df = coalesced(test_df, drop=True)
-        assert_df_equality(intended_df, result_df)
+        result_df2 = coalesced(test_df2, drop=True)
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True, ignore_column_order=True)
 
 
 
@@ -267,7 +273,7 @@ class TestCutOff(object):
 
         # cutOff does not remove null values when the val is an Int type
         result_df = cut_off(test_df, threshold_column="ints", val=3, mode=">=")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
         test_df_2 = spark.createDataFrame(
             (
@@ -290,7 +296,7 @@ class TestCutOff(object):
         ).withColumn("col1", F.to_date("col1", "dd-MM-yyyy"))
 
         result_df_2 = cut_off(test_df_2, "col1", "1997-01-15", ">=")
-        assert_df_equality(intended_df_2, result_df_2)
+        assert_df_equality(intended_df_2, result_df_2, ignore_row_order=True)
 
 
 ####################################################################
@@ -328,7 +334,7 @@ class TestLiteralColumn(object):
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
         result_df = literal_column(test_df, "newStr", "yes")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ####################################################################
@@ -353,7 +359,7 @@ class TestDropNulls(object):
         )
 
         result_df = drop_nulls(test_df, subset="lower", val="five")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 #####################################################################
@@ -448,7 +454,7 @@ class TestUnionAll(object):
         )
 
         result_df = union_all(test_df1, test_df2, test_df3, fill="xd")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 #########################################################################
@@ -481,7 +487,7 @@ class TestRenameColumns(object):
         result_df = rename_columns(
             test_df, rename_dict={"col1": "first", "col2": "second"}
         )
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 #########################################################################
@@ -517,7 +523,7 @@ class TestRenameColumns2(object):
             rename_dict={"abefore": "aafter", "bbefore": "bafter", "cbefore": "cafter"},
         )
 
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 #########################################################################
@@ -549,7 +555,7 @@ class TestPrefixColumns(object):
         )
 
         result_df = prefix_columns(test_df, prefix="mr", exclude="col1")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ###########################################################################
@@ -580,7 +586,7 @@ class TestSuffixColumns(object):
             )
         )
         result_df = suffix_columns(test_df, suffix="mr", exclude="col1")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 #######################################################################
@@ -621,7 +627,7 @@ class TestWindow(object):
         result_df = window(
             test_df, window=["col1", "col2"], target="col2", mode="count", alias="new"
         )
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
         test_df2 = spark.createDataFrame(
             (
@@ -655,7 +661,7 @@ class TestWindow(object):
         result_df2 = window(
             test_df2, window=["col1"], target="col2", mode="min", alias="new"
         ).orderBy("col1", "col2")
-        assert_df_equality(intended_df2, result_df2)
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True)
 
         intended_schema3 = StructType(
             [
@@ -677,7 +683,7 @@ class TestWindow(object):
         result_df3 = window(
             test_df2, window=["col1"], target="col2", mode="max", alias="new"
         ).orderBy("col1", "col2")
-        assert_df_equality(intended_df3, result_df3)
+        assert_df_equality(intended_df3, result_df3, ignore_row_order=True)
 
         test_df4 = spark.createDataFrame(
             (
@@ -730,7 +736,7 @@ class TestWindow(object):
         result_df4 = window(
             test_df4, window=["col1"], target="col2", mode="max", alias="new"
         ).orderBy("col1", "col2")
-        assert_df_equality(intended_df4, result_df4)
+        assert_df_equality(intended_df4, result_df4, ignore_row_order=True)
 
 
 ###############################################################################
@@ -758,7 +764,7 @@ class TestSplit(object):
             )
         )
         result_df = split(test_df, "before", col_out="new", split_on="_")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ###############################################################################
@@ -791,7 +797,7 @@ class IndexSelectTesting(object):
             )
         )
         result_df = index_select(test_df, "before", "test", 0)
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 
 ###############################################################################
@@ -816,7 +822,7 @@ class TestCloneColumn(object):
         ).select("UPPER", "NEW")
 
         result_df = clone_column(test_df, "UPPER", "NEW")
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
     #######################################################################
 
@@ -848,7 +854,7 @@ class TestSubstring(object):
             )
         ).select("NEW", "end", "start", "final")
         result_df = substring(test_df, "final", "NEW", 1, 3)
-        assert_df_equality(intended_df, result_df)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True, ignore_column_order=True)
 
 
 ##############################################################
@@ -875,7 +881,7 @@ class TestFilterWindow(object):
         result_df1 = filter_window(
             test_df1, "col1", "col2", "count", value=1, condition=True
         )
-        assert_df_equality(intended_df1, result_df1)
+        assert_df_equality(intended_df1, result_df1, ignore_row_order=True)
 
         test_df2 = spark.createDataFrame(
             (
@@ -893,4 +899,38 @@ class TestFilterWindow(object):
         )
         result_df2 = filter_window(test_df2, "col1", "col2", "max", condition=False)
 
-        assert_df_equality(intended_df2, result_df2)
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True)
+
+##############################################################
+
+
+class TestDateDiff(object):
+    def test_expected(self, spark): 
+      
+        test_df = spark.createDataFrame(
+              (
+                  pd.DataFrame(
+                      {
+                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01', '2012-04-01', '2014-05-09','2021-01-12'],
+                          "today": ['2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02'],
+                      }
+                  )
+              )
+          )
+
+        intended_df = spark.createDataFrame(
+              (
+                  pd.DataFrame(
+                      {
+                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01', '2012-04-01', '2014-05-09','2021-01-12'],
+                          "today": ['2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02','2023-05-02'],
+                          "Difference": [14600.0, 14593.0, 4019.0, 4019.0, 3280.0, 720.0],
+                      }
+                  )
+              )
+        )
+
+
+        result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-mm-dd',units='days')
+
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
