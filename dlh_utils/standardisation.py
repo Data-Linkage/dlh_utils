@@ -1097,13 +1097,13 @@ def replace(df, subset, replace_dict, use_join=False, use_regex=False):
       Dictionary given needs to be in the format of
       value_to_be_replaced:value_to_replace_with.
     use_join : Boolean, default = False
-      Set this to True for higher performance if you have a large 
+      Set this to True for higher performance if you have a large
       number of key-value pairs (e.g. industrial classifications).
       NOTE: You cannot use this mode to replace None values.
-      Call replace() separately with use_join=False if you need to 
+      Call replace() separately with use_join=False if you need to
       replace the None values.
     use_regex : Boolean, default = False
-      Use regular expression matching. By default replacements are 
+      Use regular expression matching. By default replacements are
       only done if the whole value matches the dictionary key exactly.
       If use_regex is True, use_join must be set to False.
 
@@ -1146,48 +1146,48 @@ def replace(df, subset, replace_dict, use_join=False, use_regex=False):
     """
 
     if use_join and use_regex:
-      raise ValueError("Can't call replace() with True values for both use_join and use_regex.")
+        raise ValueError("Can't call replace() with True values for both use_join and use_regex.")
     if use_join:
-      for k, i in replace_dict.items():
-        if k is None or i is None:
-          raise ValueError("Join mode (use_join=True) is not compatible with the use of None in the replace dictionary. Set use_join=True to use None values.")
-  
+        for k, i in replace_dict.items():
+            if k is None or i is None:
+                raise ValueError("Join mode (use_join=True) is not compatible with the use of None in the replace dictionary. Set use_join=True to use None values.")
+
     if not isinstance(subset, list):
         subset = [subset]
 
     if use_join:
-      spark = SparkSession.builder.getOrCreate()
-      schema = StructType([
-         StructField("_replace_dict_element_before", StringType(), True),
-         StructField("_replace_dict_element_after", StringType(), True)])
-      replace_df = spark.createDataFrame(replace_dict.items(), schema)
-      for col in subset:
-        df = df.join(
-          replace_df, 
-          df[col] == replace_df["_replace_dict_element_before"], 
-          how="left"
-        )
-        df = df.withColumn(
-          col, 
-          F.coalesce(df["_replace_dict_element_after"], df[col])
-        )
-        df = df.drop("_replace_dict_element_before", "_replace_dict_element_after")
+        spark = SparkSession.builder.getOrCreate()
+        schema = StructType([
+           StructField("_replace_dict_element_before", StringType(), True),
+           StructField("_replace_dict_element_after", StringType(), True)])
+        replace_df = spark.createDataFrame(replace_dict.items(), schema)
+        for col in subset:
+            df = df.join(
+              replace_df,
+              df[col] == replace_df["_replace_dict_element_before"],
+              how="left"
+            )
+            df = df.withColumn(
+              col,
+              F.coalesce(df["_replace_dict_element_after"], df[col])
+            )
+            df = df.drop("_replace_dict_element_before", "_replace_dict_element_after")
     else:
-      for col in subset:
-          for before, after in replace_dict.items():
-            if use_regex:
-              df = (df
-                    .withColumn(col, F.when(F.col(col).rlike(before), after)
-                                .otherwise(F.col(col)))
-                    )
-            else:
-              df = (df
-                    .withColumn(col, F.when(F.col(col).like(before), after)
-                                .otherwise(F.col(col)))
-                    )
+        for col in subset:
+            for before, after in replace_dict.items():
+                if use_regex:
+                    df = (df
+                          .withColumn(col, F.when(F.col(col).rlike(before), after)
+                                      .otherwise(F.col(col)))
+                      )
+                else:
+                    df = (df
+                          .withColumn(col, F.when(F.col(col).like(before), after)
+                                    .otherwise(F.col(col)))
+                          )
 
     return df
-  
+
 ##############################################################################
 
 
@@ -1425,29 +1425,29 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
     Example
     -------
     > df.show()
-    +---+--------+-------+----------+---+--------+
-    | ID|Forename|Surname|       DoB|Sex|Postcode|
-    +---+--------+-------+----------+---+--------+
-    |  1|   Homer|Simpson|1983-05-12|  M|ET74 2SP|
-    |  2|   Marge|Simpson|1983-03-19|  F|ET74 2SP|
-    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|Simpson|2014-05-09|  F|ET74 2SP|
-    |  5|  Maggie|Simpson|2021-01-12|  F|ET74 2SP|
-    +---+--------+-------+----------+---+--------+
+    +---+--------+-------+----------+---+
+    | ID|Forename|Surname|       DoB|Sex|
+    +---+--------+-------+----------+---+
+    |  1|   Homer|Simpson|1983-05-12|  M|
+    |  2|   Marge|Simpson|1983-03-19|  F|
+    |  3|    Bart|Simpson|2012-04-01|  M|
+    |  3|    Bart|Simpson|2012-04-01|  M|
+    |  4|    Lisa|Simpson|2014-05-09|  F|
+    |  5|  Maggie|Simpson|2021-01-12|  F|
+    +---+--------+-------+----------+---+
 
     > dates = ['2022-11-03','2020-12-25']
     > age_at(df,'DoB','yyyy-MM-dd',*dates).show()
-    +---+--------+-------+----------+---+--------+---------------------+---------------------+
-    | ID|Forename|Surname|       DoB|Sex|Postcode|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
-    +---+--------+-------+----------+---+--------+---------------------+---------------------+
-    |  1|   Homer|Simpson|1983-05-12|  M|ET74 2SP|                   39|                   37|
-    |  2|   Marge|Simpson|1983-03-19|  F|ET74 2SP|                   39|                   37|
-    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
-    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
-    |  4|    Lisa|Simpson|2014-05-09|  F|ET74 2SP|                    8|                    6|
-    |  5|  Maggie|Simpson|2021-01-12|  F|ET74 2SP|                    1|                    0|
-    +---+--------+-------+----------+---+--------+---------------------+---------------------+
+    +---+--------+-------+----------+---+---------------------+---------------------+
+    | ID|Forename|Surname|       DoB|Sex|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
+    +---+--------+-------+----------+---+---------------------+---------------------+
+    |  1|   Homer|Simpson|1983-05-12|  M|                   39|                   37|
+    |  2|   Marge|Simpson|1983-03-19|  F|                   39|                   37|
+    |  3|    Bart|Simpson|2012-04-01|  M|                   10|                    8|
+    |  3|    Bart|Simpson|2012-04-01|  M|                   10|                    8|
+    |  4|    Lisa|Simpson|2014-05-09|  F|                    8|                    6|
+    |  5|  Maggie|Simpson|2021-01-12|  F|                    1|                    0|
+    +---+--------+-------+----------+---+---------------------+---------------------+
 
     """
 

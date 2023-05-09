@@ -929,8 +929,8 @@ class TestReplace(object):
         )
 
         result_df = replace(
-            test_df, 
-            subset="before", 
+            test_df,
+            subset="before",
             replace_dict={"^a": "A", "y$": "Y"},
             use_regex=True
         )
@@ -951,14 +951,14 @@ class TestReplace(object):
         )
 
         with pytest.raises(ValueError) as e:
-          result_df = replace(
-              test_df, 
-              subset="before", 
+            result_df = replace(
+              test_df,
+              subset="before",
               replace_dict={"^a": "A", "y$": "Y"},
               use_regex=True,
               use_join=True
           )
-        
+
     def test_value_error_on_join_and_none(self, spark):
         test_df = spark.createDataFrame(
             (
@@ -974,14 +974,13 @@ class TestReplace(object):
         )
 
         with pytest.raises(ValueError) as e:
-          result_df = replace(
-              test_df, 
-              subset="before", 
+            result_df = replace(
+              test_df,
+              subset="before",
               replace_dict={"^a": "A", None: "Y"},
               use_join=True
           )
 
-        
 ##############################################################################
 
 
