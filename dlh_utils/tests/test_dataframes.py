@@ -12,7 +12,7 @@ from chispa import assert_df_equality
 import pytest
 from dlh_utils.dataframes import explode,drop_columns,select,cut_off,\
 drop_nulls,union_all,rename_columns,prefix_columns,suffix_columns,split,\
-clone_column,substring,filter_window,concat,coalesced,window,literal_column, \
+clone_column,substring,filter_window,concat,coalesced,window,literal_column,\
 date_diff
 
 pytestmark = pytest.mark.usefixtures("spark")

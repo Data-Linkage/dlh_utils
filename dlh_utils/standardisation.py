@@ -1154,13 +1154,13 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
                      out_date_format='yyyy-MM-dd',null_counts=False):
     """
     Changes the date format of a specified date column.
-    
+
     Also has an optional argument null_counts. If set to False, the function
-    only returns the dataframe with specified date values altered. 
-    However, if set to True, will also return a tuple, displaying a count of 
-    nulls in the dataframe before and after the function has been applied.  
+    only returns the dataframe with specified date values altered.
+    However, if set to True, will also return a tuple, displaying a count of
+    nulls in the dataframe before and after the function has been applied.
     This is because the standardise_date function will make a date
-    value null if its format differs from the in_date_format. 
+    value null if its format differs from the in_date_format.
 
     Parameters
     ----------
@@ -1176,9 +1176,9 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
       changed.
     null_counts: default = False, bool
       If set to True provides a tuple, where the first part displays
-      the df null count before the function has been applied, and the 
-      second part is the df null count after the function has been 
-      applied. 
+      the df null count before the function has been applied, and the
+      second part is the df null count after the function has been
+      applied.
 
     Returns
     -------
@@ -1186,7 +1186,7 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     dataframe
       Dataframe with specified date column values altered
       to new specified format.
-    
+
     If null_counts = True:
     dataframe as described above,
     Tuple
@@ -1225,10 +1225,10 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     |  4|    Lisa|     Marie|Simpson|09/05/2014|  F|ET74 2SP|
     |  5|  Maggie|      null|Simpson|12/01/2021|  F|ET74 2SP|
     +---+--------+----------+-------+----------+---+--------+
-    
+
     Example using null_counts:
     > df.show()
-    
+
     +----------+
     |      date|
     +----------+
@@ -1238,9 +1238,9 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     |1999/11/02|
     |2005-12-24|
     +----------+
-    
+
     >df,nulls = standardise_date(df,'date','yyyy/MM/dd','yyyy.MM.dd',True)
-    
+
     >df.show()
     +----------+
     |      date|
@@ -1251,10 +1251,10 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     |1999.11.02|
     |      null|
     +----------+
-    
+
     >nulls
     (0, 1)
-     
+
     """
     if null_counts:
         null_before = df.where(F.col(col_name).isNull()).count()
