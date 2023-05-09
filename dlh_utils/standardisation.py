@@ -2,7 +2,8 @@
 Functions used to standardise and clean data prior to linkage.
 '''
 import pyspark.sql.functions as F
-from pyspark.sql.types import IntegerType
+from pyspark.sql.types import IntegerType, StringType, StructType, StructField
+from pyspark.sql import SparkSession
 from dlh_utils import dataframes as da
 
 ###############################################################################
@@ -1081,7 +1082,7 @@ def add_leading_zeros(df, subset, n):
 ##############################################################################
 
 
-def replace(df, subset, replace_dict):
+def replace(df, subset, replace_dict, use_join=False, use_regex=False):
     """
     Replaces specific string values in given column(s) with specified values.
 
@@ -1095,6 +1096,16 @@ def replace(df, subset, replace_dict):
     replace_dict: dictionary
       Dictionary given needs to be in the format of
       value_to_be_replaced:value_to_replace_with.
+    use_join : Boolean, default = False
+      Set this to True for higher performance if you have a large 
+      number of key-value pairs (e.g. industrial classifications).
+      NOTE: You cannot use this mode to replace None values.
+      Call replace() separately with use_join=False if you need to 
+      replace the None values.
+    use_regex : Boolean, default = False
+      Use regular expression matching. By default replacements are 
+      only done if the whole value matches the dictionary key exactly.
+      If use_regex is True, use_join must be set to False.
 
     Returns
     -------
@@ -1103,7 +1114,7 @@ def replace(df, subset, replace_dict):
 
     Raises
     -------
-    None at present.
+    ValueError if use_join and use_regex are both passed in as True.
 
     Example
     -------
@@ -1134,19 +1145,49 @@ def replace(df, subset, replace_dict):
     +---+---------+----------+-------+----------+---+--------+
     """
 
+    if use_join and use_regex:
+      raise ValueError("Can't call replace() with True values for both use_join and use_regex.")
+    if use_join:
+      for k, i in replace_dict.items():
+        if k is None or i is None:
+          raise ValueError("Join mode (use_join=True) is not compatible with the use of None in the replace dictionary. Set use_join=True to use None values.")
+  
     if not isinstance(subset, list):
         subset = [subset]
 
-    for col in subset:
-
-        for before, after in replace_dict.items():
-            df = (df
-                  .withColumn(col, F.when(F.col(col).like(before), after)
-                              .otherwise(F.col(col)))
-                  )
+    if use_join:
+      spark = SparkSession.builder.getOrCreate()
+      schema = StructType([
+         StructField("_replace_dict_element_before", StringType(), True),
+         StructField("_replace_dict_element_after", StringType(), True)])
+      replace_df = spark.createDataFrame(replace_dict.items(), schema)
+      for col in subset:
+        df = df.join(
+          replace_df, 
+          df[col] == replace_df["_replace_dict_element_before"], 
+          how="left"
+        )
+        df = df.withColumn(
+          col, 
+          F.coalesce(df["_replace_dict_element_after"], df[col])
+        )
+        df = df.drop("_replace_dict_element_before", "_replace_dict_element_after")
+    else:
+      for col in subset:
+          for before, after in replace_dict.items():
+            if use_regex:
+              df = (df
+                    .withColumn(col, F.when(F.col(col).rlike(before), after)
+                                .otherwise(F.col(col)))
+                    )
+            else:
+              df = (df
+                    .withColumn(col, F.when(F.col(col).like(before), after)
+                                .otherwise(F.col(col)))
+                    )
 
     return df
-
+  
 ##############################################################################
 
 
