@@ -33,8 +33,7 @@ def alpha_name(df, input_col, output_col):
     Returns
     -------
     a dataframe with output_col appended
-    null values in input_col persist in output_col, with nullable=true
-    if input_col contains no null values, output_col will be nullable=false
+    if input_col contains a Null, this will remain in output_col
 
     Raises
     ------
