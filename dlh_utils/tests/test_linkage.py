@@ -510,7 +510,7 @@ class TestMatchkeyDataframe(object):
 class Test_alphaname(object):
 
     #Test 1
-    def test_expected(self,spark):  
+    def test_expected(self,spark):
 
         test_schema = StructType([
           StructField("ID", IntegerType(), True),
@@ -523,7 +523,7 @@ class Test_alphaname(object):
           [4, "Lisa"],
           [5, "Maggie"],
         ]
-    
+
         test_df = spark.createDataFrame(test_data, test_schema)
 
         intended_schema = StructType([
@@ -548,7 +548,7 @@ class Test_alphaname(object):
 
 
     #Test 2
-    def test_expected(self,spark):  
+    def test_expected(self,spark):
 
         test_schema2 = StructType([
           StructField("ID", IntegerType(), True),

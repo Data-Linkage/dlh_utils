@@ -1268,7 +1268,7 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
         return df,(null_before,null_after)
 
     else:
-      return df
+        return df
 
 ##############################################################################
 
@@ -1384,29 +1384,29 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
     Example
     -------
     > df.show()
-    +---+--------+----------+-------+----------+---+--------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|
-    +---+--------+----------+-------+----------+---+--------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|
-    +---+--------+----------+-------+----------+---+--------+
+    +---+--------+-------+----------+---+--------+
+    | ID|Forename|Surname|       DoB|Sex|Postcode|
+    +---+--------+-------+----------+---+--------+
+    |  1|   Homer|Simpson|1983-05-12|  M|ET74 2SP|
+    |  2|   Marge|Simpson|1983-03-19|  F|ET74 2SP|
+    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|
+    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|
+    |  4|    Lisa|Simpson|2014-05-09|  F|ET74 2SP|
+    |  5|  Maggie|Simpson|2021-01-12|  F|ET74 2SP|
+    +---+--------+-------+----------+---+--------+
 
     > dates = ['2022-11-03','2020-12-25']
     > age_at(df,'DoB','yyyy-MM-dd',*dates).show()
-    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
-    | ID|Forename|Middlename|Surname|       DoB|Sex|Postcode|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
-    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
-    |  1|   Homer|       Jay|Simpson|1983-05-12|  M|ET74 2SP|                   39|                   37|
-    |  2|   Marge|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|                   39|                   37|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
-    |  3|    Bart|     Jo-Jo|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
-    |  4|    Lisa|     Marie|Simpson|2014-05-09|  F|ET74 2SP|                    8|                    6|
-    |  5|  Maggie|      null|Simpson|2021-01-12|  F|ET74 2SP|                    1|                    0|
-    +---+--------+----------+-------+----------+---+--------+---------------------+---------------------+
+    +---+--------+-------+----------+---+--------+---------------------+---------------------+
+    | ID|Forename|Surname|       DoB|Sex|Postcode|DoB_age_at_2022-11-03|DoB_age_at_2020-12-25|
+    +---+--------+-------+----------+---+--------+---------------------+---------------------+
+    |  1|   Homer|Simpson|1983-05-12|  M|ET74 2SP|                   39|                   37|
+    |  2|   Marge|Simpson|1983-03-19|  F|ET74 2SP|                   39|                   37|
+    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
+    |  3|    Bart|Simpson|2012-04-01|  M|ET74 2SP|                   10|                    8|
+    |  4|    Lisa|Simpson|2014-05-09|  F|ET74 2SP|                    8|                    6|
+    |  5|  Maggie|Simpson|2021-01-12|  F|ET74 2SP|                    1|                    0|
+    +---+--------+-------+----------+---+--------+---------------------+---------------------+
 
     """
 
@@ -1429,7 +1429,7 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
                 / F.lit(12)
             ).cast(IntegerType()),
         )
-        
+
     df = df.drop(f"{reference_col}_fmt")
-        
+
     return df
