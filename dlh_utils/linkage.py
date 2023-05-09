@@ -84,58 +84,6 @@ def alpha_name(df, input_col, output_col):
     return df
 
 
-  
-  ###OLD for reference - temp
-
-
-#def alpha_name(df, input_col, output_col):
-#    """
-#    Orders string columns alphabetically, also setting them to UPPER CASE.
-#
-#    Parameters
-#    ----------
-#    df: dataframe
-#    input_col: string
-#      name of column to be sorted alphabetically
-#    output_col: string
-#      name of column to be output
-#
-#    Returns
-#    -------
-#    a dataframe with output_col appended
-#
-#    Example
-#    --------
-#
-#    > df.show()
-#    +---+--------+
-#    | ID|Forename|
-#    +---+--------+
-#    |  1|   Homer|
-#    |  2|   Marge|
-#    |  3|    Bart|
-#    |  4|    Lisa|
-#    |  5|  Maggie|
-#    +---+--------+
-#
-#    > alpha_name(df,'Forename','alphaname').show()
-#    +---+--------+---------+
-#    | ID|Forename|alphaname|
-#    +---+--------+---------+
-#    |  1|   Homer|    EHMOR|
-#    |  2|   Marge|    AEGMR|
-#    |  3|    Bart|     ABRT|
-#    |  4|    Lisa|     AILS|
-#    |  5|  Maggie|   AEGGIM|
-#    +---+--------+---------+
-#
-#    """
-#    df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
-#           .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
-#           .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
-#           .drop('name_array', 'sorted_name_array')
-#    return df
-
 ###############################################################################
 
 
