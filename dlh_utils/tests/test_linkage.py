@@ -12,7 +12,7 @@ import chispa
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
 demographics,demographics_compare,assert_unique_matches,matchkey_counts,\
-matchkey_dataframe
+matchkey_dataframe,alpha_name
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -503,6 +503,93 @@ class TestMatchkeyDataframe(object):
 
         assert_df_equality(intended_df,result_df)
 
+        
+###############################################################
+
+
+class Test_alphaname(object):
+
+    #Test 1
+    def test_expected(self,spark):        
+        
+        test_schema = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Forename", StringType(), True),  
+        ])
+        test_data = [
+          [1, "Homer"],
+          [2, "Marge"],
+          [3, "Bart"],
+          [4, "Lisa"],
+          [5, "Maggie"],
+        ]
+                  
+        test_df = spark.createDataFrame(test_data, test_schema)
+
+        intended_schema = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Forename", StringType(), True),
+          StructField("alphaname", StringType(), True),
+        ])
+        
+        intended_data = [
+          [1, "Homer", "EHMOR"],
+          [2, "Marge","AEGMR"],
+          [3, "Bart","ABRT"],
+          [4, "Lisa","AILS"],
+          [5, "Maggie","AEGGIM"],
+        ]
+        
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+      
+        result_df = alpha_name(test_df,'Forename','alphaname')
+        
+        assert_df_equality(intended_df,result_df)
+
+    
+    #Test 2
+    def test_expected(self,spark):        
+        
+        test_schema2 = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Name", StringType(), True),  
+        ])
+        
+        test_data2 = [
+          [1, "Romer, Bogdan"],
+          [2, "Margarine"],
+          [3, None],
+          [4, "Nisa"],
+          [5, "Moggie"],
+        ]
+
+        test_df2 = spark.createDataFrame(test_data2, test_schema2)
+
+        intended_schema2 = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Name", StringType(), True),
+          StructField("alphaname", StringType(), True), # Note alphaname is always returned as nullable=false
+        ])
+        
+        intended_data2 = [
+          [1, "Romer, Bogdan", " ,ABDEGMNOORR"],
+          [2, "Margarine","AAEGIMNRR"],
+          [3, None, None],
+          [4, "Nisa","AINS"],
+          [5, "Moggie","EGGIMO"],
+        ]
+        
+        intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
+      
+        result_df2 = alpha_name(test_df2,'Name','alphaname')
+        
+        assert_df_equality(intended_df2,result_df2)
+    
+    
+    
+    
+###############################################################    
+    
 
 # unable to do pytest on the following code as function 'deterministic_linkage()'
 # is missing the argument 'out_dir'

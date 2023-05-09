@@ -19,12 +19,13 @@ from dlh_utils import utilities as ut
 
 
 def alpha_name(df, input_col, output_col):
+    print('test')    
     """
-    Orders string columns alphabetically, also setting them to UPPER CASE.
+    Orders each field of a string column alphabetically, also setting to UPPER CASE.
 
     Parameters
     ----------
-    df: dataframe
+    df: Spark dataframe
     input_col: string
       name of column to be sorted alphabetically
     output_col: string
@@ -33,7 +34,13 @@ def alpha_name(df, input_col, output_col):
     Returns
     -------
     a dataframe with output_col appended
+    null values in input_col persist in output_col, with nullable=true
+    if input_col contains no null values, output_col will be nullable=false
 
+    Raises
+    ------
+    Exception if input_col not string type
+    
     Example
     --------
 
@@ -46,6 +53,7 @@ def alpha_name(df, input_col, output_col):
     |  3|    Bart|
     |  4|    Lisa|
     |  5|  Maggie|
+    |  6|    null|
     +---+--------+
 
     > alpha_name(df,'Forename','alphaname').show()
@@ -57,14 +65,76 @@ def alpha_name(df, input_col, output_col):
     |  3|    Bart|     ABRT|
     |  4|    Lisa|     AILS|
     |  5|  Maggie|   AEGGIM|
+    |  6|    null|     null|
     +---+--------+---------+
 
     """
-    df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
-           .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
-           .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
-           .drop('name_array', 'sorted_name_array')
+    
+    #input validation
+    if (df.schema[input_col].dataType.typeName()!='string'):
+      raise Exception(f'Column: {input_col} is not of type string')
+    
+    else:
+      #concat removes any null values. conditional replacement only when not null added
+      #to avoid unwanted removal of null
+      df= df.withColumn(output_col, \
+                F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(\
+                F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
+
     return df
+
+
+  
+  ###OLD for reference - temp
+
+
+#def alpha_name(df, input_col, output_col):
+#    """
+#    Orders string columns alphabetically, also setting them to UPPER CASE.
+#
+#    Parameters
+#    ----------
+#    df: dataframe
+#    input_col: string
+#      name of column to be sorted alphabetically
+#    output_col: string
+#      name of column to be output
+#
+#    Returns
+#    -------
+#    a dataframe with output_col appended
+#
+#    Example
+#    --------
+#
+#    > df.show()
+#    +---+--------+
+#    | ID|Forename|
+#    +---+--------+
+#    |  1|   Homer|
+#    |  2|   Marge|
+#    |  3|    Bart|
+#    |  4|    Lisa|
+#    |  5|  Maggie|
+#    +---+--------+
+#
+#    > alpha_name(df,'Forename','alphaname').show()
+#    +---+--------+---------+
+#    | ID|Forename|alphaname|
+#    +---+--------+---------+
+#    |  1|   Homer|    EHMOR|
+#    |  2|   Marge|    AEGMR|
+#    |  3|    Bart|     ABRT|
+#    |  4|    Lisa|     AILS|
+#    |  5|  Maggie|   AEGGIM|
+#    +---+--------+---------+
+#
+#    """
+#    df = df.withColumn('name_array', (F.split(F.upper(F.col(input_col)), '')))\
+#           .withColumn('sorted_name_array', F.array_sort(F.col('name_array')))\
+#           .withColumn(output_col, F.concat_ws('', F.col('sorted_name_array')))\
+#           .drop('name_array', 'sorted_name_array')
+#    return df
 
 ###############################################################################
 
@@ -180,6 +250,8 @@ def std_lev_score(string1, string2):
     -------
     float
         similarity score between 0 and 1
+        
+
 
     Example
     --------
