@@ -503,18 +503,18 @@ class TestMatchkeyDataframe(object):
 
         assert_df_equality(intended_df,result_df)
 
-        
+
 ###############################################################
 
 
 class Test_alphaname(object):
 
     #Test 1
-    def test_expected(self,spark):        
-        
+    def test_expected(self,spark):  
+
         test_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
+          StructField("Forename", StringType(), True),
         ])
         test_data = [
           [1, "Homer"],
@@ -523,7 +523,7 @@ class Test_alphaname(object):
           [4, "Lisa"],
           [5, "Maggie"],
         ]
-                  
+    
         test_df = spark.createDataFrame(test_data, test_schema)
 
         intended_schema = StructType([
@@ -531,7 +531,7 @@ class Test_alphaname(object):
           StructField("Forename", StringType(), True),
           StructField("alphaname", StringType(), True),
         ])
-        
+
         intended_data = [
           [1, "Homer", "EHMOR"],
           [2, "Marge","AEGMR"],
@@ -539,22 +539,22 @@ class Test_alphaname(object):
           [4, "Lisa","AILS"],
           [5, "Maggie","AEGGIM"],
         ]
-        
+
         intended_df = spark.createDataFrame(intended_data, intended_schema)
-      
+
         result_df = alpha_name(test_df,'Forename','alphaname')
-        
+
         assert_df_equality(intended_df,result_df)
 
-    
+
     #Test 2
-    def test_expected(self,spark):        
-        
+    def test_expected(self,spark):  
+
         test_schema2 = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Name", StringType(), True),  
+          StructField("Name", StringType(), True),
         ])
-        
+
         test_data2 = [
           [1, "Romer, Bogdan"],
           [2, "Margarine"],
@@ -568,9 +568,9 @@ class Test_alphaname(object):
         intended_schema2 = StructType([
           StructField("ID", IntegerType(), True),
           StructField("Name", StringType(), True),
-          StructField("alphaname", StringType(), True), # Note alphaname is always returned as nullable=false
-        ])
-        
+          StructField("alphaname", StringType(), True),
+        ]) # Note alphaname is always returned as nullable=false
+
         intended_data2 = [
           [1, "Romer, Bogdan", " ,ABDEGMNOORR"],
           [2, "Margarine","AAEGIMNRR"],
@@ -578,18 +578,16 @@ class Test_alphaname(object):
           [4, "Nisa","AINS"],
           [5, "Moggie","EGGIMO"],
         ]
-        
+
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
-      
+
         result_df2 = alpha_name(test_df2,'Name','alphaname')
-        
-        assert_df_equality(intended_df2,result_df2)
-    
-    
-    
-    
-###############################################################    
-    
+
+
+
+
+###############################################################
+
 
 # unable to do pytest on the following code as function 'deterministic_linkage()'
 # is missing the argument 'out_dir'

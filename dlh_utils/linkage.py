@@ -19,7 +19,6 @@ from dlh_utils import utilities as ut
 
 
 def alpha_name(df, input_col, output_col):
-    print('test')    
     """
     Orders each field of a string column alphabetically, also setting to UPPER CASE.
 
@@ -40,7 +39,7 @@ def alpha_name(df, input_col, output_col):
     Raises
     ------
     Exception if input_col not string type
-    
+
     Example
     --------
 
@@ -69,15 +68,15 @@ def alpha_name(df, input_col, output_col):
     +---+--------+---------+
 
     """
-    
+
     #input validation
-    if (df.schema[input_col].dataType.typeName()!='string'):
-      raise Exception(f'Column: {input_col} is not of type string')
-    
+    if df.schema[input_col].dataType.typeName()!='string':
+        raise Exception(f'Column: {input_col} is not of type string')
+
     else:
-      #concat removes any null values. conditional replacement only when not null added
-      #to avoid unwanted removal of null
-      df= df.withColumn(output_col, \
+        #concat removes any null values. conditional replacement only when not null added
+        #to avoid unwanted removal of null
+        df= df.withColumn(output_col, \
                 F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(\
                 F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
 
@@ -198,8 +197,6 @@ def std_lev_score(string1, string2):
     -------
     float
         similarity score between 0 and 1
-        
-
 
     Example
     --------
@@ -952,7 +949,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
       Dataframe of deterministic linkage samples by matchkey.
     Raises
     -------
-    None at present. 
+    None at present.
 
     See Also
     --------
