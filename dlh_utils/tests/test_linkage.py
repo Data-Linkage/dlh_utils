@@ -584,18 +584,18 @@ class Test_alphaname(object):
         result_df2 = alpha_name(test_df2,'Name','alphaname')
 
 
-###############################################################    
+###############################################################
 
 #test currently fails, as metaphone is not working?
 
-#class Test_metaphone(object):  
-#    
+#class Test_metaphone(object):
+#
 #    #Test 1
-#    def test_expected(self,spark):        
-#        
+#    def test_expected(self,spark):
+#
 #        test_schema = StructType([
 #          StructField("ID", IntegerType(), True),
-#          StructField("Forename", StringType(), True),  
+#          StructField("Forename", StringType(), True),
 #        ])
 #        test_data = [
 #          [1, "David"],
@@ -604,16 +604,16 @@ class Test_alphaname(object):
 #          [4, "Gordon"],
 #          [5, "Emma"],
 #        ]
-#                  
+#
 #        test_df = spark.createDataFrame(test_data, test_schema)
 #        result_df = metaphone(test_df,'Forename','metaname')
-#        
+#
 #        intended_schema = StructType([
 #          StructField("ID", IntegerType(), True),
 #          StructField("Forename", StringType(), True),
 #          StructField("metaname", StringType(), True),
 #        ])
-#        
+#
 #        intended_data = [
 #          [1, "David", "TFT"],
 #          [2, "Idrissa","ITRS"],
@@ -621,24 +621,24 @@ class Test_alphaname(object):
 #          [4, "Gordon","KRTN"],
 #          [5, "Emma","EM"],
 #        ]
-#        
+#
 #        intended_df = spark.createDataFrame(intended_data, intended_schema)
-#      
-#        
-#        
+#
+#
+#
 #        assert_df_equality(intended_df,result_df)
-  
-  
-###############################################################   
-  
-class Test_soundex(object):  
-    
+
+
+###############################################################
+
+class Test_soundex(object):
+
     #Test 1
-    def test_expected(self,spark):   
-  
+    def test_expected(self,spark):
+
         test_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
+          StructField("Forename", StringType(), True),
         ])
         test_data = [
           [1, "Homer"],
@@ -647,17 +647,17 @@ class Test_soundex(object):
           [4, "Lisa"],
           [5, "Maggie"],
         ]
-                  
+
         test_df = spark.createDataFrame(test_data, test_schema)
-  
+
         result_df = soundex(test_df,'Forename','forename_soundex')
-  
+
         intended_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
-          StructField("forename_soundex", StringType(), True),  
+          StructField("Forename", StringType(), True),
+          StructField("forename_soundex", StringType(), True),
         ])
-        
+
         intended_data = [
           [1, "Homer",'H560'],
           [2, "Marge", 'M620'],
@@ -665,57 +665,57 @@ class Test_soundex(object):
           [4, "Lisa", 'L200'],
           [5, "Maggie", 'M200'],
         ]
-  
+
         intended_df = spark.createDataFrame(intended_data, intended_schema)
-    
+
         assert_df_equality(intended_df,result_df)
-  
-  
+
+
     #Test 2
-    def test_expected(self,spark):   
-  
+    def test_expected(self,spark):
+
         test_schema2 = StructType([
-          StructField("Surname", StringType(), True),  
+          StructField("Surname", StringType(), True),
         ])
-        
+
         test_data2 = [
           ["McDonald"],
           [None],
           ["MacDonald"],
           ["MacDougall"],
         ]
-                  
+
         test_df2 = spark.createDataFrame(test_data2, test_schema2)
-  
+
         result_df2 = soundex(test_df2,'Surname','soundex')
-  
+
         intended_schema2 = StructType([
-          StructField("Surname", StringType(), True),  
-          StructField("soundex", StringType(), True),  
+          StructField("Surname", StringType(), True),
+          StructField("soundex", StringType(), True),
         ])
-        
+
         intended_data2 = [
           ["McDonald",'M235'],
           [None, None],
           ["MacDonald",'M235'],
           ["MacDougall",'M232'],
         ]
-  
+
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
-    
-        assert_df_equality(intended_df2,result_df2) 
-      
-###############################################################   
-  
-class Test_std_lev_score(object):  
-    
+
+        assert_df_equality(intended_df2,result_df2)
+
+###############################################################
+
+class Test_std_lev_score(object):
+
     #Test 1
-    def test_expected(self,spark):     
-      
+    def test_expected(self,spark):
+
         test_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
-          StructField("Forename_2", StringType(), True),  
+          StructField("Forename", StringType(), True),
+          StructField("Forename_2", StringType(), True),
         ])
         test_data = [
           [1, "Homer",'Milhouse'],
@@ -723,41 +723,42 @@ class Test_std_lev_score(object):
           [3, "Bart",'Milhouse'],
           [4, "Lisa",'Milhouse'],
           [5, "Maggie",'Milhouse'],
-        ]      
-      
+        ]
+
         test_df = spark.createDataFrame(test_data, test_schema)
-        
-        result_df = test_df.withColumn('forename_lev', std_lev_score(F.col('Forename'), F.col('Forename_2')))
-        
-        
+
+        result_df = test_df.withColumn('forename_lev',\
+                                       std_lev_score(F.col('Forename'), F.col('Forename_2')))
+
+
         intended_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
-          StructField("Forename_2", StringType(), True),  
-          StructField("forename_lev", DoubleType(), True),  
+          StructField("Forename", StringType(), True),
+          StructField("Forename_2", StringType(), True),
+          StructField("forename_lev", DoubleType(), True),
         ])
         intended_data = [
           [1, "Homer",'Milhouse', 1/8],
           [2, "Marge",'Milhouse', 2/8],
           [3, "Bart",'Milhouse', 0/8],
           [4, "Lisa",'Milhouse', 2/8],
-          [5, "Maggie",'Milhouse', 2/8], 
-        ]   
-        
+          [5, "Maggie",'Milhouse', 2/8],
+        ]
+
         intended_df = spark.createDataFrame(intended_data, intended_schema)
-        
-        assert_df_equality(intended_df,result_df) 
-        
-        
+
+        assert_df_equality(intended_df,result_df)
+
+
      #Test 2
-    def test_expected(self,spark):     
-      
+    def test_expected(self,spark):
+
         test_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
-          StructField("Forename_2", StringType(), True),  
+          StructField("Forename", StringType(), True),
+          StructField("Forename_2", StringType(), True),
         ])
-        
+
         test_data2 = [
           [1, "Homer",'Milhouse'],
           [2, "Marge",'Milhouse'],
@@ -767,40 +768,37 @@ class Test_std_lev_score(object):
           [6, None,'Milhouse'],
           [7, 'Milhouse', None],
           [8, 'Milhouse','Milhouse'],
-        ]      
+        ]
 
         test_df2 = spark.createDataFrame(test_data2, test_schema)
-        
-        result_df2 = test_df2.withColumn('forename_lev', std_lev_score(F.col('Forename'), F.col('Forename_2')))
-        
-        
+
+        result_df2 = test_df2.withColumn('forename_lev',\
+                                         std_lev_score(F.col('Forename'), F.col('Forename_2')))
+
+
         intended_schema = StructType([
           StructField("ID", IntegerType(), True),
-          StructField("Forename", StringType(), True),  
-          StructField("Forename_2", StringType(), True),  
-          StructField("forename_lev", DoubleType(), True),  
+          StructField("Forename", StringType(), True),
+          StructField("Forename_2", StringType(), True),
+          StructField("forename_lev", DoubleType(), True),
         ])
-        
+
         intended_data2 = [
           [1, "Homer",'Milhouse', 1/8],
           [2, "Marge",'Milhouse', 2/8],
           [3, "Bart",'Milhouse', 0/8],
           [4, "Lisa",'Milhouse', 2/8],
-          [5, "Maggie",'Milhouse', 2/8], 
-          [6, None,'Milhouse', None], 
-          [7, 'Milhouse',None, None], 
-          [8, "Milhouse",'Milhouse', 1/1], 
-        ]   
-        
-        intended_df2 = spark.createDataFrame(intended_data2, intended_schema)
-        
-        assert_df_equality(intended_df2,result_df2) 
-               
+          [5, "Maggie",'Milhouse', 2/8],
+          [6, None,'Milhouse', None],
+          [7, 'Milhouse',None, None],
+          [8, "Milhouse",'Milhouse', 1/1],
+        ]
 
-        
-        
-      
-###############################################################   
+        intended_df2 = spark.createDataFrame(intended_data2, intended_schema)
+
+        assert_df_equality(intended_df2,result_df2)
+
+###############################################################
 
 # unable to do pytest on the following code as function 'deterministic_linkage()'
 # is missing the argument 'out_dir'
