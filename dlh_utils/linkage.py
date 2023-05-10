@@ -70,7 +70,7 @@ def alpha_name(df, input_col, output_col):
 
     #input validation
     if df.schema[input_col].dataType.typeName()!='string':
-        raise Exception(f'Column: {input_col} is not of type string')
+        raise TypeError(f'Column: {input_col} is not of type string')
 
     else:
         #concat removes any null values. conditional replacement only when not null added
