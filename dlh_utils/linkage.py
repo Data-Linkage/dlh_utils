@@ -21,6 +21,7 @@ from dlh_utils import utilities as ut
 def alpha_name(df, input_col, output_col):
     """
     Orders each field of a string column alphabetically, also setting to UPPER CASE.
+    If input_col contains a Null, this will remain in output_col
 
     Parameters
     ----------
@@ -33,7 +34,6 @@ def alpha_name(df, input_col, output_col):
     Returns
     -------
     a dataframe with output_col appended
-    if input_col contains a Null, this will remain in output_col
 
     Raises
     ------

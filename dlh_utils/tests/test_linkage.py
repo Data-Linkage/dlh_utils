@@ -56,7 +56,7 @@ class TestOrderMatchkeys(object):
                 dfo['last_name'] == dffn['last_name']]
       ]
 
-        testDf = pd.DataFrame({
+        test_df = pd.DataFrame({
             'mks': mks,
             'count': [(dfo.join(dffn, on=mk, how='inner')).count()
                     for mk in mks]
