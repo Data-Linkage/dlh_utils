@@ -503,61 +503,80 @@ class TestMatchkeyDataframe(object):
 
         assert_df_equality(intended_df,result_df)
 
-class TestDeterministicLinkage(object):
+class TestDeterministicLinkage:
     def test_expected(self,spark):
+        """
+        Tests 1:1 linkage if two dataframes on two matchkeys.
 
-      right_df = spark.createDataFrame(
-          (
-              pd.DataFrame(
-                  {
-                      "firstname": ["Alan", "Betty", "Claire", "Claire", "Elin"],
-                      "lastname": ["Jones", "Jones", "Smith", "Jones", "Evans"],
-                      "numeric": [1, 2, 2, 4, 5],
-                      "id1": [1, 2, 3, 4, 5]
-                  }
-              )
-          )
-      )
+        In this case the first matchkey should only match Betty with Betty and the second
+        sould only match Evans with Evans. Other matching pairs between the datasets are not
+        unique (for example, Alan is unique in right_df but there are two Alans in left_df)
+        so in a 1:1 match these will be ignored.
 
-      left_df = spark.createDataFrame(
-          (
-              pd.DataFrame(
-                  {
-                      "firstname": ["Alan", "Alan", "Betty", "Barry", "Claire", "David", "Emma"],
-                      "lastname": ["Jones", "Smith", "James", "Jones", "Smith", "Jones", "Evans"],
-                      "numeric": [1, 2, 2, 3, 3, 3, 3], 
-                      "id2": [11, 12, 13, 14, 15, 16, 17]
-                  }
-              )
-          )
-      )
+        Parameters
+        ----------
+        spark : pyspark session
+          Usually passed in by pytest.
 
-      intended_df = spark.createDataFrame(
-        pd.DataFrame(
-            {
-                "id1": [2, 5],
-                "id2": [13, 17],
-                "matchkey": [1, 2]
-            }
-        ),
-        StructType(
-          [
-              StructField("id1", LongType(), True),
-              StructField("id2", LongType(), True),
-              StructField("matchkey", IntegerType(), False),
-          ]
+        Returns
+        -------
+        Nothing
+
+        Raises
+        ------
+        DataFramesNotEqualError if the linkage results are not as expected.
+        """
+
+        right_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "firstname": ["Alan", "Betty", "Claire", "Claire", "Elin"],
+                        "lastname": ["Jones", "Jones", "Smith", "Jones", "Evans"],
+                        "numeric": [1, 2, 2, 4, 5],
+                        "id1": [1, 2, 3, 4, 5]
+                    }
+                )
+            )
         )
-      )
-      matchkey = [
-        [right_df.firstname == left_df.firstname],
-        [right_df.lastname == left_df.lastname]  
-      ]
-      result_df = deterministic_linkage(
-        right_df, left_df, 
-        "id1", "id2",
-        matchkey, 
-        None
-      )
-      assert_df_equality(intended_df, result_df, )
-      
 
+        left_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "firstname": ["Alan", "Alan", "Betty", "Barry", "Claire", "David", "Emma"],
+                        "lastname": ["Jones", "Smith", "James", "Jones", "Smith", "Jones", "Evans"],
+                        "numeric": [1, 2, 2, 3, 3, 3, 3],
+                        "id2": [11, 12, 13, 14, 15, 16, 17]
+                    }
+                )
+            )
+        )
+
+        intended_df = spark.createDataFrame(
+          pd.DataFrame(
+              {
+                  "id1": [2, 5],
+                  "id2": [13, 17],
+                  "matchkey": [1, 2]
+              }
+          ),
+          StructType(
+            [
+                StructField("id1", LongType(), True),
+                StructField("id2", LongType(), True),
+                StructField("matchkey", IntegerType(), False),
+            ]
+          )
+        )
+        matchkey = [
+          [right_df.firstname == left_df.firstname],
+          [right_df.lastname == left_df.lastname]
+        ]
+        result_df = deterministic_linkage(
+          right_df, left_df,
+          "id1", "id2",
+          matchkey,
+          None
+        )
+        assert_df_equality(intended_df, result_df, )

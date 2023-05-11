@@ -1336,7 +1336,7 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
                   ).count()
     # initial count of matches
     count = 0
-    
+
     for index, matchkey in enumerate(matchkeys, 1):
 
         if index == 1:
@@ -1345,23 +1345,23 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             )
             # writes first matchkey to parquet
             if use_parquet:
-              ut.write_format(
-                match_data,
-                'parquet',
-                f"{out_dir}/linked_identifiers",
-                mode='overwrite'
-              )
+                ut.write_format(
+                  match_data,
+                  'parquet',
+                  f"{out_dir}/linked_identifiers",
+                  mode='overwrite'
+                )
             else:
-              out_df = match_data
+                out_df = match_data
 
         else:
             # reads previous matches
             # used in left anti join to ignore matched records
             if use_parquet:
-              matches = ut.read_format('parquet',
+                matches = ut.read_format('parquet',
                                        f"{out_dir}/linked_identifiers")
             else:
-              matches = out_df
+                matches = out_df
 
             last_count = count
             count = matches.count()
@@ -1379,21 +1379,20 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
                 id_l, id_r, matchkey, index
             )
             if use_parquet:
-              ut.write_format(
-                match_data,
-                'parquet',
-                f"{out_dir}/linked_identifiers",
-                mode='append'
-              )
+                ut.write_format(
+                  match_data,
+                  'parquet',
+                  f"{out_dir}/linked_identifiers",
+                  mode='append'
+                )
             else:
-              out_df = out_df.union(match_data)
+                out_df = out_df.union(match_data)
 
     # reads and returns final matches
     if use_parquet:
-      matches = ut.read_format('parquet',
-                               f"{out_dir}/linked_identifiers")
+        matches = ut.read_format('parquet', f"{out_dir}/linked_identifiers")
     else:
-      matches = out_df
+        matches = out_df
 
     last_count = count
     count = matches.count()
