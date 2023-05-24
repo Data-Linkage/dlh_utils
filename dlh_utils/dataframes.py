@@ -1431,7 +1431,8 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
     |  4|  5|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
     |  2|  3|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
     +---+---+----------+-------+----------+---+--------+
-
+    The records are grouped by ID, and then the minimum age for each record 
+    is returned. Therefore, the age '6' for ID '3' is removed. 
 
     See Also
     --------
