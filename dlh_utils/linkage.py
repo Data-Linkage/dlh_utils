@@ -12,6 +12,7 @@ from pyspark.sql.types import StringType, FloatType
 from graphframes import GraphFrame
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
+from difflib import SequenceMatcher
 
 ###############################################################################
 
@@ -366,6 +367,61 @@ def jaro_winkler(string1, string2):
 
     return jellyfish.jaro_winkler_similarity(
         string1, string2) if string1 is not None and string2 is not None else None
+
+###############################################################################
+
+
+@F.udf(FloatType())
+def difflib_sequence_matcher(string1, string2):
+    """
+    Applies the difflib.SequenceMatcher ratio() function to get the distance between two 
+    strings and calculates a score between 0 and 1 (1.0 if the sequences are identical,
+    0.0 is they do not have anything in common). 
+    
+    This function works at the column level, and so needs to either be applied to two 
+    forename columns in an already-linked dataset, or as a join condition in a matchkey.
+    
+    Parameters
+    ----------
+    string1: str
+        string to be compared to string2
+    string2: str
+        string to be compared to string1
+
+    Returns
+    -------
+    float
+        similarity score between 0 and 1
+
+    Example
+    --------
+
+    >df.show()
+    +---+---------+----------+
+    | ID| Forename|Forename_2|
+    +---+---------+----------+
+    |  1|    David|     Emily|
+    |  2|  Idrissa|     Emily|
+    |  3|   Edward|     Emily|
+    |  4|   Gordon|     Emily|
+    |  5|     Emma|     Emily|
+    +---+---------+----------+
+
+    >df = df.withColumn('sequence_matcher', difflib_sequence_matcher(F.col('Forename'), F.col('Forename_2')))
+    +---+---------+----------+----------------+
+    | ID| Forename|Forename_2|sequence_matcher|
+    +---+---------+----------+----------------+
+    |  1|    David|     Emily|             0.2|
+    |  2|  Idrissa|     Emily|      0.16666667|
+    |  3|   Edward|     Emily|      0.18181819|
+    |  4|   Gordon|     Emily|             0.0|
+    |  5|     Emma|     Emily|      0.44444445|
+    +---+---------+----------+----------------+
+
+    """
+
+    return SequenceMatcher(
+      a=string1, b=string2) if string1 is not None and string2 is not None else None
 
 ###############################################################################
 # linkage methods
@@ -932,7 +988,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
       Dataframe of deterministic linkage samples by matchkey.
     Raises
     -------
-    None at present. 
+    None at present.
 
     See Also
     --------

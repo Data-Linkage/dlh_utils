@@ -1562,7 +1562,7 @@ def coalesced(df, subset=None, output_col="coalesced_col", drop=False):
       Name of the output column for results of
       the coalesced columns.
     drop : boolean, default = False
-      If drop = True, the columns that were coalesced 
+      If drop = True, the columns that were coalesced
       will be dropped from the dataframe.
 
     Returns

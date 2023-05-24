@@ -52,21 +52,26 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
                                    ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     std_out, std_error = process.communicate()
-    std_out = str(std_out).split("\\n")[:-1]
-    std_out[0] = std_out[0].strip("b'")
 
-    if full_path == True:
-        for i in std_out:
-            file_name = str(i).split(' ')[-1]
-            list_of_filenames.append(file_name)
+    try:
+      std_out = str(std_out).split("\\n")[:-1]
+      std_out[0] = std_out[0].strip("b'")
 
-    elif full_path == False:
-        for i in std_out:
-            file_name = str(i).split('/')[-1]
-            list_of_filenames.append(file_name)
+      if full_path == True:
+          for i in std_out:
+              file_name = str(i).split(' ')[-1]
+              list_of_filenames.append(file_name)
 
-    if regex != None:
-        list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+      elif full_path == False:
+          for i in std_out:
+              file_name = str(i).split('/')[-1]
+              list_of_filenames.append(file_name)
+
+      if regex != None:
+          list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
+    except:
+      print('no files in this directory')
+      list_of_filenames = []
 
     return list_of_filenames
 
