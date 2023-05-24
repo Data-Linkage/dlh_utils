@@ -52,6 +52,7 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
                                    ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     std_out, std_error = process.communicate()
+
     try:
       std_out = str(std_out).split("\\n")[:-1]
       std_out[0] = std_out[0].strip("b'")
@@ -71,6 +72,7 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
     except:
       print('no files in this directory')
       list_of_filenames = []
+
     return list_of_filenames
 
 ###############################################################################

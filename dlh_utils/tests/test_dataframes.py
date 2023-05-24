@@ -896,7 +896,7 @@ class TestFilterWindow(object):
         )
 
         intended_df2 = spark.createDataFrame(
-            (pd.DataFrame({"col1": ["d", "c"], "col2": ["1", "2"]}))
+            (pd.DataFrame({"col1": ["d", "c"], "col2": [1, 2]}))
         )
         result_df2 = filter_window(test_df2, "col1", "col2", "max", condition=False)
 
