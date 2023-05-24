@@ -1268,7 +1268,7 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
         return df,(null_before,null_after)
 
     else:
-      return df
+        return df
 
 ##############################################################################
 
@@ -1429,7 +1429,7 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
                 / F.lit(12)
             ).cast(IntegerType()),
         )
-        
+
     df = df.drop(f"{reference_col}_fmt")
-        
+
     return df

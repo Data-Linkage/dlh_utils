@@ -183,7 +183,7 @@ def flag(df, ref_col, condition = None, condition_value=None, condition_col=None
                            (F.col(ref_col).isNotNull()) & (
                                F.isnan(F.col(ref_col)) == False)
                            )
-   
+
     if condition == 'regex':
         df = df.withColumn(alias,
                           (F.col(ref_col).rlike(condition_value)
