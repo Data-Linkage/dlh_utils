@@ -11,6 +11,7 @@ from pyspark.sql.types import TimestampType, LongType, IntegerType, DoubleType,\
 import pyspark.sql.functions as F
 from pyspark.context import SparkContext as sc
 from dlh_utils import dataframes as da
+import openpyxl
 
 ###############################################################################
 
@@ -1039,3 +1040,68 @@ def pandas_to_spark(pandas_df):
     return spark.createDataFrame(pandas_df, p_schema)
 
 ###################################################################
+
+def write_excel(dataframes, path, styles=None):
+  """
+    Creates an Excel workbook with one worksheet for each of the provided 
+    dataframes.
+  
+    Parameters
+    ----------
+    dataframes : dict or list
+      A dictionary whose keys are names for the datasheets and values are 
+      Pandas dataframes, or just a list of dataframes; in the latter case 
+      the function will name the sheets DF1, DF2 etc.
+      If pyspark dataframes are provided they will be converted to Pandas.
+    path : string
+      Full path (including filename) where the Excel workbook will be saved.
+    styles : dictionary (optional)
+      A dictionary to pass to apply_excel_styles(). See the documentation
+      for that function for more information.
+
+    Returns
+    -------
+    None
+
+    Example
+    -------
+    
+    Given two dataframes, people_df and places_df, 
+    
+    > write_excel({'People': people_df, 'Places': places_df}, '/tmp/xyz.xsls)
+
+  """
+  
+  if isinstance(dataframes, list):
+    dataframes= {"DF" + str(i): df for i, df in enumerate(dataframes)}
+  
+  # Set up the workbook
+  wb = openpyxl.Workbook()
+  wb.save(path)
+  for df_name in dataframes:
+    wb.create_sheet(df_name)
+  
+  # Create a writer to export the dataframes
+  writer = pd.ExcelWriter(
+    path, 
+    mode="w", 
+    engine="openpyxl"
+  )
+  writer.book = wb
+  writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
+  
+  # Export each dataframe to its own sheet
+  for df_name in dataframes:
+    if not isinstance(dataframes[df_name], pd.DataFrame):
+      dataframes[df_name] = dataframes[df_name].toPandas()
+    dataframes[df_name].to_excel(
+      writer,
+      sheet_name=df_name,
+      index=False
+    )
+  wb.save(path)
+   
+###################################################################
+
+def apply_excel_styles(df, styles):
+  pass
