@@ -217,7 +217,7 @@ def apply_styles(df, styles):
     > apply_styles(
         df, 
         {
-          style_pos_neg: "Number"
+          style_on_cutoff: "Number"
         }
       )
 
@@ -228,7 +228,7 @@ def apply_styles(df, styles):
     > apply_styles(
         df, 
         {
-          style_pos_neg: "Number",
+          style_on_cutoff: "Number",
           style_on_condition: ["Number", "OtherNumber"]
         }
       )
@@ -387,9 +387,11 @@ def style_colour_gradient(value, min, max, property="background-color", min_colo
       The CSS property the style will be applied to. Must be able to be set to 
       a hexadecimal colour string.
     min_colour : string, default="#FFFFFF" (white)
-      The colour at the minimum end of the gradient.
+      The colour at the minimum end of the gradient. Pass only a hexadecimal string,
+      not a colour name.
     max_colour : string, default="#FF0000" (red)
-      The colour at the maximum end of the gradient.
+      The colour at the maximum end of the gradient. Pass only a hexadecimal string,
+      not a colour name.
     error_colour : string, default="#000000"
       The colour will be assigned if an error occurs in this function. If None,
       the error will be raised instead.
@@ -409,13 +411,14 @@ def style_colour_gradient(value, min, max, property="background-color", min_colo
 
     # Interpolate    
     position = (value - min) / (max - min)
-    interpolated_values = [0, 0, 0]
+    interpolated_channels = [0, 0, 0]
     for c in range(3):
       if max_channels[c] > min_channels[c]:
         val = int(position * (max_channels[c] - min_channels[c]) + min_channels[c])
       else:
         val = int((1 - position) * (min_channels[c] - max_channels[c]) + max_channels[c])
-
+      interpolated_channels[c] = ("0x%0*x" % (2, val))[2:].upper()
+      
     # Return the result
     return property + " : #" + "".join(interpolated_channels) + ";"
   
@@ -423,11 +426,4 @@ def style_colour_gradient(value, min, max, property="background-color", min_colo
     if error_colour is None:
       raise ex
     else:
-      return property + " : " + error_colour + ";"
-
-    
-#############################################################  
-# Testing  
-#############################################################  
-
-  
+      return property + " : #" + error_colour + ";"
