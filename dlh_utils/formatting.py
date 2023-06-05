@@ -1,21 +1,12 @@
-'''
-Functions for formatting dataframes and exporting them to Excel
-'''
-
 import openpyxl
 import pandas as pd
+import os
+import subprocess
 
-def write_excel(dataframes, path, styles=None, columns={}):
+def export_to_excel(dataframes, styles=None, columns={}, local_path=None, hdfs_path=None):
   """
     Creates an Excel workbook with one worksheet for each of the provided 
     dataframes.
-    
-    Accepts an optional styles dictionary that will be passed to apply_styles(), see
-    the documentation on that below for details.
-    
-    Also accepts an optional dictionary of columns for the dataframes that
-    allows the caller to specify a subset of columns and the order in which they
-    will appear in the Excel sheet.
   
     Parameters
     ----------
@@ -41,7 +32,7 @@ def write_excel(dataframes, path, styles=None, columns={}):
 
     Returns
     -------
-    None
+    An openpyxl.WorkBook object
 
     Example
     -------
@@ -88,6 +79,9 @@ def write_excel(dataframes, path, styles=None, columns={}):
 
   """
   
+  if hdfs_path is not None and local_path is None:
+    raise ValueError("Can't save to HDFS without also specifying a local path")
+  
   if isinstance(dataframes, list):
     dataframes = {"Sheet" + str(i): df for i, df in enumerate(dataframes)}
   elif isinstance(dataframes, pd.DataFrame):
@@ -101,13 +95,13 @@ def write_excel(dataframes, path, styles=None, columns={}):
   
   # Set up the workbook
   wb = openpyxl.Workbook()
-  wb.save(path)
+  wb.save(local_path)
   for df_name in dataframes:
     wb.create_sheet(df_name)
   
   # Create a writer to export the dataframes
   writer = pd.ExcelWriter(
-    path, 
+    local_path, 
     mode="w", 
     engine="openpyxl"
   )
@@ -119,15 +113,69 @@ def write_excel(dataframes, path, styles=None, columns={}):
     if not isinstance(dataframes[df_name], pd.DataFrame):
       dataframes[df_name] = dataframes[df_name].toPandas()
     if df_name in columns:
-      dataframes[df_name] = dataframes[df_name].loc[: columns[df_name]] 
-    dataframes[df_name].to_excel(
+      dataframes[df_name] = dataframes[df_name].loc[: , columns[df_name]] 
+    if styles is not None and df_name in styles:
+      df_export = apply_styles(dataframes[df_name], styles[df_name])
+    else:
+      df_export = dataframes[df_name]
+    df_export.to_excel(
       writer,
       sheet_name=df_name,
       index=False
     )
-  wb.save(path)
+  
+  # Remove the default, empty sheet if it wasn't used
+  if "Sheet" not in dataframes:
+    del wb["Sheet"]
+  
+  # Save to disk
+  if local_path is not None:
+    wb.save(local_path)
+    if hdfs_path is not None:
+      copy_local_file_to_hdfs(local_path, hdfs_path)
+  
+  return wb
 
-###################################################################
+#########################################################
+
+def copy_local_file_to_hdfs(local_path, hdfs_path, local_filename=None, hdfs_filename=None):
+  """
+  Copies a file created locally to HDFS.
+  
+  Parameters
+  ----------
+  
+  local_path: string
+    Path to the local file to be copied
+  hdfs_path: string
+    Target path to copy to
+  local_filename: string, default=None
+    If not specified, the local_path is assumed to include the filename
+  hdfs_filename: string, default=None
+    If not specified, the hdfs_path is assumed to include the filename
+  
+  Returns
+  -------
+  None
+  
+  Example
+  -------
+  
+  > copy_local_file_to_hdfs('/tmp/wb.xlsx', '/hdfs/folder/xlsx)
+  """
+  if local_filename is not None:
+    local_path = os.path.join(local_path, local_filename)
+  if hdfs_filename is not None:
+    hdfs_path = os.path.join(hdfs_path, hdfs_filename)
+  commands = ["hadoop", "fs", "-put", "-f", local_path, hdfs_path]
+  process = subprocess.Popen(
+    commands,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+  )
+  stdout, stderr = process.communicate()
+
+#########################################################
   
 def apply_styles(df, styles):
   """
@@ -212,7 +260,6 @@ def apply_styles(df, styles):
       cols = [cols]
     for c in cols:
       styles_by_column[c].append(s)
-  print(styles_by_column)
   
   sdf = df.style
   for col, sty in styles_by_column.items():
@@ -221,7 +268,6 @@ def apply_styles(df, styles):
         sdf = sdf.applymap(f, subset=col)
   return sdf
 
-###################################################################
 
 def style_on_cutoff(value, cutoff=0, negative_style="red", positive_style="green", zero_style="white", error_style="black", property="background-color"):
   """
@@ -276,8 +322,7 @@ def style_on_cutoff(value, cutoff=0, negative_style="red", positive_style="green
     else:
       return property + " : " + error_style + ";"
 
-###################################################################
-
+    
 def style_on_condition(value, property="font-weight", true_style="bold", false_style="normal", error_style=None, condition= lambda x : x == 0):
   """
     Returns a CSS string that sets the specified property to the appropriate style
@@ -319,8 +364,6 @@ def style_on_condition(value, property="font-weight", true_style="bold", false_s
     else:
       return property + " : " + error_style + ";"
 
-###################################################################
-    
 def style_colour_gradient(value, min, max, property="background-color", min_colour="#FFFFFF", max_colour="#FF0000", error_colour="#000000"):
   """
     Returns a CSS string that sets the specified colour property to a colour ranging
@@ -366,11 +409,13 @@ def style_colour_gradient(value, min, max, property="background-color", min_colo
 
     # Interpolate    
     position = (value - min) / (max - min)
-    interpolated_channels = [
-      ('0x%0*x' % (2, int(position * (max_channels[c] - min_channels[c]) + min_channels[c])))[2:].upper()
-      for c in range(3)
-    ]
-    
+    interpolated_values = [0, 0, 0]
+    for c in range(3):
+      if max_channels[c] > min_channels[c]:
+        val = int(position * (max_channels[c] - min_channels[c]) + min_channels[c])
+      else:
+        val = int((1 - position) * (min_channels[c] - max_channels[c]) + max_channels[c])
+
     # Return the result
     return property + " : #" + "".join(interpolated_channels) + ";"
   
@@ -381,3 +426,8 @@ def style_colour_gradient(value, min, max, property="background-color", min_colo
       return property + " : " + error_colour + ";"
 
     
+#############################################################  
+# Testing  
+#############################################################  
+
+  
