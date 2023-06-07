@@ -976,10 +976,6 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
       variable name of column containing left unique identifier
     id_r : string
       variable name of column containing right unique identifier
-    suffix_l : string
-      suffix to be applied to left dataframe
-    suffix_r : string
-      suffix to be applied to right dataframe
     n_ids : int, default = 100
       The number of identifier pairs sampled for each matchkey
     Returns
