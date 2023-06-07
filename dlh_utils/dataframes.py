@@ -48,7 +48,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
       the conditions of the regex string.
 
     drop_duplicates : bool, default = True
-      This parameter drops duplicated columns.
+      This parameter drops duplicated rows.
 
     Returns
     -------
