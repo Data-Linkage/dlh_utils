@@ -69,7 +69,7 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
 
         if regex != None:
             list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
-      except:
+    except:
         print('no files in this directory')
         list_of_filenames = []
 
