@@ -72,12 +72,11 @@ def alpha_name(df, input_col, output_col):
     if df.schema[input_col].dataType.typeName()!='string':
         raise Exception(f'Column: {input_col} is not of type string')
 
-    else:
-        #concat removes any null values. conditional replacement only when not null added
-        #to avoid unwanted removal of null
-        df= df.withColumn(output_col, \
-                F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(\
-                F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
+    #concat removes any null values. conditional replacement only when not null added
+    #to avoid unwanted removal of null
+    df= df.withColumn(output_col, \
+            F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(\
+            F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
 
     return df
 

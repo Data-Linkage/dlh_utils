@@ -529,7 +529,7 @@ class Test_alphaname(object):
         intended_schema = StructType([
           StructField("ID", IntegerType(), True),
           StructField("Forename", StringType(), True),
-          StructField("alphaname", StringType(), True),
+          StructField("alphaname", StringType(), False),
         ])
 
         intended_data = [
@@ -796,7 +796,7 @@ class Test_std_lev_score(object):
         
         assert_df_equality(intended_df2,result_df2) 
                
-
+          
         
         
       
