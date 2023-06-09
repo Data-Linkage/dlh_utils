@@ -5,16 +5,31 @@ Pytesting on Linkage functions
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType, DoubleType
 import pandas as pd
 import pytest
 import chispa
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
 demographics,demographics_compare,assert_unique_matches,matchkey_counts,\
-matchkey_dataframe,alpha_name
+matchkey_dataframe,alpha_name, std_lev_score, soundex
 
 pytestmark = pytest.mark.usefixtures("spark")
+
+@pytest.fixture(scope="session")
+def spark(request):
+    """fixture for creating a spark context
+    Args:
+        request: pytest.FixtureRequest object
+    """
+    spark = (
+        SparkSession.builder.appName("dataframe_testing")
+        .config("spark.executor.memory", "5g")
+        .config("spark.yarn.excecutor.memoryOverhead", "2g")
+        .getOrCreate()
+    )
+    request.addfinalizer(lambda: spark.stop())
+    return spark
 
 #############################################################################
 
@@ -582,6 +597,8 @@ class Test_alphaname(object):
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
         result_df2 = alpha_name(test_df2,'Name','alphaname')
+        
+        assert_df_equality(intended_df2,result_df2)
 
 
 ###############################################################
