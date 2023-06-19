@@ -48,7 +48,7 @@ def select(df, columns=None, startswith=None, endswith=None, contains=None,
       the conditions of the regex string.
 
     drop_duplicates : bool, default = True
-      This parameter drops duplicated columns.
+      This parameter drops duplicated rows.
 
     Returns
     -------
@@ -1431,7 +1431,8 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
     |  4|  5|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
     |  2|  3|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
     +---+---+----------+-------+----------+---+--------+
-
+    The records are grouped by ID, and then the minimum age for each record 
+    is returned. Therefore, the age '6' for ID '3' is removed. 
 
     See Also
     --------
@@ -1461,37 +1462,26 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
     if mode in ['min', 'max']:
 
+        dt_target = [dtype for name, dtype in df.dtypes if name == target][0]
+        df = window(df, filter_window, target, mode, alias='value')
+        df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
+
         if condition:
-
-            df = window(df, filter_window, target, mode, alias='value')
-
-            df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
-
             df = (df
                   .where(F.col(target) == F.col('value'))
                   .drop('value')
                   )
-
-            df = (st.standardise_null(df=df,
-                                      replace="^<<<>>>$",
-                                      subset=target)
-                  )
-
         else:
-
-            df = window(df, filter_window, target, mode, alias='value')
-
-            df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
-
             df = (df
                   .where(F.col(target) != F.col('value'))
                   .drop('value')
                   )
 
-            df = (st.standardise_null(df=df,
-                                      replace="^<<<>>>$",
-                                      subset=target)
-                  )
+        df = (st.standardise_null(df=df,
+                                  replace="^<<<>>>$",
+                                  subset=target)
+              )
+        df = df.withColumn(target, F.col(target).cast(dt_target))
 
     return df
 

@@ -859,8 +859,127 @@ class TestReplace(object):
         result_df2 = replace(
             test_df, subset=["before", "before1"], replace_dict={"a": None, "c": "f"}
         )
-        assert_df_equality(intended_df2, result_df2)
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True)
 
+    def test_expected_with_join(self, spark):
+
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["a", None, "c", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        print("Test")
+        test_df.show()
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["A", None, "f", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        print("Intended")
+        intended_df.show()
+        result_df = replace(
+            test_df, subset="before", replace_dict={"a": "A", "c": "f"}, use_join=True
+        )
+        print("Result")
+        result_df.show()
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
+
+    def test_expected_with_regex(self, spark):
+
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["alan", None, "betty", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["A", None, "Y", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        result_df = replace(
+            test_df,
+            subset="before",
+            replace_dict={"^a": "A", "y$": "Y"},
+            use_regex=True
+        )
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
+
+    def test_value_error_on_join_and_regex(self, spark):
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["alan", None, "betty", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        with pytest.raises(ValueError) as e:
+            result_df = replace(
+              test_df,
+              subset="before",
+              replace_dict={"^a": "A", "y$": "Y"},
+              use_regex=True,
+              use_join=True
+          )
+
+    def test_value_error_on_join_and_none(self, spark):
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "before": ["alan", None, "betty", ""],
+                        "before1": ["a", "b", "c", "d"],
+                        "after": [None, None, "f", ""],
+                        "after1": [None, "b", "f", "d"],
+                    }
+                )
+            )
+        )
+
+        with pytest.raises(ValueError) as e:
+            result_df = replace(
+              test_df,
+              subset="before",
+              replace_dict={"^a": "A", None: "Y"},
+              use_join=True
+          )
 
 ##############################################################################
 

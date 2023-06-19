@@ -12,6 +12,7 @@ from pyspark.sql.types import StringType, FloatType
 from graphframes import GraphFrame
 from dlh_utils import dataframes as da
 from dlh_utils import utilities as ut
+from difflib import SequenceMatcher
 
 ###############################################################################
 
@@ -381,6 +382,61 @@ def jaro_winkler(string1, string2):
 
     return jellyfish.jaro_winkler_similarity(
         string1, string2) if string1 is not None and string2 is not None else None
+
+###############################################################################
+
+
+@F.udf(FloatType())
+def difflib_sequence_matcher(string1, string2):
+    """
+    Applies the difflib.SequenceMatcher ratio() function to get the distance between two 
+    strings and calculates a score between 0 and 1 (1.0 if the sequences are identical,
+    0.0 is they do not have anything in common). 
+    
+    This function works at the column level, and so needs to either be applied to two 
+    forename columns in an already-linked dataset, or as a join condition in a matchkey.
+    
+    Parameters
+    ----------
+    string1: str
+        string to be compared to string2
+    string2: str
+        string to be compared to string1
+
+    Returns
+    -------
+    float
+        similarity score between 0 and 1
+
+    Example
+    --------
+
+    >df.show()
+    +---+---------+----------+
+    | ID| Forename|Forename_2|
+    +---+---------+----------+
+    |  1|    David|     Emily|
+    |  2|  Idrissa|     Emily|
+    |  3|   Edward|     Emily|
+    |  4|   Gordon|     Emily|
+    |  5|     Emma|     Emily|
+    +---+---------+----------+
+
+    >df = df.withColumn('sequence_matcher', difflib_sequence_matcher(F.col('Forename'), F.col('Forename_2')))
+    +---+---------+----------+----------------+
+    | ID| Forename|Forename_2|sequence_matcher|
+    +---+---------+----------+----------------+
+    |  1|    David|     Emily|             0.2|
+    |  2|  Idrissa|     Emily|      0.16666667|
+    |  3|   Edward|     Emily|      0.18181819|
+    |  4|   Gordon|     Emily|             0.0|
+    |  5|     Emma|     Emily|      0.44444445|
+    +---+---------+----------+----------------+
+
+    """
+
+    return SequenceMatcher(
+      a=string1, b=string2) if string1 is not None and string2 is not None else None
 
 ###############################################################################
 # linkage methods
@@ -935,10 +991,6 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
       variable name of column containing left unique identifier
     id_r : string
       variable name of column containing right unique identifier
-    suffix_l : string
-      suffix to be applied to left dataframe
-    suffix_r : string
-      suffix to be applied to right dataframe
     n_ids : int, default = 100
       The number of identifier pairs sampled for each matchkey
     Returns
@@ -1333,8 +1385,10 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     +--------------------+--------------------+--------+
     '''
 
+    use_parquet = out_dir is not None
+
     # control for file path format
-    if out_dir[-1] == "/":
+    if use_parquet and out_dir[-1] == "/":
         out_dir = out_dir[:-1]
 
     # count of unique ids in left df
@@ -1353,18 +1407,28 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     for index, matchkey in enumerate(matchkeys, 1):
 
         if index == 1:
+            match_data = matchkey_join(
+              df_l, df_r, id_l, id_r, matchkey, index
+            )
             # writes first matchkey to parquet
-            ut.write_format(matchkey_join(
-                df_l, df_r, id_l, id_r, matchkey, index),
-                'parquet',
-                f"{out_dir}/linked_identifiers",
-                mode='overwrite')
+            if use_parquet:
+                ut.write_format(
+                  match_data,
+                  'parquet',
+                  f"{out_dir}/linked_identifiers",
+                  mode='overwrite'
+                )
+            else:
+                out_df = match_data
 
         else:
             # reads previous matches
             # used in left anti join to ignore matched records
-            matches = ut.read_format('parquet',
-                                     f"{out_dir}/linked_identifiers")
+            if use_parquet:
+                matches = ut.read_format('parquet',
+                                       f"{out_dir}/linked_identifiers")
+            else:
+                matches = out_df
 
             last_count = count
             count = matches.count()
@@ -1376,17 +1440,26 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             print("right residual: ", df_r_count-count)
 
             # appends subsequent matches to initial parquet
-            ut.write_format(matchkey_join(
+            match_data = matchkey_join(
                 df_l.join(matches, id_l, 'left_anti'),
                 df_r.join(matches, id_r, 'left_anti'),
-                id_l, id_r, matchkey, index),
-                'parquet',
-                f"{out_dir}/linked_identifiers",
-                mode='append')
+                id_l, id_r, matchkey, index
+            )
+            if use_parquet:
+                ut.write_format(
+                  match_data,
+                  'parquet',
+                  f"{out_dir}/linked_identifiers",
+                  mode='append'
+                )
+            else:
+                out_df = out_df.union(match_data)
 
     # reads and returns final matches
-    matches = ut.read_format('parquet',
-                             f"{out_dir}/linked_identifiers")
+    if use_parquet:
+        matches = ut.read_format('parquet', f"{out_dir}/linked_identifiers")
+    else:
+        matches = out_df
 
     last_count = count
     count = matches.count()
