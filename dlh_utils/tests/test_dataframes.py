@@ -5,7 +5,7 @@ Pytesting on Dataframes functions
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,IntegerType,LongType,DoubleType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,DoubleType
 import pandas as pd
 import chispa
 from chispa import assert_df_equality
@@ -13,7 +13,7 @@ import pytest
 from dlh_utils.dataframes import explode,drop_columns,select,cut_off,\
 drop_nulls,union_all,rename_columns,prefix_columns,suffix_columns,split,\
 clone_column,substring,filter_window,concat,coalesced,window,literal_column,\
-date_diff
+date_diff,index_select
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -37,6 +37,7 @@ def spark(request):
 
 
 class TestExplode(object):
+  """Test of explode function."""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -62,6 +63,7 @@ class TestExplode(object):
 
 
 class TestConcat(object):
+  """Test of concat function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -118,6 +120,7 @@ class TestConcat(object):
 
 
 class TestDropColumns(object):
+  """Test of drop_columns function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -251,7 +254,6 @@ class TestCoalesced(object):
         result_df2 = coalesced(test_df2, drop=True)
         assert_df_equality(intended_df2, result_df2, ignore_row_order=True,\
                            ignore_column_order=True)
-
 
 
 #################################################################
