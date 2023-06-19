@@ -990,3 +990,160 @@ class TestDeterministicLinkage:
           None
         )
         assert_df_equality(intended_df, result_df, )
+
+        
+###############################################################
+
+class Test_blocking(object):
+
+    #Test 1
+    def test_expected(self,spark):        
+        
+        test_schemaA = StructType([
+          StructField("ID_1", IntegerType(), True),
+          StructField("age_df1", IntegerType(), True),
+          StructField("sex_df1", StringType(), True),
+          StructField("pc_df1", StringType(), True),
+        ])
+        
+        test_dataA = [
+          [1, 1, 'Male', 'gu1111'],
+          [2,  1, 'Female', 'gu1211'],
+          [3, 56, 'Male', 'gu2111'],
+        ]
+
+        test_dfA = spark.createDataFrame(test_dataA, test_schemaA)
+        test_dfA.show()
+
+        test_schemaB = StructType([
+          StructField("ID_2", IntegerType(), True),
+          StructField("age_df2", IntegerType(), True),
+          StructField("sex_df2", StringType(), True),
+          StructField("pc_df2", StringType(), True),
+        ])
+        
+        test_dataB = [
+          [6, 2, 'Female', 'gu1211'],
+          [5,  56, 'Male', 'gu2111'],
+          [4, 7, 'Female', 'gu1111'],
+        ]
+
+        test_dfB = spark.createDataFrame(test_dataB, test_schemaB)
+        test_dfB.show()
+        
+        id_vars = ['ID_1', 'ID_2']
+    
+        blocks = {'pc_df1': 'pc_df2'}
+
+        blocking(test_dfA, test_dfB, blocks, id_vars).show() 
+
+        result_df = blocking(test_dfA, test_dfB, blocks, id_vars)
+        
+        intended_schema = StructType([
+          StructField("ID_1", IntegerType(), True),
+          StructField("age_df1", IntegerType(), True),
+          StructField("sex_df1", StringType(), True),
+          StructField("pc_df1", StringType(), True),
+          StructField("ID_2", IntegerType(), True),
+          StructField("age_df2", IntegerType(), True),
+          StructField("sex_df2", StringType(), True),
+          StructField("pc_df2", StringType(), True),
+        ])
+
+        intended_data = [
+          [1, 1, 'Male', 'gu1111', 4, 7, 'Female', 'gu1111'],
+          [2,  1, 'Female', 'gu1211', 6, 2, 'Female', 'gu1211'],
+          [3, 56, 'Male', 'gu2111', 5,  56, 'Male', 'gu2111'],
+        ]
+ 
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_df.show()
+    
+        assert_df_equality(intended_df, result_df)
+    
+
+    #Test 2
+    def test_missing_values(self,spark):
+
+        test_schemaA = StructType([
+          StructField("ID_1", StringType(), True),
+          StructField("Forename_1", StringType(), True),
+          StructField("Middlename_1", StringType(), True),
+          StructField("Surname_1", StringType(), True),
+          StructField("DoB_1", StringType(), True),
+          StructField("Sex_1", StringType(), True),
+          StructField("Postcode_1", StringType(), True),
+        ])
+
+        test_dataA = [
+          ("1","Homer","Jay","Simpson","1983-05-12","M","ET74 2SP"),
+          ("2","Marge","Juliet","Simpson","1983-03-19","F","EC1N 8UB"),
+          ("3","Bart","Jo-Jo",None,"2012-04-01","M","SS4 3BF"),
+          ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","HU 9DD"),
+          ("4","Lisa","Marie","Simpson","2014-05-09","F",None),
+          ("5","Maggie",None,"Simpson","2021-01-12","F","G42 8AU")
+          ]
+
+        test_dfA = spark.createDataFrame(test_dataA, test_schemaA)
+        test_dfA.show()
+
+        test_schemaB = StructType([
+          StructField("ID_2", StringType(), True),
+          StructField("Forename_2", StringType(), True),
+          StructField("Middlename_2", StringType(), True),
+          StructField("Surname_2", StringType(), True),
+          StructField("DoB_2", StringType(), True),
+          StructField("Sex_2", StringType(), True),
+          StructField("Postcode_2", StringType(), True),
+        ])
+
+        test_dataB = [
+          ("1","Homer","Jay","Simpson","1983-05-12","M",None),
+          ("2","Marge","Juliet","Simpson","1983-03-19","F","EC1N 8UB"),
+          ("3","Bart","Jo-Jo",None,"2012-04-01","M","SS4 3BF"),
+          ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","HU 9DD"),
+          ("4","Lisa","Marie","Simpson","2014-05-09","F",None),
+          ("5","Maggie",None,"Simpson","2021-01-12","F","G42 8AU")
+          ]
+
+        test_dfB = spark.createDataFrame(test_dataB, test_schemaB)
+        test_dfB.show()
+
+        id_vars = ['ID_1', 'ID_2']
+
+        blocks = {'Postcode_1': 'Postcode_2'}
+
+        blocking(test_dfA, test_dfB, blocks, id_vars).show() 
+
+        result_df = blocking(test_dfA, test_dfB, blocks, id_vars)
+
+        intended_schema = StructType([
+          StructField("ID_1", StringType(), True),
+          StructField("Forename_1", StringType(), True),
+          StructField("Middlename_1", StringType(), True),
+          StructField("Surname_1", StringType(), True),
+          StructField("DoB_1", StringType(), True),
+          StructField("Sex_1", StringType(), True),
+          StructField("Postcode_1", StringType(), True),
+          StructField("ID_2", StringType(), True),
+          StructField("Forename_2", StringType(), True),
+          StructField("Middlename_2", StringType(), True),
+          StructField("Surname_2", StringType(), True),
+          StructField("DoB_2", StringType(), True),
+          StructField("Sex_2", StringType(), True),
+          StructField("Postcode_2", StringType(), True),
+        ])
+
+        intended_data = [
+          ("2","Marge","Juliet","Simpson","1983-03-19","F","EC1N 8UB", "2","Marge","Juliet","Simpson","1983-03-19","F","EC1N 8UB"),
+          ("3","Bart","Jo-Jo",None,"2012-04-01","M","SS4 3BF", "3","Bart","Jo-Jo",None,"2012-04-01","M","SS4 3BF"),
+          ("3","Bart","Jo-Jo","Simpson","2012-04-01","M","HU 9DD", "3","Bart","Jo-Jo","Simpson","2012-04-01","M","HU 9DD"),
+          ("5","Maggie",None,"Simpson","2021-01-12","F","G42 8AU", "5","Maggie",None,"Simpson","2021-01-12","F","G42 8AU")]
+
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_df.show()
+
+        assert_df_equality(intended_df, result_df, ignore_row_order = True)
+    
+
+###############################################################
