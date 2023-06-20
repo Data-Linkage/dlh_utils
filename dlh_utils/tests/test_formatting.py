@@ -422,3 +422,64 @@ class TestStyleColourGradient:
           error_colour="AAAAAA"
         )
         assert result == "background-color : #AAAAAA;"
+
+#############################################################################
+
+class TestStyleMapValues:
+
+    def test_numeric(self):
+        """
+        Testing the function for a numeric input.
+        """
+        result = dlh_utils.formatting.style_map_values(
+          1, 
+          {0:"black", 1:"red"}
+        )
+        assert result == "background-color : red;"
+
+    def test_boolean(self):
+        """
+        Testing the function for a boolean input.
+        """
+        result = dlh_utils.formatting.style_map_values(
+          True, 
+          {True:"black", False:"red"},
+          property="color"
+        )
+        assert result == "color : black;"
+        
+        # NB 1 is truthy in Python, so this is expected behaviour
+        result = dlh_utils.formatting.style_map_values(
+          1, 
+          {True:"black", False:"red"},
+          property="color"
+        )
+        assert result == "color : black;"
+
+    def test_default_style(self):
+        """
+        Testing the default style is used when the value is absent from the
+        mapping_dictionary.
+        """
+        result = dlh_utils.formatting.style_map_values(
+          2, 
+          {0:"black", 1:"red"},
+          property="color",
+          default_style="green"
+        )
+        assert result == "color : green;"
+
+    def test_error_style(self):
+        """
+        Testing the function applies the error style correctly.
+        A TypeError arises because [1] is a list, which cannot be used
+        to look up a key in a dictionary. This is "swallowed" by style_map_values,
+        which instead returns the error_style.
+        """
+        result = dlh_utils.formatting.style_map_values(
+          [1], 
+          {True:"black", False:"red"},
+          property="color",
+          error_style="green"
+        )
+        assert result == "color : green;"

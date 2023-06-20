@@ -11,6 +11,7 @@ def export_to_excel(
   dataframes,
   styles=None,
   columns=None,
+  freeze_panes=None,
   local_path=None,
   hdfs_path=None
 ):
@@ -33,10 +34,13 @@ def export_to_excel(
         A dictionary whose keys are dataframe names and whose values are lists
         of columns. If a dataframe is named in this dictionary, only the listed
         columns will be written to Excel and their order will be as in the list
-        provided.
-
-        If a dataframe is not named in this dictionary, all of its columns
-        will be included.
+        provided. If a dataframe is not named in this dictionary, all of its
+        columns will be included in their default order.
+      freeze_panes : dictionary, default = None
+        Dictionary mapping table names to tuples of the form (r, c) where r is
+        the number of columns on the left to freeze and r the number of rows
+        from the top. If a table's name is not present as a key, nothing will
+        be frozen.
       local_path : string, default=None
         Full path (including filename) where the Excel workbook will be saved.
         If not specified, the workbook will not be saved to disk.
@@ -59,13 +63,12 @@ def export_to_excel(
         columns={'People': ['surname', firstname']}
         )
 
-      A single dataframe with complex styling as follows:
-      * bank_balance is given a background colour gradient
-      * income_change is given red/green text colours for negative/positive
-      * age is formatted in bold if the person is a child
-
-      This example uses defaults for many of the parameters, but note the
-      use of partial() to set values for the parameters we choose.
+      This next example shows a single dataframe with complex styling:
+        * bank_balance is given a background colour gradient
+        * income_change is given red/green text colours for negative/positive
+        * age is formatted in bold if the person is a child
+      Note the use of partial() to set values for the parameters when we
+      don't want to use their default values.
 
       See apply_styles and the style_* functions for more information on
       these functions.
@@ -108,10 +111,9 @@ def export_to_excel(
               "Can't pass a list of columns to write_excel "
               "unless you only passed in a single dataframe. "
               "You can use a dictionary instead "
-              "(see the docstring for more information)"
+              "(see this function's docstring for an example)"
             )
         columns = {"Sheet1": columns}
-
 
     # Set up the workbook
     wb = openpyxl.Workbook()
@@ -138,10 +140,14 @@ def export_to_excel(
             df_export = apply_styles(dataframes[df_name], styles[df_name])
         else:
             df_export = dataframes[df_name]
+        fp = None
+        if freeze_panes is not None and df_name in freeze_panes:
+            fp = freeze_panes[df_name]
         df_export.to_excel(
             writer,
             sheet_name=df_name,
-            index=False
+            index=False,
+            freeze_panes=fp
         )
 
     # Remove the default, empty sheet if it wasn't used
@@ -165,7 +171,7 @@ def copy_local_file_to_hdfs(
   hdfs_filename=None
 ):
     """
-    Copies a file created locally to HDFS.
+    Copies a file created locally (i.e. in CDSW) to HDFS.
 
     Parameters
     ----------
@@ -200,7 +206,7 @@ def copy_local_file_to_hdfs(
     )
     stdout, stderr = process.communicate()
 
-#########################################################
+###############################################################################
 
 def apply_styles(df, styles):
     """
@@ -209,7 +215,7 @@ def apply_styles(df, styles):
       into Excel or HTML.
 
       Some suitable functions are included in this module with the prefix
-      "style_".
+      "style_" but you can also pass in a custom function.
 
       NOTE: This function returns a Styler, not a DataFrame.
 
@@ -220,13 +226,9 @@ def apply_styles(df, styles):
         If a pyspark dataframe is provided it will be converted to Pandas.
       styles : dict
         A dictionary whose keys are functions and whose values are lists
-        of column names.
-        Each function should take in a single value and return a valid CSS
-        string.
-        The value can be a single column name (as a string) or a list
-      columns : list of strings, default=None
-        If provided, only the columns in the list will be written to Excel,
-        and they will be ordered as they are in the list.
+        of column names. Each function should take in a single value and
+        return a valid CSS string. The value can be a single column name
+        (as a string) or a list
 
       Returns
       -------
@@ -258,7 +260,7 @@ def apply_styles(df, styles):
           }
         )
 
-      The style_ functions have optional parameters we may want to customize. To
+      The style_ functions have default behaviours we may want to customize. To
       do this, use the following pattern. The partial() function is defined in
       functools (part of python's standard library) and allows us to "freeze" some
       parameters of a function before it's evaluated:
@@ -269,10 +271,6 @@ def apply_styles(df, styles):
             partial(style_fill_pos_neg, property='color'): "Number"
           }
         )
-
-      For more custom applications, you can define your own style function and pass
-      it into apply_styles -- see the style_ functions in this module for examples.
-
     """
 
     if not isinstance(df, pd.DataFrame):
@@ -292,6 +290,8 @@ def apply_styles(df, styles):
             for f in sty:
                 sdf = sdf.applymap(f, subset=col)
     return sdf
+
+###############################################################################
 
 def style_on_cutoff(
   value,
@@ -321,6 +321,8 @@ def style_on_cutoff(
 
       value : numeric or other appropriate type
         A value of any type that can be compared with cutoff using "<" and ">".
+      cutoff : any type comparable to value
+        The passed-in value will be compared to cutoff to determine which style is returned.
       negative_style : string, default="red"
         The colour name, RGB code or other style value to be assigned when value < cutoff.
       positive_style : string, default="green"
@@ -331,7 +333,8 @@ def style_on_cutoff(
       error_style : string, default="black"
        The colour name, RGB code or other style value to be assigned when an error occurs.
        This can happen when the value is NaN or not of the expected type.
-       If error_style=None, the exception will be re-raised instead.
+       If error_style=None, the exception will be re-raised instead. If in doubt, pass in
+       None and make sure any errors that are raised are expected.
       property : string, default="background-color"
         The CSS property the colour will be applied to.
 
@@ -356,6 +359,8 @@ def style_on_cutoff(
         if error_style is None:
             raise ex
         return property + " : " + error_style + ";"
+
+###############################################################################
 
 def style_on_condition(
   value,
@@ -403,6 +408,8 @@ def style_on_condition(
             raise ex
         return property + " : " + error_style + ";"
 
+###############################################################################
+
 def style_colour_gradient(
   value,
   min,
@@ -422,14 +429,14 @@ def style_colour_gradient(
       Parameters
       ----------
 
-      value : any appropriate type
-        A value of a type that can be accepted by the condition function.
-      max : any numeric type
-        The lowest value that will receive the end_colour (any higher values
-        also receive end_colour).
+      value : any numeric type
+        The value to be mapped to a colour.
       min : any numeric type
         The highest value that will receive the start_colour (any lower values
         also receive start_colour).
+      max : any numeric type
+        The lowest value that will receive the end_colour (any higher values
+        also receive end_colour).
       property : string, default="background-colour"
         The CSS property the style will be applied to. Must be able to be set to
         a hexadecimal colour string.
@@ -472,3 +479,64 @@ def style_colour_gradient(
         if error_colour is None:
             raise ex
         return property + " : #" + error_colour + ";"
+
+###############################################################################
+
+def style_map_values(
+  value,
+  mapping_dictionary,
+  property="background-color",
+  default_style=None,
+  error_style=None
+):
+    """
+      Returns a CSS string that sets the specified property to a value as specified by
+      mapping_dictionary, which maps possible values being passed in to the style the
+      property should be assigned to. If the value is not found in mapping_dictionary
+      the default_value is used, if one is specified, or an error is raised. In the
+      event of an error, error_value will be used if it is not None, otherwise the
+      caller will receive the error.
+
+      This function is intended to be used with apply_styles() (defined in this module).
+
+      Parameters
+      ----------
+
+      value : any appropriate type
+        A value of a type that can be accepted by the condition function.
+      mapping_dictionary : dictionary
+        Keys are possible values for the parameter "value"; these are mapped to styles.
+      property : string, default="background-colour"
+        The CSS property the style will be applied to. Must be able to be set to
+        a hexadecimal colour string.
+      default_style : string, default=None
+        If not None, this will be used if the value passed in is not found in
+        mapping_dictionary.
+      error_style : string, default=None
+        The style will be assigned if an error occurs in this function. If None,
+        the error will be raised instead.
+
+      Returns
+      -------
+      String
+    """
+
+    try:
+        if value in mapping_dictionary:
+            style = mapping_dictionary[value]
+        elif default_style is not None:
+            style = default_style
+        else:
+            str_val = str(value)
+            raise ValueError(
+                f"Value {str_val} not found in "
+                "mapping_dictionary and no default_value "
+                "was specified."
+            )
+        # Return the result
+        return property + " : " + style + ";"
+
+    except Exception as ex:
+        if error_style is None:
+            raise ex
+        return property + " : " + error_style + ";"
