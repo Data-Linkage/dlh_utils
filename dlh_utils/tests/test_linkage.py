@@ -12,7 +12,7 @@ import chispa
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
 demographics,demographics_compare,assert_unique_matches,matchkey_counts,\
-matchkey_dataframe,alpha_name, std_lev_score, soundex, deterministic_linkage
+matchkey_dataframe,alpha_name, std_lev_score, soundex, deterministic_linkage, blocking
 
 pytestmark = pytest.mark.usefixtures("spark")
 
