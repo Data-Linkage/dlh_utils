@@ -258,7 +258,6 @@ class TestCoalesced(object):
 
 #################################################################
 
-
 class TestCutOff(object):
     def test_expected(self, spark):
 
