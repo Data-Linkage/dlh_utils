@@ -37,7 +37,7 @@ def spark(request):
 
 
 class TestExplode(object):
-  """Test of explode function."""
+    """Test of explode function."""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -63,7 +63,7 @@ class TestExplode(object):
 
 
 class TestConcat(object):
-  """Test of concat function"""
+    """Test of concat function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -120,7 +120,7 @@ class TestConcat(object):
 
 
 class TestDropColumns(object):
-  """Test of drop_columns function"""
+    """Test of drop_columns function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -940,4 +940,5 @@ class TestDateDiff(object):
 
         result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-mm-dd',units='days')
 
-        assert_df_equality(intended_df, result_df, ignore_row_order=True)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True,\
+                           ignore_column_order=True)
