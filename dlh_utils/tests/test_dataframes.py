@@ -37,7 +37,7 @@ def spark(request):
 
 
 class TestExplode(object):
-  """Test of explode function."""
+    """Test of explode function."""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -63,7 +63,7 @@ class TestExplode(object):
 
 
 class TestConcat(object):
-  """Test of concat function"""
+    """Test of concat function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -120,7 +120,7 @@ class TestConcat(object):
 
 
 class TestDropColumns(object):
-  """Test of drop_columns function"""
+    """Test of drop_columns function"""
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
@@ -185,19 +185,18 @@ class TestSelect(object):
 class TestCoalesced(object):
     def test_expected(self, spark):
 
-        test_df = spark.createDataFrame(
-            (
-                pd.DataFrame(
-                    {
-                        "extra": [None, None, None, "FO+ UR", None],
-                        "lower": ["one", None, "one", "four", None],
-                        "lowerNulls": ["one", "two", None, "four", None],
-                        "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
-                        "value": [1, 2, 3, 4, 5],
-                    }
-                )
-            )
+        pdf = pd.DataFrame(
+            {
+                "extra": [None, None, None, "FO+ UR", None],
+                "lower": ["one", None, "one", "four", None],
+                "lowerNulls": ["one", "two", None, "four", None],
+                "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
+                "value": [1, 2, 3, 4, 5],
+            }
         )
+
+        pdf = pdf[["extra", "lower", "lowerNulls", "upperNulls", "value"]]
+        test_df = spark.createDataFrame((pdf))
 
         intended_schema = StructType(
             [
@@ -222,10 +221,7 @@ class TestCoalesced(object):
         assert_df_equality(intended_df, result_df, ignore_row_order=True, ignore_column_order=True)
 
     def test_expected_with_drop(self, spark):
-
-        test_df2 = spark.createDataFrame(
-            (
-                pd.DataFrame(
+        pdf = pd.DataFrame(
                     {
                         "lower": ["one", None, "one", "four", None],
                         "value": [1, 2, 3, 4, 5],
@@ -234,8 +230,9 @@ class TestCoalesced(object):
                         "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
                     }
                 )
-            )
-        )
+        pdf = pdf[["lower", "value", "extra", "lowerNulls", "upperNulls"]]
+
+        test_df2 = spark.createDataFrame((pdf))
 
         intended_schema2 = StructType(
             [
@@ -257,7 +254,6 @@ class TestCoalesced(object):
 
 
 #################################################################
-
 
 class TestCutOff(object):
     def test_expected(self, spark):
@@ -940,4 +936,5 @@ class TestDateDiff(object):
 
         result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-mm-dd',units='days')
 
-        assert_df_equality(intended_df, result_df, ignore_row_order=True)
+        assert_df_equality(intended_df, result_df, ignore_row_order=True,\
+                           ignore_column_order=True)

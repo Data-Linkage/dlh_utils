@@ -646,7 +646,7 @@ class Test_alphaname(object):
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
         result_df2 = alpha_name(test_df2,'Name','alphaname')
-        
+
         assert_df_equality(intended_df2,result_df2)
 
 
@@ -861,8 +861,8 @@ class Test_std_lev_score(object):
         ]
 
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema)
-      
-        assert_df_equality(intended_df2,result_df2) 
+
+        assert_df_equality(intended_df2,result_df2)
 
 
 # unable to do pytest on the following code as function 'deterministic_linkage()'
