@@ -432,7 +432,7 @@ class TestStyleMapValues:
         Testing the function for a numeric input.
         """
         result = dlh_utils.formatting.style_map_values(
-          1, 
+          1,
           {0:"black", 1:"red"}
         )
         assert result == "background-color : red;"
@@ -442,15 +442,15 @@ class TestStyleMapValues:
         Testing the function for a boolean input.
         """
         result = dlh_utils.formatting.style_map_values(
-          True, 
+          True,
           {True:"black", False:"red"},
           property="color"
         )
         assert result == "color : black;"
-        
+
         # NB 1 is truthy in Python, so this is expected behaviour
         result = dlh_utils.formatting.style_map_values(
-          1, 
+          1,
           {True:"black", False:"red"},
           property="color"
         )
@@ -462,7 +462,7 @@ class TestStyleMapValues:
         mapping_dictionary.
         """
         result = dlh_utils.formatting.style_map_values(
-          2, 
+          2,
           {0:"black", 1:"red"},
           property="color",
           default_style="green"
@@ -477,7 +477,7 @@ class TestStyleMapValues:
         which instead returns the error_style.
         """
         result = dlh_utils.formatting.style_map_values(
-          [1], 
+          [1],
           {True:"black", False:"red"},
           property="color",
           error_style="green"
