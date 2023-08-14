@@ -5,6 +5,8 @@
 # to ignore a specific error on a specific line of code (at the end of a line of code outside of this file) use e.g. # noqa: E731
 # to ignore a specific error across all files (like the annoying pyspark module not found error) specify that here e.g. ignore = E402
 
+max-line-length = 100
+
 exclude =
     .git,
     __pycache__,
