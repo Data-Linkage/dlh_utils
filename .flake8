@@ -4,3 +4,8 @@
 # to exclude certain files/directories exclude = .github,.git,docs/source/conf.py,old,build,dist
 # to ignore a specific error on a specific line of code (at the end of a line of code outside of this file) use e.g. # noqa: E731
 # to ignore a specific error across all files (like the annoying pyspark module not found error) specify that here e.g. ignore = E402
+
+exclude =
+    .git,
+    __pycache__,
+    .ipynb_checkpoints,
