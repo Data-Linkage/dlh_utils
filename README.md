@@ -31,6 +31,13 @@ pip3 install -U dlh_utils
 ## Demo
 For a worked demonstration notebook of these functions being applied within a data linkage context, head over to our [separate demo repository](https://github.com/anthonye93/dlh_utils_demo)
 
+## Contributing
+
+This repository adheres to pep8 coding standards. These can be automatically checked for when you're making new commits by the repository's pre-commit hooks. To get this working:
+* `pip install` both 'flake8' and 'pre-commit'
+* install the git hook scripts `pre-commit install`
+* When adding new git commits, the pre-commit hooks will now run and make suggestions needed to adhere to pep8 code standards
+
 ## Common issues
 
 ### When using the jaro/jaro_winkler functions the error "no module called Jellyfish found" is thrown
