@@ -7,7 +7,7 @@
 
 max-line-length = 100
 
-ignore = E231, W605
+ignore = E231, W605, W503
 
 exclude =
     .git,
