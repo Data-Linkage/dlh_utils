@@ -391,7 +391,7 @@ def difflib_sequence_matcher(string1, string2):
     """
     Applies the difflib.SequenceMatcher ratio() function to get the distance between two
     strings and calculates a score between 0 and 1 (1.0 if the sequences are identical,
-    0.0 is they do not have anything in common).
+    0.0 if they do not have anything in common).
 
     This function works at the column level, and so needs to either be applied to two
     forename columns in an already-linked dataset, or as a join condition in a matchkey.
