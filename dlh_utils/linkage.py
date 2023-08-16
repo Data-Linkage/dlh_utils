@@ -69,15 +69,15 @@ def alpha_name(df, input_col, output_col):
 
     """
 
-    #input validation
-    if df.schema[input_col].dataType.typeName()!='string':
+    # input validation
+    if df.schema[input_col].dataType.typeName() != 'string':
         raise TypeError(f'Column: {input_col} is not of type string')
 
-    #concat removes any null values. conditional replacement only when not null added
-    #to avoid unwanted removal of null
-    df= df.withColumn(output_col, \
-            F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(\
-            F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
+    # concat removes any null values. conditional replacement only when not null added
+    # to avoid unwanted removal of null
+    df = df.withColumn(output_col,
+                       F.when(F.col(input_col).isNull(),F.col(input_col)).otherwise(
+                           F.concat_ws('',F.array_sort(F.split(F.upper(F.col(input_col)),'')))))
 
     return df
 
@@ -240,8 +240,8 @@ def std_lev_score(string1, string2):
                                           matchkeys = MK, out_dir = '/some_path/links')
     """
 
-    return (1 - ((F.levenshtein(string1, string2)) /
-                 F.greatest(F.length(string1), F.length(string2))))
+    return (1 - ((F.levenshtein(string1, string2))
+                 / F.greatest(F.length(string1), F.length(string2))))
 
 ###############################################################################
 
@@ -389,13 +389,13 @@ def jaro_winkler(string1, string2):
 @F.udf(FloatType())
 def difflib_sequence_matcher(string1, string2):
     """
-    Applies the difflib.SequenceMatcher ratio() function to get the distance between two 
+    Applies the difflib.SequenceMatcher ratio() function to get the distance between two
     strings and calculates a score between 0 and 1 (1.0 if the sequences are identical,
-    0.0 is they do not have anything in common). 
-    
-    This function works at the column level, and so needs to either be applied to two 
+    0.0 is they do not have anything in common).
+
+    This function works at the column level, and so needs to either be applied to two
     forename columns in an already-linked dataset, or as a join condition in a matchkey.
-    
+
     Parameters
     ----------
     string1: str
@@ -422,7 +422,8 @@ def difflib_sequence_matcher(string1, string2):
     |  5|     Emma|     Emily|
     +---+---------+----------+
 
-    >df = df.withColumn('sequence_matcher', difflib_sequence_matcher(F.col('Forename'), F.col('Forename_2')))
+    >df = df.withColumn('sequence_matcher', difflib_sequence_matcher(F.col('Forename'),\
+                                                                    F.col('Forename_2')))
     +---+---------+----------+----------------+
     | ID| Forename|Forename_2|sequence_matcher|
     +---+---------+----------+----------------+
@@ -436,7 +437,7 @@ def difflib_sequence_matcher(string1, string2):
     """
 
     return SequenceMatcher(
-      a=string1, b=string2) if string1 is not None and string2 is not None else None
+        a=string1, b=string2) if string1 is not None and string2 is not None else None
 
 ###############################################################################
 # linkage methods
@@ -621,10 +622,10 @@ def cluster_number(df, id_1, id_2):
 
     except py4j.protocol.Py4JJavaError:
         print("""WARNING: A graphframes wrapper package installation has not been found!
-        If you have not already done so, you will need to submit graphframes' JAR file 
+        If you have not already done so, you will need to submit graphframes' JAR file
         dependency to your spark context. This can be found here:
         \nhttps://repos.spark-packages.org/graphframes/graphframes/0.6.0-spark2.3-s_2.11/
-        graphframes-0.6.0-spark2.3-s_2.11.jar\nOnce downloaded, 
+        graphframes-0.6.0-spark2.3-s_2.11.jar\nOnce downloaded,
         this can be submitted to your spark context via:
         spark.conf.set('spark.jars', path_to_jar_file) or by starting a sparksession from the
         sessions module of dlh_utils
@@ -736,14 +737,14 @@ def order_matchkeys(df_l, df_r, mks, chunk=10):
                            in enumerate(mks)]
     })
 
-    mks = chunk_list(mks, chunk)
+    mks = ut.chunk_list(mks, chunk)
 
     mk_counts = pd.DataFrame(columns=[
         'supplied_order',
         'count'
     ])
 
-    chunk_n = 0-chunk
+    chunk_n = 0 - chunk
 
     for mk_chunk in mks:
 
@@ -753,7 +754,7 @@ def order_matchkeys(df_l, df_r, mks, chunk=10):
             (mk_dropna(df_l, mk).join(mk_dropna(df_r, mk),
                                       on=mk,
                                       how='inner')
-             .withColumn('supplied_order', F.lit(mk_n+chunk_n))
+             .withColumn('supplied_order', F.lit(mk_n + chunk_n))
              .select('supplied_order')
              )
             for mk_n, mk in enumerate(mk_chunk)
@@ -923,7 +924,7 @@ def assert_unique(df, column):
     '''
 
     if not isinstance(column, list):
-        col = [col]
+        column = [column]
 
     assert df.count() == df.dropDuplicates(subset=column).count()
 
@@ -1026,10 +1027,10 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
     end_columns = ['description']
 
     review_df = (review_df
-                 .select(lead_columns +
-                         sorted([x for x in review_df.columns
-                                 if x not in
-                                 lead_columns+end_columns])
+                 .select(lead_columns
+                         + sorted([x for x in review_df.columns
+                                   if x not in
+                                   lead_columns + end_columns])
                          + end_columns)
                  )
 
@@ -1038,6 +1039,7 @@ def clerical_sample(linked_ids, mk_df, df_l, df_r, id_l, id_r, n_ids=100):
 ############################################################################
 
 
+'''
 def deduplicate(df, record_id, mks, checkpoint=False):
     """
     Matches a dataframe to itself on a specified set of matchkeys. Returns
@@ -1079,9 +1081,6 @@ def deduplicate(df, record_id, mks, checkpoint=False):
     > CCS.count()
     10487
     """
-
-    # get active spark session
-    spark = SparkSession.builder.getOrCreate()
 
     # check to see if matchkeys are passed as a list of lists
     if any(isinstance(matchkey, list) for matchkey in mks) is False:
@@ -1125,11 +1124,11 @@ def deduplicate(df, record_id, mks, checkpoint=False):
     duplicates = duplicates.drop_duplicates([f"{record_id}", f"{record_id}_2"])
 
     unique = df.join(duplicates, how="left_anti",
-                     on=(df[f"{record_id}"] == duplicates[f"{record_id}"]) |
-                     (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
+                     on=(df[f"{record_id}"] == duplicates[f"{record_id}"])
+                     | (df[f"{record_id}"] == duplicates[f"{record_id}_2"]))
 
     return unique, duplicates
-
+'''
 ############################################################################
 
 
@@ -1232,15 +1231,15 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
 
         if index == 1:
             match_data = matchkey_join(
-              df_l, df_r, id_l, id_r, matchkey, index
+                df_l, df_r, id_l, id_r, matchkey, index
             )
             # writes first matchkey to parquet
             if use_parquet:
                 ut.write_format(
-                  match_data,
-                  'parquet',
-                  f"{out_dir}/linked_identifiers",
-                  mode='overwrite'
+                    match_data,
+                    'parquet',
+                    f"{out_dir}/linked_identifiers",
+                    mode='overwrite'
                 )
             else:
                 out_df = match_data
@@ -1250,18 +1249,18 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             # used in left anti join to ignore matched records
             if use_parquet:
                 matches = ut.read_format('parquet',
-                                       f"{out_dir}/linked_identifiers")
+                                         f"{out_dir}/linked_identifiers")
             else:
                 matches = out_df
 
             last_count = count
             count = matches.count()
 
-            print("\nMATCHKEY", index-1)
-            print("matches on matchkey: ", count-last_count)
+            print("\nMATCHKEY", index - 1)
+            print("matches on matchkey: ", count - last_count)
             print("total matches: ", count)
-            print("left residual: ", df_l_count-count)
-            print("right residual: ", df_r_count-count)
+            print("left residual: ", df_l_count - count)
+            print("right residual: ", df_r_count - count)
 
             # appends subsequent matches to initial parquet
             match_data = matchkey_join(
@@ -1271,10 +1270,10 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
             )
             if use_parquet:
                 ut.write_format(
-                  match_data,
-                  'parquet',
-                  f"{out_dir}/linked_identifiers",
-                  mode='append'
+                    match_data,
+                    'parquet',
+                    f"{out_dir}/linked_identifiers",
+                    mode='append'
                 )
             else:
                 out_df = out_df.union(match_data)
@@ -1289,9 +1288,9 @@ def deterministic_linkage(df_l, df_r, id_l, id_r, matchkeys, out_dir):
     count = matches.count()
 
     print("\nMATCHKEY", index)
-    print("matches on matchkey: ", count-last_count)
+    print("matches on matchkey: ", count - last_count)
     print("total matches: ", count)
-    print("left residual: ", df_l_count-count)
-    print("right residual: ", df_r_count-count)
+    print("left residual: ", df_l_count - count)
+    print("right residual: ", df_r_count - count)
 
     return matches

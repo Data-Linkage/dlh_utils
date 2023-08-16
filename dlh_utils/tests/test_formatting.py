@@ -6,8 +6,9 @@ import dlh_utils.formatting
 
 #############################################################################
 
-class TestExportToExcel:
 
+class TestExportToExcel:
+    """Test of export to excel function."""
     def test_default_single_dataframe(self):
         """
         The simplest case: exporting one dataframe to a single-sheet workbook
@@ -54,11 +55,11 @@ class TestExportToExcel:
             }
         )
         wb = dlh_utils.formatting.export_to_excel(
-          {
-            "Dataframe A": dfA,
-            "Dataframe B": dfB
-          },
-          local_path="/tmp/pytest.xlsx"
+            {
+                "Dataframe A": dfA,
+                "Dataframe B": dfB
+            },
+            local_path="/tmp/pytest.xlsx"
         )
         assert len(wb.worksheets) == 2
         for i, c in enumerate(dfA.columns):
@@ -91,13 +92,13 @@ class TestExportToExcel:
         )
         column_list = ["numeric_B", "lastname"]
         wb = dlh_utils.formatting.export_to_excel(
-          {
-            "Dataframe C": df
-          },
-          local_path="/tmp/pytest.xlsx",
-          columns={
-            "Dataframe C": column_list
-          }
+            {
+                "Dataframe C": df
+            },
+            local_path="/tmp/pytest.xlsx",
+            columns={
+                "Dataframe C": column_list
+            }
         )
         assert len(wb.worksheets) == 1
         for i, c in enumerate(column_list):
@@ -123,21 +124,22 @@ class TestExportToExcel:
             }
         )
         wb = dlh_utils.formatting.export_to_excel(
-          {
-            "Dataframe D": df
-          },
-          local_path="/tmp/pytest.xlsx",
-          styles={
-            "Dataframe D": {
-              dlh_utils.formatting.style_on_cutoff: "numeric_A"
+            {
+                "Dataframe D": df
+            },
+            local_path="/tmp/pytest.xlsx",
+            styles={
+                "Dataframe D": {
+                    dlh_utils.formatting.style_on_cutoff: "numeric_A"
+                }
             }
-          }
         )
         assert len(wb.worksheets) == 1
         assert wb["Dataframe D"].cell(2, 3).has_style
         assert wb["Dataframe D"].cell(2, 3).fill.fgColor.rgb == "00FF0000"
 
 #############################################################################
+
 
 class TestApplyStyles:
 
@@ -157,10 +159,10 @@ class TestApplyStyles:
 
         # Default behaviour
         sdf = dlh_utils.formatting.apply_styles(
-          df,
-          {
-            dlh_utils.formatting.style_on_cutoff: "numeric_A"
-          }
+            df,
+            {
+                dlh_utils.formatting.style_on_cutoff: "numeric_A"
+            }
         )
         style_applied = sdf.export()
         # Only one style was applied
@@ -188,10 +190,10 @@ class TestApplyStyles:
 
         # Default behaviour with multiple columns
         sdf = dlh_utils.formatting.apply_styles(
-          df,
-          {
-            dlh_utils.formatting.style_on_condition: ["numeric_A", "numeric_B"]
-          }
+            df,
+            {
+                dlh_utils.formatting.style_on_condition: ["numeric_A", "numeric_B"]
+            }
         )
         style_applied = sdf.export()
         # Two styles were applied
@@ -223,10 +225,10 @@ class TestApplyStyles:
         from functools import partial
         f = partial(dlh_utils.formatting.style_on_condition, property='color')
         sdf = dlh_utils.formatting.apply_styles(
-          df,
-          {
-            f: "numeric_A"
-          }
+            df,
+            {
+                f: "numeric_A"
+            }
         )
         style_applied = sdf.export()
         # Only one style was applied
@@ -256,10 +258,10 @@ class TestApplyStyles:
             return "a" in x.lower()
 
         sdf = dlh_utils.formatting.apply_styles(
-          df,
-          {
-            udf: "lastname"
-          }
+            df,
+            {
+                udf: "lastname"
+            }
         )
         style_applied = sdf.export()
         # Only one style was applied
@@ -272,6 +274,7 @@ class TestApplyStyles:
         assert style_applied[0][1][1] == "lastname"
 
 #############################################################################
+
 
 class TestStyleOnCutoff:
 
@@ -294,47 +297,48 @@ class TestStyleOnCutoff:
         Testing the function when various optional parameters are passed.
         """
         result = dlh_utils.formatting.style_on_cutoff(
-          5,
-          cutoff=3,
-          negative_style="#00FF00",
-          positive_style="#AABBAA",
-          zero_style="#33DD33",
-          error_style="green",
-          property="color"
+            5,
+            cutoff=3,
+            negative_style="#00FF00",
+            positive_style="#AABBAA",
+            zero_style="#33DD33",
+            error_style="green",
+            property="color"
         )
         assert result == "color : #AABBAA;"
         result = dlh_utils.formatting.style_on_cutoff(
-          3,
-          cutoff=3,
-          negative_style="#00FF00",
-          positive_style="#AABBAA",
-          zero_style="#33DD33",
-          error_style="green",
-          property="color"
+            3,
+            cutoff=3,
+            negative_style="#00FF00",
+            positive_style="#AABBAA",
+            zero_style="#33DD33",
+            error_style="green",
+            property="color"
         )
         assert result == "color : #33DD33;"
         result = dlh_utils.formatting.style_on_cutoff(
-          -5,
-          cutoff=3,
-          negative_style="#00FF00",
-          positive_style="#AABBAA",
-          zero_style="#33DD33",
-          error_style="green",
-          property="color"
+            -5,
+            cutoff=3,
+            negative_style="#00FF00",
+            positive_style="#AABBAA",
+            zero_style="#33DD33",
+            error_style="green",
+            property="color"
         )
         assert result == "color : #00FF00;"
         result = dlh_utils.formatting.style_on_cutoff(
-          "ERROR",
-          cutoff=3,
-          negative_style="#00FF00",
-          positive_style="#AABBAA",
-          zero_style="#33DD33",
-          error_style="green",
-          property="color"
+            "ERROR",
+            cutoff=3,
+            negative_style="#00FF00",
+            positive_style="#AABBAA",
+            zero_style="#33DD33",
+            error_style="green",
+            property="color"
         )
         assert result == "color : green;"
 
 #############################################################################
+
 
 class TestStyleOnCondition:
 
@@ -352,11 +356,11 @@ class TestStyleOnCondition:
         Testing the function when no optional formatting parameters are passed.
         """
         result = dlh_utils.formatting.style_on_condition(
-          1,
-          property="color",
-          true_style="'red'",
-          false_style="'blue'",
-          error_style=None
+            1,
+            property="color",
+            true_style="'red'",
+            false_style="'blue'",
+            error_style=None
         )
         assert result == "color : 'blue';"
 
@@ -365,12 +369,13 @@ class TestStyleOnCondition:
         Testing the function when a custom condition is specified.
         """
         result = dlh_utils.formatting.style_on_condition(
-          10,
-          condition=lambda x : x % 2 == 0
+            10,
+            condition=lambda x:x % 2 == 0
         )
         assert result == "font-weight : bold;"
 
 #############################################################################
+
 
 class TestStyleColourGradient:
 
@@ -379,10 +384,10 @@ class TestStyleColourGradient:
         Testing the function when the lowest possible value is passed.
         """
         result = dlh_utils.formatting.style_colour_gradient(
-          1, 1, 10,
-          min_colour="FF0000",
-          max_colour="00DDFF",
-          error_colour=None
+            1, 1, 10,
+            min_colour="FF0000",
+            max_colour="00DDFF",
+            error_colour=None
         )
         assert result == "background-color : #FF0000;"
 
@@ -391,11 +396,11 @@ class TestStyleColourGradient:
         Testing the function when the highest possible value is passed.
         """
         result = dlh_utils.formatting.style_colour_gradient(
-          10, 1, 10,
-          min_colour="FF0000",
-          max_colour="00DDFF",
-          error_colour=None,
-          property="color"
+            10, 1, 10,
+            min_colour="FF0000",
+            max_colour="00DDFF",
+            error_colour=None,
+            property="color"
         )
         assert result == "color : #00DDFF;"
 
@@ -404,10 +409,10 @@ class TestStyleColourGradient:
         Testing the function when an intermediate value is passed.
         """
         result = dlh_utils.formatting.style_colour_gradient(
-          4, 1, 10,
-          min_colour="FF0000",
-          max_colour="00DDFF",
-          error_colour=None
+            4, 1, 10,
+            min_colour="FF0000",
+            max_colour="00DDFF",
+            error_colour=None
         )
         assert result == "background-color : #AA4955;"
 
@@ -416,14 +421,15 @@ class TestStyleColourGradient:
         Testing the function when an invalid value is passed amd error_colour is specified.
         """
         result = dlh_utils.formatting.style_colour_gradient(
-          "ERROR", 1, 10,
-          min_colour="FF0000",
-          max_colour="00DDFF",
-          error_colour="AAAAAA"
+            "ERROR", 1, 10,
+            min_colour="FF0000",
+            max_colour="00DDFF",
+            error_colour="AAAAAA"
         )
         assert result == "background-color : #AAAAAA;"
 
 #############################################################################
+
 
 class TestStyleMapValues:
 
@@ -432,8 +438,8 @@ class TestStyleMapValues:
         Testing the function for a numeric input.
         """
         result = dlh_utils.formatting.style_map_values(
-          1,
-          {0:"black", 1:"red"}
+            1,
+            {0:"black", 1:"red"}
         )
         assert result == "background-color : red;"
 
@@ -442,17 +448,17 @@ class TestStyleMapValues:
         Testing the function for a boolean input.
         """
         result = dlh_utils.formatting.style_map_values(
-          True,
-          {True:"black", False:"red"},
-          property="color"
+            True,
+            {True:"black", False:"red"},
+            property="color"
         )
         assert result == "color : black;"
 
         # NB 1 is truthy in Python, so this is expected behaviour
         result = dlh_utils.formatting.style_map_values(
-          1,
-          {True:"black", False:"red"},
-          property="color"
+            1,
+            {True:"black", False:"red"},
+            property="color"
         )
         assert result == "color : black;"
 
@@ -462,10 +468,10 @@ class TestStyleMapValues:
         mapping_dictionary.
         """
         result = dlh_utils.formatting.style_map_values(
-          2,
-          {0:"black", 1:"red"},
-          property="color",
-          default_style="green"
+            2,
+            {0:"black", 1:"red"},
+            property="color",
+            default_style="green"
         )
         assert result == "color : green;"
 
@@ -477,9 +483,9 @@ class TestStyleMapValues:
         which instead returns the error_style.
         """
         result = dlh_utils.formatting.style_map_values(
-          [1],
-          {True:"black", False:"red"},
-          property="color",
-          error_style="green"
+            [1],
+            {True:"black", False:"red"},
+            property="color",
+            error_style="green"
         )
         assert result == "color : green;"

@@ -5,12 +5,13 @@ metrics about a dataframe
 import subprocess
 import os
 import re
+import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.types import TimestampType, LongType, IntegerType, DoubleType,\
     FloatType, StringType, StructType, StructField
 import pyspark.sql.functions as F
-from pyspark.context import SparkContext as sc
 from dlh_utils import dataframes as da
+from dlh_utils import utilities as ut
 
 ###############################################################################
 
@@ -42,14 +43,13 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
 
     """
     list_of_filenames = []
-    list_of_filename = []
 
-    if walk == True:
-        process = subprocess.Popen(["hadoop","fs", "-ls", "-R", file_path]\
-                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if walk is True:
+        process = subprocess.Popen(["hadoop","fs","-ls","-R", file_path],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-        process = subprocess.Popen(["hadoop","fs", "-ls", "-C", file_path]\
-                                   ,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["hadoop","fs","-ls","-C", file_path],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     std_out, std_error = process.communicate()
 
@@ -57,17 +57,17 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
         std_out = str(std_out).split("\\n")[:-1]
         std_out[0] = std_out[0].strip("b'")
 
-        if full_path == True:
+        if full_path is True:
             for i in std_out:
                 file_name = str(i).split(' ')[-1]
                 list_of_filenames.append(file_name)
 
-        elif full_path == False:
+        elif full_path is False:
             for i in std_out:
                 file_name = str(i).split('/')[-1]
                 list_of_filenames.append(file_name)
 
-        if regex != None:
+        if regex is not None:
             list_of_filenames = list(filter(re.compile(regex).search, list_of_filenames))
     except:
         print('no files in this directory')
@@ -313,8 +313,8 @@ def most_recent(path, filetype, regex=None):
 
             except Exception as exc:
 
-                raise FileNotFoundError(filetype + " file, matching this regular expression: " +
-                                        regex + " not found in this directory: " + path) from exc
+                raise FileNotFoundError(filetype + " file, matching this regular expression: "
+                                        + regex + " not found in this directory: " + path) from exc
 
         # if filetype != hive
         else:
@@ -345,10 +345,10 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype +
-                                            " file, matching this regular expression: " +
-                                            regex + " not found in this directory: " +
-                                            path) from exc
+                    raise FileNotFoundError(filetype
+                                            + " file, matching this regular expression: "
+                                            + regex + " not found in this directory: "
+                                            + path) from exc
 
             elif filetype == 'parquet':
 
@@ -363,10 +363,10 @@ def most_recent(path, filetype, regex=None):
 
                 except Exception as exc:
 
-                    raise FileNotFoundError(filetype +
-                                            " file, matching this regular expression: " +
-                                            regex + " not found in this directory: " +
-                                            path) from exc
+                    raise FileNotFoundError(filetype
+                                            + " file, matching this regular expression: "
+                                            + regex + " not found in this directory: "
+                                            + path) from exc
 
     return most_recent_filepath, filetype
 
@@ -416,7 +416,6 @@ def write_format(df, write, path,
                   mode = 'overwrite')
     """
 
-    spark = SparkSession.builder.getOrCreate()
     if file_name is None:
         if write == 'csv':
             df.write.format('csv').option('header', header).mode(
@@ -634,8 +633,6 @@ def describe_metrics(df, output_mode='pandas'):
     +----------+------+-----+--------+----------------+----+------------+--------+----------------+
     """
 
-    spark = SparkSession.builder.getOrCreate()
-
     distinct_df = (df
                    .agg(*(F.countDistinct(F.col(c)).alias(c) for c in df.columns))
                    .withColumn('summary', F.lit('distinct')))
@@ -654,14 +651,14 @@ def describe_metrics(df, output_mode='pandas'):
 
     decribe_df = decribe_df.toPandas()
     decribe_df = decribe_df.transpose().reset_index()
-    decribe_df.columns = ['variable']+list(decribe_df[decribe_df['index'] == 'summary']
-                                           .reset_index(drop=True).transpose()[0])[1:]
+    decribe_df.columns = ['variable'] + list(decribe_df[decribe_df['index'] == 'summary']
+                                             .reset_index(drop=True).transpose()[0])[1:]
     decribe_df = decribe_df[decribe_df['variable'] != 'summary']
     decribe_df['count'] = count
-    decribe_df['not_null'] = decribe_df['count']-decribe_df['null']
+    decribe_df['not_null'] = decribe_df['count'] - decribe_df['null']
     for variable in ['distinct', 'null', 'not_null']:
-        decribe_df['percent_' +
-                   variable] = (decribe_df[variable]/decribe_df['count'])*100
+        decribe_df['percent_'
+                   + variable] = (decribe_df[variable] / decribe_df['count']) * 100
     decribe_df['type'] = [types[x] for x in decribe_df['variable']]
 
     decribe_df = decribe_df[[
@@ -721,7 +718,6 @@ def value_counts(df, limit=20, output_mode='pandas'):
     |  2|       1|    Lisa|             1|       Jay|               1|       |            0|
     +---+--------+--------+--------------+----------+----------------+-------+-------------+
     """
-    spark = SparkSession.builder.getOrCreate()
 
     def value_count(df, col, limit):
 
@@ -730,7 +726,7 @@ def value_counts(df, limit=20, output_mode='pandas'):
                 .count()
                 .sort('count', ascending=False)
                 .limit(limit)
-                .withColumnRenamed('count', col+'_count')
+                .withColumnRenamed('count', col + '_count')
                 .toPandas())
 
     dfs = [value_count(df, col, limit) for col in df.columns]
@@ -741,11 +737,11 @@ def value_counts(df, limit=20, output_mode='pandas'):
 
         if count < limit:
 
-            dif = limit-count
+            dif = limit - count
 
             dif_df = pd.DataFrame({
-                0: ['']*dif,
-                1: [0]*dif
+                0: [''] * dif,
+                1: [0] * dif
             })[[0, 1]]
 
             dif_df.columns = list(df)
@@ -948,12 +944,12 @@ def regex_match(df, regex, limit=10000, cut_off=0.75):
 
     counts_df = (sample_df
                  .groupBy()
-                 .agg(*
-                      [F.sum(F.when(F.col(col)
-                                     .rlike(regex), 1)
+                 .agg(
+                     *[F.sum(F.when(F.col(col)
+                                    .rlike(regex), 1)
                              ).alias(col)
                        for col in sample_df.columns]
-                      )
+                 )
                  )
 
     counts_df = (counts_df
@@ -968,7 +964,7 @@ def regex_match(df, regex, limit=10000, cut_off=0.75):
                  )
 
     counts_df['match_rate'] = \
-        counts_df['count']/row_count
+        counts_df['count'] / row_count
 
     counts_df = (counts_df
                  [counts_df['match_rate'] >= cut_off]

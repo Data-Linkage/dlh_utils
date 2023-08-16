@@ -8,6 +8,7 @@ from dlh_utils import dataframes as da
 
 ###############################################################################
 
+
 def cast_type(df, subset=None, types='string'):
     """
     Casts specific dataframe columns to a specified type.
@@ -194,8 +195,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     dataframes.concat()
     """
 
-    out = df.where((F.col(first_name).contains(sep) == False)
-                   | (F.col(first_name).isNull()))
+    out = df.where((F.col(first_name).contains(sep) is False) | (F.col(first_name).isNull()))
     df = df.where(F.col(first_name).contains(sep))
 
     df = da.concat(df, 'align_forenames', sep, [
@@ -323,7 +323,7 @@ def clean_surname(df, subset):
     surname_prefix_regex = "|".join([f"(?<=\\b{prefix})[ -]"
                                      for prefix in prefixes])
 
-    surname_regex = surname_regex+"|"+surname_prefix_regex
+    surname_regex = surname_regex + "|" + surname_prefix_regex
 
     if not isinstance(subset, list):
         subset = [subset]
@@ -761,7 +761,7 @@ def max_hyphen(df, limit, subset=None):
     if not isinstance(subset, list):
         subset = [subset]
 
-    number_hyphens = "-"*limit
+    number_hyphens = "-" * limit
 
     for col in subset:
 
@@ -1069,13 +1069,13 @@ def add_leading_zeros(df, subset, n):
     if not isinstance(subset, list):
         subset = [subset]
 
-    for col in subset:
+        for col in subset:
 
-        df = (df
-              .withColumn(col,
-                          F.lpad(F.col(col), n, '0')
-                          )
-              )
+            df = (df
+                  .withColumn(col,
+                              F.lpad(F.col(col), n, '0')
+                              )
+                  )
 
     return df
 
@@ -1150,7 +1150,8 @@ def replace(df, subset, replace_dict, use_join=False, use_regex=False):
     if use_join:
         for k, i in replace_dict.items():
             if k is None or i is None:
-                raise ValueError("Join mode (use_join=True) is not compatible with the use of None in the replace dictionary. Set use_join=True to use None values.")
+                raise ValueError("Join mode (use_join=True) is not compatible with the use of None\
+                                 in the replace dictionary. Set use_join=True to use None values.")
 
     if not isinstance(subset, list):
         subset = [subset]
@@ -1158,18 +1159,18 @@ def replace(df, subset, replace_dict, use_join=False, use_regex=False):
     if use_join:
         spark = SparkSession.builder.getOrCreate()
         schema = StructType([
-           StructField("_replace_dict_element_before", StringType(), True),
-           StructField("_replace_dict_element_after", StringType(), True)])
+            StructField("_replace_dict_element_before", StringType(), True),
+            StructField("_replace_dict_element_after", StringType(), True)])
         replace_df = spark.createDataFrame(replace_dict.items(), schema)
         for col in subset:
             df = df.join(
-              replace_df,
-              df[col] == replace_df["_replace_dict_element_before"],
-              how="left"
+                replace_df,
+                df[col] == replace_df["_replace_dict_element_before"],
+                how="left"
             )
             df = df.withColumn(
-              col,
-              F.coalesce(df["_replace_dict_element_after"], df[col])
+                col,
+                F.coalesce(df["_replace_dict_element_after"], df[col])
             )
             df = df.drop("_replace_dict_element_before", "_replace_dict_element_after")
     else:
@@ -1179,11 +1180,11 @@ def replace(df, subset, replace_dict, use_join=False, use_regex=False):
                     df = (df
                           .withColumn(col, F.when(F.col(col).rlike(before), after)
                                       .otherwise(F.col(col)))
-                      )
+                          )
                 else:
                     df = (df
                           .withColumn(col, F.when(F.col(col).like(before), after)
-                                    .otherwise(F.col(col)))
+                                      .otherwise(F.col(col)))
                           )
 
     return df
@@ -1379,8 +1380,7 @@ def fill_nulls(df, fill, subset=None):
     for col in subset:
         df = (df
               .withColumn(col, F.when(
-                  (F.col(col).isNull())
-                  | (F.isnan(F.col(col))), fill)
+                  (F.col(col).isNull()) | (F.isnan(F.col(col))), fill)
                   .otherwise(F.col(col)))
               )
 
@@ -1466,8 +1466,7 @@ def age_at(df, reference_col, in_date_format='dd-MM-yyyy', *age_at_dates):
                 F.months_between(
                     F.lit(age_at_date),
                     F.col(f"{reference_col}_fmt"),
-                )
-                / F.lit(12)
+                ) / F.lit(12)
             ).cast(IntegerType()),
         )
 
