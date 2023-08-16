@@ -37,7 +37,7 @@ def export_to_excel(
         provided. If a dataframe is not named in this dictionary, all of its
         columns will be included in their default order.
       freeze_panes : dictionary, default = None
-        Dictionary mapping table names to tuples of the form (r, c) where r is
+        Dictionary mapping table names to tuples of the form (r, c) where c is
         the number of columns on the left to freeze and r the number of rows
         from the top. If a table's name is not present as a key, nothing will
         be frozen.
@@ -386,7 +386,7 @@ def style_on_condition(
       true_style : string, default="bold"
         The style will be assigned when the condition evaluates true on the value.
       false_style : string, default="normal"
-        The style will be assigned when the condition evaluates true on the value.
+        The style will be assigned when the condition evaluates false on the value.
       error_style : string, default=None
         The style will be assigned if an error occurs in this function. If None,
         the error will be raised instead.
