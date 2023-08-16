@@ -37,9 +37,9 @@ def export_to_excel(
         provided. If a dataframe is not named in this dictionary, all of its
         columns will be included in their default order.
       freeze_panes : dictionary, default = None
-        Dictionary mapping table names to tuples of the form (r, c) where c is
-        the number of columns on the left to freeze and r the number of rows
-        from the top. If a table's name is not present as a key, nothing will
+        Dictionary mapping table names to tuples of the form (r, c) where r is
+        the number of rows from the top to freeze and c the number of columns
+        on the left. If a table's name is not present as a key, nothing will
         be frozen.
       local_path : string, default=None
         Full path (including filename) where the Excel workbook will be saved.
