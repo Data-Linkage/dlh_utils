@@ -1,19 +1,17 @@
 '''
-Pytesting on Dataframes functions
+Pytesting on Dataframes functions.
 '''
 
-import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.types import StructType,StructField,StringType,LongType,DoubleType
 import pandas as pd
-import chispa
 from chispa import assert_df_equality
 import pytest
 from dlh_utils.dataframes import explode,drop_columns,select,cut_off,\
-drop_nulls,union_all,rename_columns,prefix_columns,suffix_columns,split,\
-clone_column,substring,filter_window,concat,coalesced,window,literal_column,\
-date_diff,index_select
+    drop_nulls,union_all,rename_columns,prefix_columns,suffix_columns,split,\
+    clone_column,substring,filter_window,concat,coalesced,window,literal_column,\
+    date_diff,index_select
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -85,7 +83,7 @@ class TestConcat(object):
             )
         )
 
-        #Pandas replaces None with NaN in a numeric column. Convert back to Null:
+        # Pandas replaces None with NaN in a numeric column. Convert back to Null:
         test_df = test_df.replace(float('nan'), None)
 
         intended_schema = StructType(
@@ -222,14 +220,14 @@ class TestCoalesced(object):
 
     def test_expected_with_drop(self, spark):
         pdf = pd.DataFrame(
-                    {
-                        "lower": ["one", None, "one", "four", None],
-                        "value": [1, 2, 3, 4, 5],
-                        "extra": [None, None, None, "FO+ UR", None],
-                        "lowerNulls": ["one", "two", None, "four", None],
-                        "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
-                    }
-                )
+            {
+                "lower": ["one", None, "one", "four", None],
+                "value": [1, 2, 3, 4, 5],
+                "extra": [None, None, None, "FO+ UR", None],
+                "lowerNulls": ["one", "two", None, "four", None],
+                "upperNulls": ["ONE", "TWO", None, "FOU  R", None],
+            }
+        )
         pdf = pdf[["lower", "value", "extra", "lowerNulls", "upperNulls"]]
 
         test_df2 = spark.createDataFrame((pdf))
@@ -249,7 +247,7 @@ class TestCoalesced(object):
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
         result_df2 = coalesced(test_df2, drop=True)
-        assert_df_equality(intended_df2, result_df2, ignore_row_order=True,\
+        assert_df_equality(intended_df2, result_df2, ignore_row_order=True,
                            ignore_column_order=True)
 
 
@@ -907,34 +905,33 @@ class TestDateDiff(object):
     def test_expected(self, spark):
 
         test_df = spark.createDataFrame(
-              (
-                  pd.DataFrame(
-                      {
-                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01',\
-                                  '2012-04-01', '2014-05-09','2021-01-12'],
-                          "today": ['2023-05-02','2023-05-02','2023-05-02',\
-                                    '2023-05-02','2023-05-02','2023-05-02'],
-                      }
-                  )
-              )
-          )
-
-        intended_df = spark.createDataFrame(
-              (
-                  pd.DataFrame(
-                      {
-                          "dob": ['1983-05-12', '1983-03-19', '2012-04-01',\
-                                  '2012-04-01', '2014-05-09','2021-01-12'],
-                          "today": ['2023-05-02','2023-05-02','2023-05-02',\
-                                    '2023-05-02','2023-05-02','2023-05-02'],
-                          "Difference": [14600.0, 14593.0, 4019.0, 4019.0, 3280.0, 720.0],
-                      }
-                  )
-              )
+            (
+                pd.DataFrame(
+                    {
+                        "dob": ['1983-05-12', '1983-03-19', '2012-04-01',
+                                '2012-04-01', '2014-05-09','2021-01-12'],
+                        "today": ['2023-05-02','2023-05-02','2023-05-02',
+                                  '2023-05-02','2023-05-02','2023-05-02'],
+                    }
+                )
+            )
         )
 
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "dob": ['1983-05-12', '1983-03-19', '2012-04-01',
+                                '2012-04-01', '2014-05-09','2021-01-12'],
+                        "today": ['2023-05-02','2023-05-02','2023-05-02',
+                                  '2023-05-02','2023-05-02','2023-05-02'],
+                        "Difference": [14600.0, 14593.0, 4019.0, 4019.0, 3280.0, 720.0],
+                    }
+                )
+            )
+        )
 
         result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-mm-dd',units='days')
 
-        assert_df_equality(intended_df, result_df, ignore_row_order=True,\
+        assert_df_equality(intended_df, result_df, ignore_row_order=True,
                            ignore_column_order=True)

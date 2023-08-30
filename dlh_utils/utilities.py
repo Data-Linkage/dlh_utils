@@ -1046,5 +1046,3 @@ def chunk_list(_list, _num):
     '''splits a list into a specified number of chunks'''
     return [_list[i * _num:(i + 1) * _num]
             for i in range((len(_list) + _num - 1) // _num)]
-
-###############################################################################

@@ -1,5 +1,5 @@
 '''
-Pytesting on Dataframes functions
+Pytesting on Flags functions.
 '''
 import pandas as pd
 import pytest
@@ -9,6 +9,8 @@ from dlh_utils.flags import flag, flag_check
 pytestmark = pytest.mark.usefixtures("spark")
 
 ###################################################################
+
+
 class TestFlag1:
     """Test for flag function"""
 
@@ -79,6 +81,7 @@ class TestFlag1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected3(spark):
         """Test the expected functionality"""
@@ -113,6 +116,7 @@ class TestFlag1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected4(spark):
         """Test the expected functionality"""
@@ -147,6 +151,7 @@ class TestFlag1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected5(spark):
         """Test the expected functionality"""
@@ -185,6 +190,7 @@ class TestFlag1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected6(spark):
         """Test the expected functionality"""
@@ -223,6 +229,7 @@ class TestFlag1:
 
 
 ###################################################################
+
 class TestFlagSummary1:
     """Test for flag_summary function"""
 
@@ -262,6 +269,7 @@ class TestFlagSummary1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected8(spark):
         """Test the expected functionality"""
@@ -284,9 +292,9 @@ class TestFlagSummary1:
         intended_df = spark.createDataFrame(
             (pd.DataFrame(
                 {
-                    "ref_col": list(range(40)) +
-                    [None] *
-                    10,
+                    "ref_col": list(range(40))
+                    + [None]
+                    * 10,
                     "condition_col": 25,
                     "FLAG_ref_col!=25": [True] * 25 + [False] + [True] * 24,
                 })))
@@ -301,6 +309,7 @@ class TestFlagSummary1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected9(spark):
         """Test the expected functionality"""
@@ -342,6 +351,7 @@ class TestFlagSummary1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected10(spark):
         """Test the expected functionality"""
@@ -382,6 +392,7 @@ class TestFlagSummary1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected11(spark):
         """Test the expected functionality"""
@@ -422,6 +433,7 @@ class TestFlagSummary1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected12(spark):
         """Test the expected functionality"""
@@ -461,6 +473,7 @@ class TestFlagSummary1:
         )
 
 # ===================================================================
+
     @staticmethod
     def test_expected13(spark):
         """Test the expected functionality"""
@@ -485,7 +498,7 @@ class TestFlagSummary1:
                         "ref_col": list(range(40)) + [None] * 10,
                         "condition_col": 25,
                         "test": [False] + [True] + ([False] * 8)
-                                + ([True] * 10) + ([False] * 30)
+                        + ([True] * 10) + ([False] * 30)
                     }
                 )
             )
@@ -495,6 +508,7 @@ class TestFlagSummary1:
 
 
 ###################################################################
+
 class TestFlagCheck1:
     """Test for flag_check function"""
 
@@ -546,6 +560,7 @@ class TestFlagCheck1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected15(spark):
         """Test the expected functionality"""
@@ -580,6 +595,7 @@ class TestFlagCheck1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected16(spark):
         """Test the expected functionality"""
@@ -614,6 +630,7 @@ class TestFlagCheck1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected17(spark):
         """Test the expected functionality"""
@@ -647,6 +664,7 @@ class TestFlagCheck1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected18(spark):
         """Test the expected functionality"""
@@ -713,6 +731,7 @@ class TestFlagCheck1:
 
 
 # ===================================================================
+
     @staticmethod
     def test_expected19(spark):
         """Test the expected functionality"""

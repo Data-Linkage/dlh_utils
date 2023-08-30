@@ -1,24 +1,22 @@
 '''
-Pytesting on Standardisation functions
+Pytesting on Standardisation functions.
 '''
 
-import pyspark
 from pyspark.sql import SparkSession
-import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,IntegerType,DoubleType,LongType
+from pyspark.sql.types import StructType,StructField,StringType,IntegerType,DoubleType
 import pandas as pd
-import chispa
 from chispa import assert_df_equality
 import pytest
 from dlh_utils.standardisation import cast_type,standardise_white_space,remove_punct,\
-trim,standardise_case,standardise_date,max_hyphen,max_white_space,align_forenames,\
-add_leading_zeros,group_single_characters,clean_hyphens,standardise_null,fill_nulls,\
-replace,clean_forename,clean_surname,reg_replace
+    trim,standardise_case,standardise_date,max_hyphen,max_white_space,align_forenames,\
+    add_leading_zeros,group_single_characters,clean_hyphens,standardise_null,fill_nulls,\
+    replace,clean_forename,clean_surname,reg_replace
 
 
 pytestmark = pytest.mark.usefixtures("spark")
 
 #############################################################################
+
 
 @pytest.fixture(scope="session")
 def spark(request):
@@ -36,6 +34,7 @@ def spark(request):
     return spark
 
 #############################################################################
+
 
 class TestCastType(object):
     def test_expected(self, spark):
@@ -633,11 +632,11 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",
                                   " seven", "eigh t", "n ine", "ten", "e leve n"],
                     }
                 )
@@ -648,11 +647,11 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ",
                                     " seven", "eigh t", "n ine", "ten", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",
                                   " seven", "eigh t", "n ine", "ten", "e leve n"],
                     }
                 )
@@ -668,11 +667,11 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before1": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",
                                   " seven", "eight", "nine", "ten", "eleven"],
                     }
                 )
@@ -683,20 +682,20 @@ class TestGroupSingleCharacters(object):
             (
                 pd.DataFrame(
                     {
-                        "before1": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "before1": [None, "", "-t-h ree", "four", "five", "six ",
                                     " seven", "eight", "nine", "ten", "eleven"],
-                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",\
+                        "before2": [None, "", "-t-h r e e", "four", "f i v e", "six ",
                                     " seven", "eigh t", "n ine", "t  e    n", "e leve n"],
-                        "after": [None, "", "-t-h ree", "four", "five", "six ",\
+                        "after": [None, "", "-t-h ree", "four", "five", "six ",
                                   " seven", "eight", "nine", "ten", "eleven"],
                     }
                 )
             )
         )
         result_df = group_single_characters(
-          test_df,
-          subset="before1",
-          include_terminals=True
+            test_df,
+            subset="before1",
+            include_terminals=True
         )
         assert_df_equality(intended_df, result_df,
                            ignore_row_order=True, ignore_column_order=True)
@@ -978,12 +977,12 @@ class TestReplace(object):
 
         with pytest.raises(ValueError) as e:
             result_df = replace(
-              test_df,
-              subset="before",
-              replace_dict={"^a": "A", "y$": "Y"},
-              use_regex=True,
-              use_join=True
-          )
+                test_df,
+                subset="before",
+                replace_dict={"^a": "A", "y$": "Y"},
+                use_regex=True,
+                use_join=True
+            )
 
     def test_value_error_on_join_and_none(self, spark):
         test_df = spark.createDataFrame(
@@ -1001,11 +1000,11 @@ class TestReplace(object):
 
         with pytest.raises(ValueError) as e:
             result_df = replace(
-              test_df,
-              subset="before",
-              replace_dict={"^a": "A", None: "Y"},
-              use_join=True
-          )
+                test_df,
+                subset="before",
+                replace_dict={"^a": "A", None: "Y"},
+                use_join=True
+            )
 
 ##############################################################################
 

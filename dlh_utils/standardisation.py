@@ -614,6 +614,7 @@ def standardise_null(df, replace, subset=None, replace_with=None,
 
 #################################################################
 
+
 def max_white_space(df, limit, subset=None):
     """
     Sets maximum number of whitespaces in a row.

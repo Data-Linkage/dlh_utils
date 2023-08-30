@@ -16,7 +16,7 @@ from difflib import SequenceMatcher
 
 ###############################################################################
 
-# phonetic encoders
+# Phonetic Encoders
 
 
 def alpha_name(df, input_col, output_col):

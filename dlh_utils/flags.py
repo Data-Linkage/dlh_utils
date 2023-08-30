@@ -11,7 +11,7 @@ import pandas as pd
 ###############################################################################
 
 
-def flag(df, ref_col, condition = None, condition_value=None, condition_col=None,
+def flag(df, ref_col, condition=None, condition_value=None, condition_col=None,
          alias=None, prefix='FLAG', fill_null=None):
     """
     Adds True or False flags to supplied dataframe that can then be used for
@@ -181,13 +181,13 @@ def flag(df, ref_col, condition = None, condition_value=None, condition_col=None
     if condition == 'isNotNull':
         df = df.withColumn(alias,
                            (F.col(ref_col).isNotNull()) & (
-                               F.isnan(F.col(ref_col)) == False)
+                               F.isnan(F.col(ref_col)) is False)
                            )
 
     if condition == 'regex':
         df = df.withColumn(alias,
-                          (F.col(ref_col).rlike(condition_value)
-                          ))
+                           (F.col(ref_col).rlike(condition_value))
+                           )
 
     if fill_null is not None:
         df = (df
@@ -199,9 +199,6 @@ def flag(df, ref_col, condition = None, condition_value=None, condition_col=None
 
     return df
 ###############################################################################
-
-# Potential to imporve with automated identifiaction of flag columns
-# e.g. through prefix or regex - as used in flag_check())
 
 
 def flag_summary(df, flags=None, pandas=False):
@@ -273,7 +270,7 @@ def flag_summary(df, flags=None, pandas=False):
 
         flags_out.append((df
                           .select(col)
-                         .where(F.col(col) == True)
+                         .where(F.col(col) is True)
 
                           .count()
                           ))
@@ -281,10 +278,10 @@ def flag_summary(df, flags=None, pandas=False):
     out = pd.DataFrame({
         'flag': flags,
         'true': flags_out,
-        'false': [rows-x for x in flags_out],
+        'false': [rows - x for x in flags_out],
         'rows': rows,
-        'percent_true': [(x/rows)*100 for x in flags_out],
-        'percent_false': [100-((x/rows)*100) for x in flags_out]
+        'percent_true': [(x / rows) * 100 for x in flags_out],
+        'percent_false': [100 - ((x / rows) * 100) for x in flags_out]
     })
 
     out = out[[
@@ -307,7 +304,7 @@ def flag_summary(df, flags=None, pandas=False):
 ###############################################################################
 
 
-def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
+def flag_check(df, prefix='FLAG_', flags=None, mode='master', summary=False):
     """
     Reads flag columns and counts True/ Fail values.
 
@@ -402,8 +399,8 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
         df = (df
               .withColumn('flag_count',
-                          F.when(F.col(flag) == True,
-                                 F.col('flag_count')+1)
+                          F.when(F.col(flag) is True,
+                                 F.col('flag_count') + 1)
                           .otherwise(F.col('flag_count')))
               )
 
@@ -414,23 +411,23 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
 
     if summary is True:
 
-        summary_df = flag_summary(df, flags+['FAIL'], pandas=False)
+        summary_df = flag_summary(df, flags + ['FAIL'], pandas=False)
 
         if mode == 'master':
             return (df,
                     summary_df)
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') == False)),
-                    (df.where(F.col('Fail') == True)),
+            return ((df.where(F.col('Fail') is False)),
+                    (df.where(F.col('Fail') is True)),
                     summary_df)
 
         if mode == 'pass':
-            return (df.where(F.col('Fail') == False),
+            return (df.where(F.col('Fail') is False),
                     summary_df)
 
         if mode == 'fail':
-            return (df.where(F.col('Fail') == True),
+            return (df.where(F.col('Fail') is True),
                     summary_df)
 
     else:
@@ -438,11 +435,11 @@ def flag_check(df, prefix='FLAG_', flags=None,  mode='master', summary=False):
             return df
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') == False)),
-                    (df.where(F.col('Fail') == True)))
+            return ((df.where(F.col('Fail') is False)),
+                    (df.where(F.col('Fail') is True)))
 
         if mode == 'pass':
-            return df.where(F.col('Fail') == False)
+            return df.where(F.col('Fail') is False)
 
         if mode == 'fail':
-            return df.where(F.col('Fail') == True)
+            return df.where(F.col('Fail') is True)

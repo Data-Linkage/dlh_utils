@@ -7,6 +7,8 @@ from IPython.core.display import display, HTML
 from pyspark.sql import SparkSession
 import graphframes_jars as graphframes
 
+##################################################################################
+
 
 def getOrCreateSparkSession(appName='DE_DL',
                             size='large',
@@ -55,12 +57,12 @@ def getOrCreateSparkSession(appName='DE_DL',
     """
     # obtain spark UI url parameters
     url = 'spark-' + str(os.environ['CDSW_ENGINE_ID']) + \
-        '.'+str(os.environ['CDSW_DOMAIN'])
+        '.' + str(os.environ['CDSW_DOMAIN'])
     spark_ui = display(HTML(f'<a href=http://{url}s>Spark UI</a>'))
 
     try:
 
-      # get graphframes jar path to configure session with
+        # get graphframes jar path to configure session with
         graphframes_path = graphframes.__file__
         graphframes_path = graphframes_path.rsplit('/', 1)[0]
 

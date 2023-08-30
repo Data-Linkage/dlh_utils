@@ -274,24 +274,24 @@ def drop_columns(df, subset=None, startswith=None, endswith=None, contains=None,
     """
 
     if startswith is not None:
-        df = df.drop(*
-                     [x for x in df.columns if x.startswith(startswith)]
-                     )
+        df = df.drop(
+            * [x for x in df.columns if x.startswith(startswith)]
+        )
 
     if endswith is not None:
-        df = df.drop(*
-                     [x for x in df.columns if x.endswith(endswith)]
-                     )
+        df = df.drop(
+            * [x for x in df.columns if x.endswith(endswith)]
+        )
 
     if contains is not None:
-        df = df.drop(*
-                     [x for x in df.columns if contains in x]
-                     )
+        df = df.drop(
+            * [x for x in df.columns if contains in x]
+        )
 
     if regex is not None:
-        df = df.drop(*
-                     [x for x in df.columns if re.search(regex, x)]
-                     )
+        df = df.drop(
+            * [x for x in df.columns if re.search(regex, x)]
+        )
 
     if subset is not None:
         if not isinstance(subset, list):
@@ -487,7 +487,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
                       F.explode(F.split(F.col(column), on))
                       .alias(column))
               .unionByName((df
-                           .where((F.col(column).rlike(on) == False)
+                           .where((F.col(column).rlike(on) is False)
                                   | (F.col(column).rlike(on).isNull()))))
               )
 
@@ -508,7 +508,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
             df = (df
                   .where(F.col(column).rlike(on))
                   .withColumn(flag, F.lit(True))
-                  .select(*[x for x in df.columns+[flag] if x != column],
+                  .select(*[x for x in df.columns + [flag] if x != column],
                           F.explode(F.split(F.col(column), on))
                           .alias(column))
                   .unionByName(df.withColumn(flag, F.lit(False)))
@@ -736,7 +736,7 @@ def suffix_columns(df, suffix, exclude):
         exclude = [exclude]
 
     old = [x for x in df.columns if x not in exclude]
-    new = [x+suffix for x in old]
+    new = [x + suffix for x in old]
 
     rename = dict(zip(old, new))
 
@@ -1092,9 +1092,9 @@ def window(df, window, target, mode, alias=None, drop_na=False):
         if alias is not None:
             if drop_na is True:
                 df = (df
-                      .dropDuplicates(subset=window+[target])
+                      .dropDuplicates(subset=window + [target])
                       .dropna(subset=[target])
-                      .select(*window+[target],
+                      .select(*window + [target],
                               F.count(target)
                               .over(window_spec)
                               .alias(alias))
@@ -1105,8 +1105,8 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                              how='right')
             else:
                 df = (df
-                      .dropDuplicates(subset=window+[target])
-                      .select(*window+[target],
+                      .dropDuplicates(subset=window + [target])
+                      .select(*window + [target],
                               F.count(target)
                               .over(window_spec)
                               .alias(alias))
@@ -1119,9 +1119,9 @@ def window(df, window, target, mode, alias=None, drop_na=False):
         else:
             if drop_na is True:
                 df = (df
-                      .dropDuplicates(subset=window+[target])
+                      .dropDuplicates(subset=window + [target])
                       .dropna(subset=[target])
-                      .select(*window+[target],
+                      .select(*window + [target],
                               F.count(target)
                               .over(window_spec))
                       .drop(target)
@@ -1131,8 +1131,8 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                              how='right')
             else:
                 df = (df
-                      .dropDuplicates(subset=window+[target])
-                      .select(*window+[target],
+                      .dropDuplicates(subset=window + [target])
+                      .select(*window + [target],
                               F.count(target)
                               .over(window_spec))
                       .drop(target)
@@ -1161,7 +1161,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     )
 
             df = (union_all(df_1, df_2)
-                  .select(window+[alias])
+                  .select(window + [alias])
                   .dropDuplicates()
                   .join(df,
                         on=window,
@@ -1202,7 +1202,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                             F.max(target)
                             .over(window_spec)
                             .alias(alias))
-                    .select(window+[alias])
+                    .select(window + [alias])
                     )
 
             df_2 = (df
@@ -1215,7 +1215,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     )
 
             df = (union_all(df_1, df_2)
-                  .select(window+[alias])
+                  .select(window + [alias])
                   .dropDuplicates()
                   .join(df,
                         on=window,
@@ -1264,7 +1264,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                             F.sum(target)
                             .over(window_spec)
                             .alias(alias))
-                    .select(window+[alias])
+                    .select(window + [alias])
                     )
 
             df_2 = (df
@@ -1277,7 +1277,7 @@ def window(df, window, target, mode, alias=None, drop_na=False):
                     )
 
             df = (union_all(df_1, df_2)
-                  .select(window+[alias])
+                  .select(window + [alias])
                   .dropDuplicates()
                   .join(df,
                         on=window,
@@ -1431,8 +1431,8 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
     |  4|  5|     Marie|Simpson|2014-05-09|  F|ET74 2SP|
     |  2|  3|    Juliet|Simpson|1983-03-19|  F|ET74 2SP|
     +---+---+----------+-------+----------+---+--------+
-    The records are grouped by ID, and then the minimum age for each record 
-    is returned. Therefore, the age '6' for ID '3' is removed. 
+    The records are grouped by ID, and then the minimum age for each record
+    is returned. Therefore, the age '6' for ID '3' is removed.
 
     See Also
     --------
@@ -1464,7 +1464,7 @@ def filter_window(df, filter_window, target, mode, value=None, condition=True):
 
         dt_target = [dtype for name, dtype in df.dtypes if name == target][0]
         df = window(df, filter_window, target, mode, alias='value')
-        df = st.fill_nulls(df, fill='<<<>>>', subset=['value']+[target])
+        df = st.fill_nulls(df, fill='<<<>>>', subset=['value'] + [target])
 
         if condition:
             df = (df
@@ -1745,7 +1745,7 @@ def index_select(df, split_col, out_col, index, sep=' '):
         if index < 0:
             df = (df
                   .withColumn(out_col, F.reverse(F.col(split_col))
-                              .getItem(abs(index)-1)))
+                              .getItem(abs(index) - 1)))
 
     return df
 
@@ -2064,14 +2064,14 @@ def date_diff(df, col_name1, col_name2, diff='Difference',
                        - F.unix_timestamp(F.col(col_name2), in_date_format))
 
     if units == 'days':
-        df = df.withColumn(diff, (F.col(diff)/86400))
+        df = df.withColumn(diff, (F.col(diff) / 86400))
         df = df.withColumn(diff, F.round(diff, 2))
     elif units == 'months':
         # months value is slightly inaccurate as it assumes every month is a 31 day month
-        df = df.withColumn(diff, F.col(diff)/(31*86400))
+        df = df.withColumn(diff, F.col(diff) / (31 * 86400))
         df = df.withColumn(diff, F.round(diff, 2))
     elif units == 'years':
-        df = df.withColumn(diff, F.col(diff)/(86400*365))
+        df = df.withColumn(diff, F.col(diff) / (86400 * 365))
         df = df.withColumn(diff, F.round(diff, 2))
     if absolute is True:
         df = df.withColumn(diff, F.abs((F.col(diff))))

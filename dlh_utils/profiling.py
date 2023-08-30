@@ -70,8 +70,7 @@ def df_describe(df, output_mode='pandas', approx_distinct=False, rsd=0.05):
     Produces a dataframe containing descriptive metrics on each variable within a
     specified dataframe, including:
     * the variable type
-    * the maximum value length
-    * the minimum value length
+    * the maximum and minimum value length
     * the maximum and minimum lengths before/after decimal places for float variables
     * the number and percentage of distinct values
     * the number and percentage of null and non-null values
@@ -231,8 +230,8 @@ def df_describe(df, output_mode='pandas', approx_distinct=False, rsd=0.05):
     ).toPandas()
 
     describe_df = describe_df.transpose().reset_index()
-    describe_df.columns = ['variable']+list(describe_df[describe_df['index'] == 'summary']
-                                            .reset_index(drop=True).transpose()[0])[1:]
+    describe_df.columns = ['variable'] + list(describe_df[describe_df['index'] == 'summary']
+                                              .reset_index(drop=True).transpose()[0])[1:]
     describe_df = describe_df[describe_df['variable'] != 'summary']
 
     describe_df = describe_df.rename(columns={'count': 'not_null'})
@@ -246,8 +245,8 @@ def df_describe(df, output_mode='pandas', approx_distinct=False, rsd=0.05):
         'not_null',
         'empty',
     ]:
-        describe_df['percent_'+variable] = (
-            describe_df[variable].astype(int)/describe_df['row_count'])*100
+        describe_df['percent_' + variable] = (
+            describe_df[variable].astype(int) / describe_df['row_count']) * 100
     describe_df['type'] = [types[x] for x in describe_df['variable']]
 
     describe_df = describe_df.reset_index(drop=True)
@@ -345,14 +344,14 @@ def value_counts(df, limit=20, output_mode='pandas'):
         high = (grouped
                 .sort('count', ascending=False)
                 .limit(limit)
-                .withColumnRenamed('count', col+'_count')
+                .withColumnRenamed('count', col + '_count')
                 .toPandas()
                 )
 
         low = (grouped
                .sort('count', ascending=True)
                .limit(limit)
-               .withColumnRenamed('count', col+'_count')
+               .withColumnRenamed('count', col + '_count')
                .toPandas()
                )
 
@@ -370,11 +369,11 @@ def value_counts(df, limit=20, output_mode='pandas'):
 
         if count < limit:
 
-            dif = limit-count
+            dif = limit - count
 
             dif_df = pd.DataFrame({
-                0: ['']*dif,
-                1: [0]*dif
+                0: [''] * dif,
+                1: [0] * dif
             })[[0, 1]]
 
             dif_df.columns = list(df)

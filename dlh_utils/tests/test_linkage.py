@@ -1,5 +1,5 @@
 '''
-Pytesting on Linkage functions
+Pytesting on Linkage functions.
 '''
 
 from pyspark.sql import SparkSession
@@ -10,7 +10,7 @@ import pytest
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
     assert_unique_matches,matchkey_counts,matchkey_dataframe,alpha_name, std_lev_score,\
-    soundex, deterministic_linkage
+    soundex
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -213,7 +213,7 @@ class TestExtractMkVariables():
 #############################################################################
 #
 # unable to do pytest on the following code as function 'deterministic_linkage()'
-# is missing the argument 'out_dir'
+# is missing the argument 'out_dir'. Once done needs to be imported at top
 #
 # def test_deterministic_linkage():
 #   spark = SparkSession.builder.getOrCreate()

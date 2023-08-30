@@ -7,13 +7,16 @@ import subprocess
 import openpyxl
 import pandas as pd
 
+##################################################################################
+
+
 def export_to_excel(
-  dataframes,
-  styles=None,
-  columns=None,
-  freeze_panes=None,
-  local_path=None,
-  hdfs_path=None
+    dataframes,
+    styles=None,
+    columns=None,
+    freeze_panes=None,
+    local_path=None,
+    hdfs_path=None
 ):
     """
       Creates an Excel workbook with one worksheet for each of the provided
@@ -108,10 +111,10 @@ def export_to_excel(
     if isinstance(columns, list):
         if len(dataframes) > 1:
             raise ValueError(
-              "Can't pass a list of columns to write_excel "
-              "unless you only passed in a single dataframe. "
-              "You can use a dictionary instead "
-              "(see this function's docstring for an example)"
+                "Can't pass a list of columns to write_excel "
+                "unless you only passed in a single dataframe. "
+                "You can use a dictionary instead "
+                "(see this function's docstring for an example)"
             )
         columns = {"Sheet1": columns}
 
@@ -135,7 +138,7 @@ def export_to_excel(
         if not isinstance(dataframes[df_name], pd.DataFrame):
             dataframes[df_name] = dataframes[df_name].toPandas()
         if df_name in columns:
-            dataframes[df_name] = dataframes[df_name].loc[: , columns[df_name]]
+            dataframes[df_name] = dataframes[df_name].loc[:,columns[df_name]]
         if styles is not None and df_name in styles:
             df_export = apply_styles(dataframes[df_name], styles[df_name])
         else:
@@ -164,11 +167,12 @@ def export_to_excel(
 
 #########################################################
 
+
 def copy_local_file_to_hdfs(
-  local_path,
-  hdfs_path,
-  local_filename=None,
-  hdfs_filename=None
+    local_path,
+    hdfs_path,
+    local_filename=None,
+    hdfs_filename=None
 ):
     """
     Copies a file created locally (i.e. in CDSW) to HDFS.
@@ -207,6 +211,7 @@ def copy_local_file_to_hdfs(
     stdout, stderr = process.communicate()
 
 ###############################################################################
+
 
 def apply_styles(df, styles):
     """
@@ -293,14 +298,15 @@ def apply_styles(df, styles):
 
 ###############################################################################
 
+
 def style_on_cutoff(
-  value,
-  cutoff=0,
-  negative_style="red",
-  positive_style="green",
-  zero_style="white",
-  error_style="black",
-  property="background-color"
+    value,
+    cutoff=0,
+    negative_style="red",
+    positive_style="green",
+    zero_style="white",
+    error_style="black",
+    property="background-color"
 ):
     """
       Returns a CSS string that sets the specified property to the appropriate style
@@ -351,9 +357,9 @@ def style_on_cutoff(
             return property + " : " + zero_style + ";"
         else:
             raise ValueError(
-              "Value " + str(value) +
-              " was not less than, equal to or greater than cutoff "
-              + str(cutoff)
+                "Value " + str(value)
+                + " was not less than, equal to or greater than cutoff "
+                + str(cutoff)
             )
     except Exception as ex:
         if error_style is None:
@@ -362,13 +368,14 @@ def style_on_cutoff(
 
 ###############################################################################
 
+
 def style_on_condition(
-  value,
-  property="font-weight",
-  true_style="bold",
-  false_style="normal",
-  error_style=None,
-  condition= lambda x : x == 0
+    value,
+    property="font-weight",
+    true_style="bold",
+    false_style="normal",
+    error_style=None,
+    condition=lambda x:x == 0
 ):
     """
       Returns a CSS string that sets the specified property to the appropriate style
@@ -401,7 +408,7 @@ def style_on_condition(
     """
     try:
         if condition(value):
-            return property + " : " +  true_style + ";"
+            return property + " : " + true_style + ";"
         return property + " : " + false_style + ";"
     except Exception as ex:
         if error_style is None:
@@ -410,14 +417,15 @@ def style_on_condition(
 
 ###############################################################################
 
+
 def style_colour_gradient(
-  value,
-  min,
-  max,
-  property="background-color",
-  min_colour="#FFFFFF",
-  max_colour="#FF0000",
-  error_colour="#000000"
+    value,
+    min,
+    max,
+    property="background-color",
+    min_colour="#FFFFFF",
+    max_colour="#FF0000",
+    error_colour="#000000"
 ):
     """
       Returns a CSS string that sets the specified colour property to a colour ranging
@@ -459,8 +467,8 @@ def style_colour_gradient(
         # Extract colour channels from parameters
         min_colour = min_colour.replace("#", "")
         max_colour = max_colour.replace("#", "")
-        min_channels = [int(min_colour[i:i+2], 16) for i in (0, 2, 4)]
-        max_channels = [int(max_colour[i:i+2], 16) for i in (0, 2, 4)]
+        min_channels = [int(min_colour[i:i + 2], 16) for i in (0, 2, 4)]
+        max_channels = [int(max_colour[i:i + 2], 16) for i in (0, 2, 4)]
 
         # Interpolate
         position = (value - min) / (max - min)
@@ -482,12 +490,13 @@ def style_colour_gradient(
 
 ###############################################################################
 
+
 def style_map_values(
-  value,
-  mapping_dictionary,
-  property="background-color",
-  default_style=None,
-  error_style=None
+    value,
+    mapping_dictionary,
+    property="background-color",
+    default_style=None,
+    error_style=None
 ):
     """
       Returns a CSS string that sets the specified property to a value as specified by
