@@ -130,6 +130,119 @@ def hash_id(df, column, salt):
 ###############################################################################
 
 
+def date_year_quarter(df, date_column):
+  """
+  Deletes your date column and replaces it with 
+  a year column and a year quarter column.
+  
+  The column can be string, integer or datestamp.
+  
+  The function will output 'input_error' if 
+  the length of numbers in the date_column is not equal to 8
+  or the month in the date is not 01-12.
+  
+  prerequisites
+  -------------
+  Please insure that the date_column is fully numeric and the 
+  order is year then month then day e.g yyyyMMdd, yyyy-MM-dd etc...
+  Please insure that the month is represented as two numbers
+  i.e Janurary would be represented at 01 instead of 1
+  
+    Parameters
+  ----------
+  df: dataframe
+    Dataframe to which the function is applied.
+  date_column: date column (str)
+    The name of the date column that you want to change to year and year quarter.
+    
+  Returns
+  -------
+  The function returns your dataframe but with the date column omitted and  
+  replaced with a date year and a date year quarter column.
+  
+  Example
+  -------
+
+  > df.show()
+  +---+-----------+------+--------+
+  | id|        dob|  name|postcode|
+  +---+-----------+------+--------+
+  | a1|QQ 123456 C|SPORTY| PO356TH|
+  | a2|07451224152| SCARY|KZ66 ZYT|
+  | a3|   19760424|  BABY| BH242ED|
+  | a4|   19750127|GINGER| KN231SD|
+  | a5|   19730724|  POSH| HK192YC|
+  +---+-----------+------+--------+
+  
+  > date_year_quarter(df, date_column='dob').show()
+  
+  +---+------+--------+-----------+----------------+
+  | id|  name|postcode|   dob_year|dob_year_quarter|
+  +---+------+--------+-----------+----------------+
+  | a1|SPORTY| PO356TH|input_error|     input_error|
+  | a2| SCARY|KZ66 ZYT|input_error|     input_error|
+  | a3|  BABY| BH242ED|       1976|              Q2|
+  | a4|GINGER| KN231SD|       1975|              Q1|
+  | a5|  POSH| HK192YC|       1973|              Q3|
+  +---+------+--------+-----------+----------------+
+
+  """
+  
+  df = df.withColumn(
+    date_column,
+    col(date_column).cast(
+      StringType()
+    )
+  )
+  
+  df = df.withColumn(
+    date_column,
+    regexp_extract(
+      date_column,
+      "[0-9]+",
+      idx=0)
+  )
+  
+  df = df.withColumn(
+    f'{date_column}_year',
+    col(date_column).substr(
+      1,4)
+  )
+  
+  df = df.withColumn(
+    f'{date_column}_year_quarter',
+    col(date_column).substr(
+      5,2)
+  )
+  
+  replace_dict = {'01': 'Q1',
+                  '02': 'Q1',
+                  '03': 'Q1',
+                  '04': 'Q2',
+                  '05': 'Q2',
+                  '06': 'Q2',
+                  '07': 'Q3',
+                  '08': 'Q3',
+                  '09': 'Q3',
+                  '10': 'Q4',
+                  '11': 'Q4',
+                  '12': 'Q4',}
+  
+      
+  df = df.na.replace(replace_dict, 
+                     subset=f'{date_column}_year_quarter')
+ 
+  for i in [f'{date_column}_year', f'{date_column}_year_quarter']:
+    df = df.withColumn(i, 
+                       when(~col(f'{date_column}_year_quarter').isin(['Q1','Q2','Q3','Q4']), 
+                             'input_error')
+                       .when(length(col(date_column)) != 8, 
+                             'input_error')
+                           .otherwise(col(i)))
+  
+  df = df.drop(date_column)
+  
+  return df
 
 
-
+###############################################################################
