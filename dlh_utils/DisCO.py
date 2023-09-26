@@ -26,6 +26,21 @@ spark = (
 )
 
 
+data = [("a1", "QQ 123456 C", "SPORTY", "PO356TH"),
+("a2", "07451224152", "SCARY", "KZ66 ZYT"),
+("a3", "19760424", "BABY", "BH242ED"),
+("a4", "19750127", "GINGER", "KN231SD"),
+("a5", "19730724", "POSH", "HK192YC")]
+
+schema = StructType([
+    StructField("id", StringType(), True),
+    StructField("dob", StringType(), True),
+    StructField("name", StringType(), True),
+    StructField("postcode", StringType(), True)
+])
+
+df = spark.createDataFrame(data = data, schema = schema)
+
 
 ###############################################################################
 
@@ -271,6 +286,8 @@ def check_variables(df, approved_string):
   df: dataframe
     Dataframe to which the function is applied.
   approved_string: an excel column cut and pasted between 3 speech marks (str)
+    NB, the column bust be cut and paste between 3 speech marks 
+    (not typed out or something) or it wont work.
 
    Returns
   -------
@@ -305,18 +322,18 @@ def check_variables(df, approved_string):
   outside this doc string)
   
   approved = approved1
-  approved2
-  id
-  name
-  postcode
+             approved2
+             id
+             name
+             postcode
 
-  > missing,not_approved = hash_id(df,approved_string = approved) 
+  > missing,not_approved = check_variables(df,approved_string = approved) 
   or
-  > missing,not_approved = hash_id(df,approved_string = approved1
-                                                        approved2
-                                                        id
-                                                        name
-                                                        postcode) 
+  > missing,not_approved = check_variables(df,approved_string = approved1
+                                                                approved2
+                                                                id
+                                                                name
+                                                                postcode) 
   > missing  
   
   	in_approved_not_in_df
@@ -345,5 +362,6 @@ def check_variables(df, approved_string):
                     [x for x in df_list if x not in a_list]})
   
   return a,x
-
+  
 ###############################################################################
+
