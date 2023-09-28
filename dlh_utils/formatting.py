@@ -293,6 +293,10 @@ def apply_styles(df, styles):
                 sdf = sdf.applymap(f, subset=col)
     return sdf
 
+  
+#########################################################
+  
+  
 def style_on_cutoff(
   value,
   cutoff=0,
@@ -357,6 +361,10 @@ def style_on_cutoff(
             raise ex
         return property + " : " + error_style + ";"
 
+      
+#########################################################
+    
+  
 def style_on_condition(
   value,
   property="font-weight",
@@ -403,6 +411,10 @@ def style_on_condition(
             raise ex
         return property + " : " + error_style + ";"
 
+      
+#########################################################
+    
+  
 def style_colour_gradient(
   value,
   min,

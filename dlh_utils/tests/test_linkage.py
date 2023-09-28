@@ -518,6 +518,9 @@ class TestMatchkeyDataframe(object):
 
         assert_df_equality(intended_df,result_df)
 
+        
+###############################################################
+
 class TestDeterministicLinkage:
     def test_expected(self,spark):
         """
@@ -864,6 +867,7 @@ class Test_std_lev_score(object):
       
         assert_df_equality(intended_df2,result_df2) 
 
+###############################################################
 
 # unable to do pytest on the following code as function 'deterministic_linkage()'
 # is missing the argument 'out_dir'
@@ -912,6 +916,8 @@ class Test_std_lev_score(object):
 #
 #    assert (li.deterministic_linkage(df_l, df_r, 'id_l', 'id_r', mks)
 #            .where(F.col('id_l') != F.col('id_r'))).count() == 0
+
+###############################################################
 
 class TestDeterministicLinkage:
     def test_expected(self,spark):
