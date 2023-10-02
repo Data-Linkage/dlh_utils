@@ -8,8 +8,9 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SQLContext
 
 import pandas as pd
-
 import numpy as np
+import random
+
 
 spark = (
     SparkSession.builder.appName("small-session")
@@ -25,6 +26,7 @@ spark = (
     .getOrCreate()
 )
 
+###--- datasets
 
 data = [("a1", "QQ 123456 C", "SPORTY", "PO356TH"),
 ("a2", "07451224152", "SCARY", "KZ66 ZYT"),
@@ -41,10 +43,24 @@ schema = StructType([
 
 df = spark.createDataFrame(data = data, schema = schema)
 
+###--- END
+
+tup = zip(random.sample(range(1,50),3)
+          +
+          random.sample(range(300,700),350)
+          +
+          random.sample(range(950,1000),3))
+
+df_nums = spark.createDataFrame(data=tup,
+                                schema=StructType([StructField("number",IntegerType(), True)]))
+
+df_nums = df_nums.withColumn('id',
+                             concat(lit('id'),
+                                    row_number().over(Window.orderBy(lit(1)))))
+
+###--- END
 
 ###############################################################################
-
-
 
 def hash_id(df, column, salt):
   """
@@ -346,7 +362,6 @@ def check_variables(df, approved_string):
   0	dob
   
   """
-  
 
   a_list = approved_string.split('\n')
   a_list = [a.lower() for a in a_list]
@@ -364,4 +379,224 @@ def check_variables(df, approved_string):
   return a,x
   
 ###############################################################################
+
+
+def numerical_outliers(df, numeric_column):
+  
+  """
+  Provides a dataframe of outliers on your chosen column.
+  
+  prerequisites
+  -------------
+  The dataframe needs to be a Pyspark database.
+  The column to calculate outliers bust have only numeric characters and a maximum 
+  of one decimal point. However, the numeric_column type can be a string, integer 
+  float, long or bigint as the function will turn it all to a float. 
+  Make sure numeric_column is not truncated.
+  
+    Parameters
+  ----------
+  df: dataframe
+    Pyspark dataframe to which the function is applied.
+  numeric_column: column that the outliers will be calculated on (str)
+    The name of the column you want to calculate your outliers on.
+    
+  Returns
+  -------
+  It will return the original dataframe filted to only include records that are 
+  outliers on the desired variable.
+  
+  
+  Example
+  -------
+
+  > df_nums.sample(False, 0.1, seed=0).limit(5).show(5)
+  +------+----+
+  |number|  id|
+  +------+----+
+  |   451|id21|
+  |   411|id34|
+  |   674|id40|
+  |   697|id45|
+  |   412|id49|
+  +------+----+
+  
+  > number_outliers = numerical_outliers(df=df_nums, numeric_column='number')
+  . 
+  number_outliers.show()
+  +------+-----+-------------------+
+  |number|   id|            Outlier|
+  +------+-----+-------------------+
+  |    17|id179| lower_bound = 90.0|
+  |    46|id180| lower_bound = 90.0|
+  |    41|id181| lower_bound = 90.0|
+  |   984|id176|upper_bound = 908.0|
+  |   977|id177|upper_bound = 908.0|
+  |   965|id178|upper_bound = 908.0|
+  +------+-----+-------------------+
+  
+  """
+  
+  num_df = df.select(numeric_column).withColumn('w', lit('w'))
+  
+  num_df = num_df.withColumn(
+        numeric_column,
+        col(numeric_column).cast(
+          FloatType()
+        )
+      ) 
+  
+  num_df.registerTempTable("num_df")
+  
+  quartile_1 = spark.sql('SELECT DISTINCT ' + numeric_column + ', PERCENTILE(' + numeric_column + ',0.25) OVER (PARTITION BY w) \
+                         from num_df').collect()[1][1]
+  
+  quartile_3 = spark.sql('SELECT DISTINCT ' + numeric_column + ', PERCENTILE(' + numeric_column + ',0.75) OVER (PARTITION BY w) \
+                          from num_df').collect()[1][1]
+  
+  iqr = quartile_3 - quartile_1
+  lower_bound = quartile_1 - (iqr * 1.5)
+  upper_bound = quartile_3 + (iqr * 1.5)
+  
+  df_lower = df.filter(col(numeric_column) 
+                       < lower_bound).withColumn('Outlier', 
+                                                 concat(lit('lower_bound = '),lit(lower_bound)))
+  
+  df_upper = df.filter(col(numeric_column) 
+                       > upper_bound).withColumn('Outlier', 
+                                                 concat(lit('upper_bound = '),lit(upper_bound))) 
+
+  df = df_lower.union(df_upper)
+  
+  return df
+
+###############################################################################
+
+def numerical_percentiles(df, numeric_column, greater_or_less, percentile):
+  
+  """
+  Provides the original database filtered to include only records where 
+  the value on the numeric_column is greater or less than the percentile value.
+  
+  prerequisites
+  -------------
+  The dataframe needs to be a Pyspark database.
+  Numeric_column must have only numeric characters and a maximum 
+  of one decimal point. However, the numeric_column type can be a string, 
+  integer, float, long or bigint as the function will turn it all to a float. 
+  Make sure numeric_column is not truncated.
+  The percentile value needs to be assigned in a fraction as a string.
+  
+    Parameters
+  ----------
+  df: dataframe
+    Pyspark dataframe to which the function is applied.
+  numeric_column: column that the outliers will be calculated on (str)
+    The name of the column you want to calculate the percentile on.
+  greater_or_less: Two choices: 'greater' or 'less' (str)
+    Assign the string 'greater' or 'less' if you want the output to include 
+    records that are either greater or less than the percentile value.
+  prcentile: The value you want calculated (str)
+    Assign this value as a fraction and a string.
+    
+  Returns
+  -------
+  It will return the original dataframe filted to only include records that are 
+  outliers on the desired variable.
+  
+  
+  Example
+  -------
+
+  > df_nums.sample(False, 0.1, seed=0).limit(5).show(5)
+  +------+----+
+  |number|  id|
+  +------+----+
+  |   451|id21|
+  |   411|id34|
+  |   674|id40|
+  |   697|id45|
+  |   412|id49|
+  +------+----+
+  
+  > percentile = numerical_percentiles(df=df_nums, 
+                                       numeric_column='number', 
+                                       greater_or_less = 'less', 
+                                       percentile = '0.15')
+   
+  > percentile.show(5)
+  +------+----+---------------------+
+  |number|  id|0.15_percentile_value|
+  +------+----+---------------------+
+  |   353| id6|               357.25|
+  |   348|id11|               357.25|
+  |   322|id24|               357.25|
+  |   301|id27|               357.25|
+  |   307|id28|               357.25|
+  +------+----+---------------------+
+  
+  """
+  num_df = df.select(numeric_column).withColumn('w',lit('w'))
+  
+  num_df = num_df.withColumn(
+        numeric_column,
+        col(numeric_column).cast(
+          FloatType()
+        )
+      )   
+  
+  num_df.registerTempTable("num_df")
+  
+  if greater_or_less == 'less':
+  
+    val_percent = spark.sql('SELECT DISTINCT ' + numeric_column + 
+                            ', PERCENTILE(' + numeric_column + ',' + percentile + 
+                            ') OVER (PARTITION BY w) from num_df').collect()[1][1]
+
+
+    df_percent = df.filter(col(numeric_column) 
+                           < val_percent).withColumn(percentile+'_percentile_value', 
+                                                     lit(val_percent))
+    
+  elif greater_or_less == 'greater':
+
+    val_percent = spark.sql('SELECT DISTINCT ' + numeric_column + 
+                            ', PERCENTILE(' + numeric_column + ',' + percentile + 
+                            ') OVER (PARTITION BY w) from num_df').collect()[1][1]
+
+
+    df_percent = df.filter(col(numeric_column) 
+                           > val_percent).withColumn(percentile+'_percentile_value', 
+                                                     lit(val_percent)) 
+  else:
+    None
+  
+  return df_percent
+
+
+###############################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
