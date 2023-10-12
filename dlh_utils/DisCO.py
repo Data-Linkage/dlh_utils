@@ -30,7 +30,7 @@ spark = (
 # --- datasets
 
 data = [("a1", "QQ 123456 C", "SPORTY", "PO356TH"),
-        ("a2", "07451224152", "SCARY", "KZ66 ZYT"),
+        ("a2", "07451224152", "SCARY", "KZ66 7YT"),
         ("a3", "19760424", "BABY", "BH242ED"),
         ("a4", "19750127", "GINGER", "KN231SD"),
         ("a5", "19730724", "POSH", "HK192YC")]
@@ -571,12 +571,79 @@ def numerical_percentiles(df, numeric_column, greater_or_less, percentile):
 
 ###############################################################################
 
-def postcode_level(df,column,postcode_level):
+def postcode_level(df, column, postcode_level):
   
   """
-  Will add doc string soon
+  Deletes your postcode column from your dataframe and replaces it with your
+  chosen level of postcode. 
   
-  """
+  Parameters
+  ----------
+  df: dataframe
+    Dataframe to which the function is applied.It must be a pyspark dataframe.
+  column: postcode column (str)
+    The name of the postcode column to change to a different level of geography.
+    Spaces and punctuation can be present and it is not case sensitive as the function 
+    has a work around for this.
+  postcode_level: choose either 'area', 'district' or 'sector'.
+    Type the postcode level as a string.
+
+  Returns
+  -------
+  The function will return the original dataframe with the postcode column
+  replaced with its respective chosen georgraphy level.
+
+  Example
+  -------
+
+  > df.show()
+  +---+-----------+------+--------+------------+
+  | id|        dob|  name|postcode|        fans|
+  +---+-----------+------+--------+------------+
+  | a1|QQ 123456 C|SPORTY| PO356TH|           1|
+  | a2|07451224152| SCARY|KZ66 7YT|     1831687|
+  | a3|   19760424|  BABY|  B242ED|     1932435|
+  | a4|   19750127|GINGER| KN231SD|      969537|
+  | a5|   19730724|  POSH| HK192YC|987646314834|
+  +---+-----------+------+--------+------------+
+        
+  > for i in ['area', 'district','sector']:
+      postcode_level(df=df,
+                     column='postcode',
+                     postcode_level=i).show(5) 
+  
+  Output
+
+  +---+-----------+------+------------+-------------+
+  | id|        dob|  name|        fans|postcode_area|
+  +---+-----------+------+------------+-------------+
+  | a1|QQ 123456 C|SPORTY|           1|           PO|
+  | a2|07451224152| SCARY|     1831687|           KZ|
+  | a3|   19760424|  BABY|     1932435|            B|
+  | a4|   19750127|GINGER|      969537|           KN|
+  | a5|   19730724|  POSH|987646314834|           HK|
+  +---+-----------+------+------------+-------------+
+
+  +---+-----------+------+------------+-----------------+
+  | id|        dob|  name|        fans|postcode_district|
+  +---+-----------+------+------------+-----------------+
+  | a1|QQ 123456 C|SPORTY|           1|             PO35|
+  | a2|07451224152| SCARY|     1831687|             KZ66|
+  | a3|   19760424|  BABY|     1932435|              B24|
+  | a4|   19750127|GINGER|      969537|             KN23|
+  | a5|   19730724|  POSH|987646314834|             HK19|
+  +---+-----------+------+------------+-----------------+
+
+  +---+-----------+------+------------+---------------+
+  | id|        dob|  name|        fans|postcode_sector|
+  +---+-----------+------+------------+---------------+
+  | a1|QQ 123456 C|SPORTY|           1|          PO356|
+  | a2|07451224152| SCARY|     1831687|          KZ667|
+  | a3|   19760424|  BABY|     1932435|           B242|
+  | a4|   19750127|GINGER|      969537|          KN231|
+  | a5|   19730724|  POSH|987646314834|          HK192|
+  +---+-----------+------+------------+---------------+
+    """
 
   df = df.withColumn(column,
                      regexp_replace(
@@ -605,9 +672,6 @@ def postcode_level(df,column,postcode_level):
   
   return df
 
-
-
-new_pc = postcode_level(df=df, column='postcode', postcode_level='district')
 
 ###############################################################################
 
