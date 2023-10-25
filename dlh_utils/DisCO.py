@@ -47,10 +47,11 @@ df = spark.createDataFrame(data=data, schema=schema)
 # --- END
 
 tup = zip(random.sample(range(1,50),3)
-
+          
           + random.sample(range(300,700),350)
 
           + random.sample(range(950,1000),3))
+
 
 df_nums = spark.createDataFrame(data=tup,
                                 schema=StructType([StructField("number",IntegerType(), True)]))
@@ -369,10 +370,10 @@ def check_variables(df, approved_string):
     a = pd.DataFrame({'in_approved_not_in_df':
                       [a for a in a_list if a not in df_list]})
 
-    x = pd.DataFrame({'in_df_not_in_approved':
-                      [x for x in df_list if x not in a_list]})
+    c = pd.DataFrame({'in_df_not_in_approved':
+                      [c for c in df_list if c not in a_list]})
 
-    return a,x
+    return a,c
 
 ###############################################################################
 
