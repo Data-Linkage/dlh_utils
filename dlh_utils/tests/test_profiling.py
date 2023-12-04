@@ -5,7 +5,6 @@ Pytesting on Profiling functions
 import pyspark
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.functions import col
 from pyspark.sql import Row
 from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType,FloatType,DecimalType,DoubleType
 import pandas as pd
@@ -14,10 +13,7 @@ import chispa
 import re
 import pandas as pd
 from pyspark.sql import Window
-from pyspark.sql.types import IntegerType, StringType
 from dlh_utils import utilities as ut
-from dlh_utils import dataframes as da
-
 from chispa import assert_df_equality
 
 pytestmark = pytest.mark.usefixtures("spark")
@@ -33,7 +29,7 @@ spark = (
 
 #############################################################################
 
-class Test_dfdescribe(object):
+class Test_df_describe(object):
 
     #Test 1
     def test_expected(self,spark):
@@ -51,7 +47,6 @@ class Test_dfdescribe(object):
         ]
 
         test_df = spark.createDataFrame(test_data, test_schema)
-        test_df.show()
 
         result_df = df_describe(test_df,
                                 output_mode='spark',
@@ -89,7 +84,6 @@ class Test_dfdescribe(object):
 
 
         intended_df = spark.createDataFrame(intended_data, schema=intended_schema)
-        intended_df.show()
 
         assert_df_equality(intended_df, result_df)
 
@@ -115,21 +109,12 @@ class Test_dfdescribe(object):
         ("5","Maggie",None,"Simpson",None,"F","G42 8AU")]
 
         test_df = spark.createDataFrame(test_data, test_schema)
-        test_df.show()
 
 
         result_df = df_describe(test_df,
                                 output_mode='spark',
                                 approx_distinct = False,
                                 rsd = 0.05)
-
-        df_describe(test_df,
-                                output_mode='spark',
-                                approx_distinct = False,
-                                rsd = 0.05).show()
-
-        type(result_df)
-        result_df.printSchema()
 
         intended_schema = StructType([
           StructField("variable", StringType(), True),
@@ -164,7 +149,6 @@ class Test_dfdescribe(object):
         ]
 
         intended_df = spark.createDataFrame(intended_data, schema=intended_schema)
-        intended_df.show()
 
         assert_df_equality(intended_df, result_df)
 
