@@ -395,8 +395,8 @@ class TestStandardiseDate(object):
         result_df3 = standardise_date(
             test_df,
             col_name="slashedReverse",
-            in_date_format="yyyy/mm/dd",
-            out_date_format="dd-mm-yyyy",
+            in_date_format="yyyy/MM/dd",
+            out_date_format="dd-MM-yyyy",
         )
 
         assert_df_equality(intended_df3, result_df3,

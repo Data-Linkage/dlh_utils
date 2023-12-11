@@ -931,7 +931,7 @@ class TestDateDiff(object):
             )
         )
 
-        result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-mm-dd',units='days')
+        result_df = date_diff(test_df, 'dob','today',in_date_format='yyyy-MM-dd',units='days')
 
         assert_df_equality(intended_df, result_df, ignore_row_order=True,
                            ignore_column_order=True)

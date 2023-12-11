@@ -1981,7 +1981,7 @@ def cut_off(df, threshold_column, val, mode):
 
 
 def date_diff(df, col_name1, col_name2, diff='Difference',
-              in_date_format='dd-mm-yyyy', units='days', absolute=True):
+              in_date_format='dd-MM-yyyy', units='days', absolute=True):
     """
     date_diff finds the number of days/months/years between two date columns
     by subtracting the dates in the second column from the dates in the first.
@@ -2001,7 +2001,7 @@ def date_diff(df, col_name1, col_name2, diff='Difference',
     diff : string, default = 'Difference'
       Name of the column in which the difference between
       dates will be shown.
-    in_date_format : string, default = 'dd-mm-yyyy'
+    in_date_format : string, default = 'dd-MM-yyyy'
       User must specify the format of how the dates are entered
       in both colName1 and colName2 and use this argument to
       do so.
