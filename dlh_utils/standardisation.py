@@ -1212,9 +1212,9 @@ def standardise_date(df, col_name, in_date_format='dd-MM-yyyy',
     col_name: string
       The column in the dataframe to which the function is being
       applied.
-    in_date_format: default = 'dd-mm-yyyy', string
+    in_date_format: default = 'dd-MM-yyyy', string
       This is the current date format of the the column.
-    out_date_format: default = 'yyyy-mm-dd', string
+    out_date_format: default = 'yyyy-MM-dd', string
       This is the date format to which the column values will be
       changed.
     null_counts: default = False, bool

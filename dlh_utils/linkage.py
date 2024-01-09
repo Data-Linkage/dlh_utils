@@ -173,8 +173,8 @@ def soundex(df, input_col, output_col):
     return df
 
 ###############################################################################
-# string comparators
 
+# String Comparators
 
 def std_lev_score(string1, string2):
     """
@@ -440,8 +440,8 @@ def difflib_sequence_matcher(string1, string2):
         a=string1, b=string2) if string1 is not None and string2 is not None else None
 
 ###############################################################################
-# linkage methods
 
+# Linkage Methods
 
 def blocking(df1, df2, blocks, id_vars):
     """
