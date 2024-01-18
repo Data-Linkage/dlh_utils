@@ -8,7 +8,7 @@ setup(
 	version="1.0",
 	description="",
 	author="",
-	packages=[],
+	packages=["dlh_utils"],
 	zip_safe=False,
 	install_requirements=requirements
 )
