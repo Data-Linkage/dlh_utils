@@ -195,7 +195,7 @@ def align_forenames(df, first_name, middle_name, identifier, sep=' '):
     dataframes.concat()
     """
 
-    out = df.where((F.col(first_name).contains(sep) is False) | (F.col(first_name).isNull()))
+    out = df.where(~(F.col(first_name).contains(sep)) | (F.col(first_name).isNull()))
     df = df.where(F.col(first_name).contains(sep))
 
     df = da.concat(df, 'align_forenames', sep, [
@@ -1070,13 +1070,13 @@ def add_leading_zeros(df, subset, n):
     if not isinstance(subset, list):
         subset = [subset]
 
-        for col in subset:
+    for col in subset:
 
-            df = (df
-                  .withColumn(col,
-                              F.lpad(F.col(col), n, '0')
-                              )
-                  )
+        df = (df
+              .withColumn(col,
+                          F.lpad(F.col(col), n, '0')
+                          )
+              )
 
     return df
 

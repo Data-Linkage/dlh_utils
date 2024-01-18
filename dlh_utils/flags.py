@@ -180,8 +180,8 @@ def flag(df, ref_col, condition=None, condition_value=None, condition_col=None,
 
     if condition == 'isNotNull':
         df = df.withColumn(alias,
-                           (F.col(ref_col).isNotNull()) & (
-                               F.isnan(F.col(ref_col)) is False)
+                           (F.col(ref_col).isNotNull()) & ~(
+                               F.isnan(F.col(ref_col)))
                            )
 
     if condition == 'regex':
@@ -399,8 +399,8 @@ def flag_check(df, prefix='FLAG_', flags=None, mode='master', summary=False):
 
         df = (df
               .withColumn('flag_count',
-                          F.when(F.col(flag) is True,
-                                 F.col('flag_count') + 1)
+                          F.when(F.col(flag),
+                                 F.col('flag_count') + F.lit(1))
                           .otherwise(F.col('flag_count')))
               )
 
