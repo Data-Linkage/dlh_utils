@@ -339,7 +339,7 @@ class TestMatchkeyDataframe(object):
 
         df_l = spark.createDataFrame(
             (pd.DataFrame({
-                "first_name": ['test'],
+                "first_name": ['test'] * 10,
                 "last_name": ['test'] * 10,
                 "uprn": ['test'] * 10,
                 "date_of_birth": ['test'] * 10,
@@ -465,7 +465,7 @@ class Test_alphaname(object):
         intended_schema = StructType([
             StructField("ID", IntegerType(), True),
             StructField("Forename", StringType(), True),
-            StructField("alphaname", StringType(), False),
+            StructField("alphaname", StringType(), True),
         ])
 
         intended_data = [
