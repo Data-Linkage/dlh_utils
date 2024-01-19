@@ -36,7 +36,7 @@ def spark(request):
 
 class TestExplode(object):
     """Test of explode function."""
-    def test_expected(self, spark):
+    def test_expected_1(self, spark):
 
         test_df = spark.createDataFrame(
             (pd.DataFrame({"check": ["iagsigajs"], "before1": ["a_b_c"]}))
@@ -54,6 +54,26 @@ class TestExplode(object):
         ).select("check", "before1")
 
         result_df = explode(test_df, "before1", "_")
+        assert_df_equality(intended_df, result_df,ignore_row_order=True)
+
+    def test_expected_2(self, spark):
+
+        test_df = spark.createDataFrame(
+            (pd.DataFrame({"check": ["iagsigajs"], "before1": ["a_b_c"]}))
+        ).select("check", "before1")
+
+        intended_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "check": ["iagsigajs", "iagsigajs", "iagsigajs", "iagsigajs"],
+                        "before1": ["b", "a_b_c", "c", "a"],
+                    }
+                )
+            )
+        ).select("check", "before1")
+
+        result_df = explode(test_df, "before1", "_", retain=True)
         assert_df_equality(intended_df, result_df,ignore_row_order=True)
 
 
@@ -590,7 +610,7 @@ class TestSuffixColumns(object):
 
 
 class TestWindow(object):
-    def test_expected(self, spark):
+    def test_expected_count(self, spark):
 
         test_df = spark.createDataFrame(
             (
@@ -626,6 +646,7 @@ class TestWindow(object):
         )
         assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
+    def test_expected_min(self, spark):
         test_df2 = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -660,6 +681,17 @@ class TestWindow(object):
         ).orderBy("col1", "col2")
         assert_df_equality(intended_df2, result_df2, ignore_row_order=True)
 
+    def test_expected_max_1(self, spark):
+        test_df2 = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "col1": ["a", "b", "c", "c", "d", "e", "d"],
+                        "col2": [1, 1, 1, 2, 1, 1, 2],
+                    }
+                )
+            )
+        )
         intended_schema3 = StructType(
             [
                 StructField("col1", StringType(), True),
@@ -682,6 +714,7 @@ class TestWindow(object):
         ).orderBy("col1", "col2")
         assert_df_equality(intended_df3, result_df3, ignore_row_order=True)
 
+    def test_expected_max_2(self, spark):
         test_df4 = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -735,6 +768,95 @@ class TestWindow(object):
         ).orderBy("col1", "col2")
         assert_df_equality(intended_df4, result_df4, ignore_row_order=True)
 
+    def test_expected_max_3(self, spark):
+        test_df4 = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "col1": [
+                            "a",
+                            "b",
+                            "c",
+                            "c",
+                            "d",
+                            "e",
+                            "d",
+                            "c",
+                            "c",
+                            "c",
+                            "d",
+                            "d",
+                        ],
+                        "col2": [1, 1, 1, 2, 1, 1, 2, 5, 6, 7, 11, 12],
+                    }
+                )
+            )
+        )
+
+        intended_schema4 = StructType(
+            [
+                StructField("col1", StringType(), True),
+                StructField("max(col2) OVER (PARTITION BY col1 unspecifiedframe$())", LongType(), True),
+                StructField("col2", LongType(), True),
+            ]
+        )
+
+        intended_data4 = [
+            ["a", 1, 1],
+            ["b", 1, 1],
+            ["c", 7, 1],
+            ["c", 7, 2],
+            ["c", 7, 5],
+            ["c", 7, 6],
+            ["c", 7, 7],
+            ["d", 12, 1],
+            ["d", 12, 2],
+            ["d", 12, 11],
+            ["d", 12, 12],
+            ["e", 1, 1],
+        ]
+
+        intended_df4 = spark.createDataFrame(intended_data4, intended_schema4)
+        result_df4 = window(
+            test_df4, window=["col1"], target="col2", mode="max", alias=None
+        ).orderBy("col1", "col2")
+        assert_df_equality(intended_df4, result_df4, ignore_row_order=True)
+
+    def test_expected_count_distinct(self, spark):
+
+        test_df = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "col1": ["a", "b", "c", "c", "d", None, "d"],
+                        "col2": [1, 1, 2, 2, 1, 1, 1],
+                    }
+                )
+            )
+        )
+        intended_schema = StructType(
+            [
+                StructField("col1", StringType(), True),
+                StructField("col2", LongType(), True),
+                StructField("new", LongType(), False),
+            ]
+        )
+
+        intended_data = [
+            ["c", 2, 2],
+            ["c", 2, 2],
+            ["a", 1, 1],
+            ["b", 1, 1],
+            ["e", 1, 1],
+            ["d", 1, 2],
+            ["d", 1, 2],
+        ]
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        result_df = window(
+            test_df, window=["col1", "col2"], target="col2", mode="countDistinct", alias="new"
+        )
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)
 
 ###############################################################################
 
