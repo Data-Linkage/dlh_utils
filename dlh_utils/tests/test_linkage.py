@@ -10,7 +10,9 @@ import pytest
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
     assert_unique_matches,matchkey_counts,matchkey_dataframe,alpha_name, std_lev_score,\
-    soundex
+    soundex,jaro,jaro_winkler, difflib_sequence_matcher, blocking, mk_dropna, \
+    assert_unique
+    
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -209,6 +211,50 @@ class TestExtractMkVariables():
         result_list = sorted(extract_mk_variables(test_df_l, mks))
 
         assert result_list == intended_list
+
+#############################################################################
+        
+class TestMkDropna(object):
+    def test_expected(self, spark):
+
+        test_df_l = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', '2', None, None, None, '6', '7', '8'],
+                "first_name": ['aa', None, 'ab', 'bb', 'aa', 'ax', 'cr', 'cd'],
+                "last_name": ['fr', 'gr', None, 'ga', 'gx', 'mx', 'ra', 'ga']
+            })))
+
+        test_df_r = spark.createDataFrame(
+            (pd.DataFrame({
+                "r_id": ['1', '2', '3', '4', None, None, None, '8'],
+                "first_name": ['ax', None, 'ad', 'bd', 'ar', 'ax', 'cr', 'cd'],
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', None]
+            })))
+
+        mks = [
+            [test_df_l['first_name'] == test_df_r['first_name'],
+             test_df_l['last_name'] == test_df_r['last_name']],
+
+            [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'],
+                                                                       1, 1),
+                test_df_l['last_name'] == test_df_r['last_name']],
+
+            [F.substring(test_df_l['first_name'], 1, 1) == F.substring(test_df_r['first_name'],
+                                                                       1, 1),
+                F.substring(test_df_l['last_name'], 1, 1) == F.substring(test_df_r['last_name'],
+                                                                         1, 1)]
+        ]
+
+        result_df = mk_dropna(df=test_df_l, match_key=mks)
+
+        intended_df = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', None, None, '6', '7', '8'],
+                "first_name": ['aa', 'bb', 'aa', 'ax', 'cr', 'cd'],
+                "last_name": ['fr', 'ga', 'gx', 'mx', 'ra', 'ga']
+            })))
+
+        assert_df_equality(intended_df,result_df)     
 
 #############################################################################
 #
@@ -644,7 +690,6 @@ class Test_soundex(object):
 
 ###############################################################
 
-
 class Test_std_lev_score(object):
 
     # Test 1
@@ -735,130 +780,162 @@ class Test_std_lev_score(object):
 
         assert_df_equality(intended_df2,result_df2)
 
+###############################################################
 
-# unable to do pytest on the following code as function 'deterministic_linkage()'
-# is missing the argument 'out_dir'
-#
-#    df_l = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "id_l": [-1, -2, -3],
-#            "first_name": ['AMY', 'AMY', 'AMY'],
-#            "last_name": ['SMITH', 'SMITH', 'SMITH'],
-#            "date_of_birth": ['a', None, 'b'],
-#            "uprn": ['a', 'b', None],
-#            "sex": ['F', 'F', 'F']
-#        })))
-#
-#    df_r = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "id_r": [-1, -2, -3],
-#            "first_name": ['AMY', 'AMY', 'AMY'],
-#            "last_name": ['SMITH', 'SMITH', 'SMITH'],
-#            "date_of_birth": ['a', None, 'b'],
-#            "uprn": ['a', 'b', None],
-#            "sex": ['F', 'F', 'F']
-#        })))
-#
-#    mks = [
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['uprn'] == df_r['uprn'],
-#            df_l['date_of_birth'] == df_r['date_of_birth'],
-#        ],
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['uprn'] == df_r['uprn'],
-#        ],
-#        [
-#            df_l['first_name'] == df_r['first_name'],
-#            df_l['last_name'] == df_r['last_name'],
-#            df_l['sex'] == df_r['sex'],
-#            df_l['date_of_birth'] == df_r['date_of_birth'],
-#        ],
-#    ]
-#
-#    assert (li.deterministic_linkage(df_l, df_r, 'id_l', 'id_r', mks)
-#            .where(F.col('id_l') != F.col('id_r'))).count() == 0
-'''
-class TestDeterministicLinkage:
+class TestJaro(object):
     def test_expected(self,spark):
-        """
-        Tests 1:1 linkage if two dataframes on two matchkeys.
+      test_schema = StructType([
+          StructField("string1", StringType(), True),
+          StructField("string2", StringType(), True)
+      ])
 
-        In this case the first matchkey should only match Betty with Betty and the second
-        sould only match Evans with Evans. Other matching pairs between the datasets are not
-        unique (for example, Alan is unique in right_df but there are two Alans in left_df)
-        so in a 1:1 match these will be ignored.
+      test_data = [
+        ["Hello", "HHheello"],
+        ["Hello", " h e l l o"],
+        ["Hello", "olleH"],
+        ["Hello", "H1234"],
+        ["Hello", "1234"]
+      ]
 
-        Parameters
-        ----------
-        spark : pyspark session
-          Usually passed in by pytest.
+      test_df = spark.createDataFrame(test_data, test_schema)
+      result = test_df.withColumn("jaro", jaro(test_df["string1"], test_df["string2"]))
+      assert sorted(
+        result.toPandas().loc[:, "jaro"].tolist()
+      ) == sorted(
+        [0.875, 0.6333333253860474, 0.6000000238418579, 0.46666666865348816, 0.0]
+      )
+      
+###############################################################
 
-        Returns
-        -------
-        Nothing
+class TestJaroWinkler(object):
+    def test_expected(self,spark):
+      test_schema = StructType([
+          StructField("string1", StringType(), True),
+          StructField("string2", StringType(), True)
+      ])
 
-        Raises
-        ------
-        DataFramesNotEqualError if the linkage results are not as expected.
-        """
+      test_data = [
+        ["Hello", "HHheello"],
+        ["Hello", " h e l l o"],
+        ["Hello", "olleH"],
+        ["Hello", "H1234"],
+        ["Hello", "1234"]
+      ]
 
-        right_df = spark.createDataFrame(
-            (
-                pd.DataFrame(
-                    {
-                        "firstname": ["Alan", "Betty", "Claire", "Claire", "Elin"],
-                        "lastname": ["Jones", "Jones", "Smith", "Jones", "Evans"],
-                        "numeric": [1, 2, 2, 4, 5],
-                        "id1": [1, 2, 3, 4, 5]
-                    }
-                )
-            )
-        )
-
-        left_df = spark.createDataFrame(
-            (
-                pd.DataFrame(
-                    {
-                        "firstname": ["Alan", "Alan", "Betty", "Barry", "Claire", "David", "Emma"],
-                        "lastname": ["Jones", "Smith", "James", "Jones", "Smith", "Jones", "Evans"],
-                        "numeric": [1, 2, 2, 3, 3, 3, 3],
-                        "id2": [11, 12, 13, 14, 15, 16, 17]
-                    }
-                )
-            )
-        )
-
-        intended_df = spark.createDataFrame(
-            pd.DataFrame(
-                {
-                    "id1": [2, 5],
-                    "id2": [13, 17],
-                    "matchkey": [1, 2]
-                }
-            ),
-            StructType(
-                [
-                    StructField("id1", LongType(), True),
-                    StructField("id2", LongType(), True),
-                    StructField("matchkey", IntegerType(), False),
-                ]
-            )
-        )
-        matchkey = [
-            [right_df.firstname == left_df.firstname],
-            [right_df.lastname == left_df.lastname]
+      test_df = spark.createDataFrame(test_data, test_schema)
+      result = test_df.withColumn("jaro_winkler", jaro_winkler(test_df["string1"], test_df["string2"]))
+      assert sorted(
+        result.toPandas().loc[:, "jaro_winkler"].tolist()
+      ) == sorted(
+        [0.887499988079071,
+         0.6333333253860474,
+         0.6000000238418579,
+         0.46666666865348816,
+         0.0
         ]
-        result_df = deterministic_linkage(
-            right_df, left_df,
-            "id1", "id2",
-            matchkey,
-            None
+      )
+
+###############################################################
+
+class TestDifflibSequenceMatcher(object):
+    def test_expected(self,spark):
+      test_schema = StructType([
+          StructField("string1", StringType(), True),
+          StructField("string2", StringType(), True)
+      ])
+
+      test_data = [
+        ["David", "Emily"],
+        ["Idrissa", "Emily"],
+        ["Edward", "Emily"],
+        ["Gordon", "Emily"],
+        ["Emma", "Emily"]
+      ]
+
+      test_df = spark.createDataFrame(test_data, test_schema)
+      result = test_df.withColumn(
+        "difflib", 
+        difflib_sequence_matcher(
+          F.col("string1"), F.col("string2")
         )
-        assert_df_equality(intended_df, result_df, )
-'''
+      )
+      # Current fuction does not work so automatically fail
+      # until we determine what the output should be
+      assert False
+
+###############################################################
+
+class TestBlocking(object):
+  def test_expected(self, spark):
+      test_schema = StructType([
+          StructField("ID_1", IntegerType(), True),
+          StructField("age_df1", IntegerType(), True),
+          StructField("sex_df1", StringType(), True),
+          StructField("pc_df1", StringType(), True)
+      ])
+
+      test_data = [
+        [1, 1, "Male", "gu1111"],
+        [2, 1, "Female", "gu1211"],
+        [3, 56, "Male", "gu2111"],
+      ]
+      df1 = spark.createDataFrame(test_data, test_schema)
+      
+      test_schema = StructType([
+          StructField("ID_2", IntegerType(), True),
+          StructField("age_df2", IntegerType(), True),
+          StructField("sex_df2", StringType(), True),
+          StructField("pc_df2", StringType(), True)
+      ])
+
+      test_data = [
+        [6, 2, "Female", "gu1211"],
+        [5, 56, "Male", "gu1411"],
+        [4, 7, "Female", "gu1111"],
+      ]
+      df2 = spark.createDataFrame(test_data, test_schema)
+      
+      id_vars = ['ID_1', 'ID_2']
+      blocks = {'pc_df1': 'pc_df2'}
+      result_df = blocking(df1, df2, blocks, id_vars)    
+      
+      expected_schema = StructType([
+          StructField("ID_1", IntegerType(), True),
+          StructField("age_df1", IntegerType(), True),
+          StructField("sex_df1", StringType(), True),
+          StructField("pc_df1", StringType(), True),
+          StructField("ID_2", IntegerType(), True),
+          StructField("age_df2", IntegerType(), True),
+          StructField("sex_df2", StringType(), True),
+          StructField("pc_df2", StringType(), True)
+      ])
+
+      expected_data = [
+        [1, 1, "Male", "gu1111", 4, 7, "Female", "gu1111"],
+        [2, 1, "Female", "gu1211", 6, 2, "Female", "gu1211"]
+      ]
+      expected_df = spark.createDataFrame(expected_data, expected_schema)
+      
+      assert_df_equality(expected_df, result_df)
+
+###############################################################
+
+class TestAssertUnique(object):
+  
+  def test_expected(self, spark):
+      test_schema = StructType([
+          StructField("colA", IntegerType(), True),
+          StructField("colB", IntegerType(), True)
+      ])
+
+      test_data = [
+        [1, 1],
+        [1, 2]
+      ]
+      df = spark.createDataFrame(test_data, test_schema)
+      try:
+        assert_unique(df, "colA")
+      except AssertionError:
+        pass
+      assert_unique(df, ["colB"])
+  
