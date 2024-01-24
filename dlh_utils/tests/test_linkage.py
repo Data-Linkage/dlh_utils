@@ -11,7 +11,7 @@ from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
     assert_unique_matches,matchkey_counts,matchkey_dataframe,alpha_name, std_lev_score,\
     soundex,jaro,jaro_winkler, difflib_sequence_matcher, blocking, mk_dropna, \
-    assert_unique
+    assert_unique, deterministic_linkage, clerical_sample, metaphone
     
 
 pytestmark = pytest.mark.usefixtures("spark")
@@ -257,62 +257,131 @@ class TestMkDropna(object):
         assert_df_equality(intended_df,result_df)     
 
 #############################################################################
-#
-# unable to do pytest on the following code as function 'deterministic_linkage()'
-# is missing the argument 'out_dir'. Once done needs to be imported at top
-#
-# def test_deterministic_linkage():
-#   spark = SparkSession.builder.getOrCreate()
-#    df_l = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
-#                     '14', '15', '16', '17', '18', '19', '20'],
-#
-#            "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-#                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
-#
-#            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-#                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-#        })))
-#
-#    df_r = spark.createDataFrame(
-#        (pd.DataFrame({
-#            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
-#                    '14', '15', '16', '17', '18', '19', '20'],
-#
-#            "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-#                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
-#
-#            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-#                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-#        })))
-#
-#    mks = [
-#        [df_l['first_name'] == df_r['first_name'],
-#         df_l['last_name'] == df_r['last_name']],
-#
-#        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-#            df_l['last_name'] == df_r['last_name']],
-#
-#        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-#            F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
-#    ]
-#
-#    result_df = deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks).filter(F.col('l_id') <= 5)\
-#                                                                      .where(F.col('matchkey')\
-#                                                                       == 1)
-#                                                                      .count()==5
-#
-#    assert ((deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks)
-#             .filter(F.col('l_id') <= 5))
-#            .where(F.col('matchkey') == 1)
-#            .count() == 5)
-#
-#    assert ((deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks)
-#             .filter(F.col('l_id') > 5))
-#            .where(F.col('matchkey') == 0)
-#            .count() == 15)
-#
+        
+class TestClericalSample(object):
+    def test_expected(self, spark):
+        df_l = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', '2', '3', '4', '5', '6', '7', '8'],
+                "l_first_name": ['aa', None, 'ab', 'bb', 'aa', 'ax', 'cr', 'cd'],
+                "l_last_name": ['fr', 'gr', None, 'ga', 'gx', 'mx', 'ra', 'ga']
+            })))
+
+        df_r = spark.createDataFrame(
+            (pd.DataFrame({
+                "r_id": ['1', '2', '3', '4', '5', '6', '7', '8'],
+                "r_first_name": ['ax', None, 'ad', 'bd', 'ar', 'ax', 'cr', 'cd'],
+                "r_last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', None]
+            })))
+
+        mks = [
+            [df_l['l_first_name'] == df_r['r_first_name'],
+             df_l['l_last_name'] == df_r['r_last_name']],
+
+            [F.substring(df_l['l_first_name'], 1, 1) == F.substring(df_r['r_first_name'],
+                                                                       1, 1),
+                df_l['l_last_name'] == df_r['r_last_name']],
+
+            [F.substring(df_l['l_first_name'], 1, 1) == F.substring(df_r['r_first_name'],
+                                                                       1, 1),
+                F.substring(df_l['l_last_name'], 1, 1) == F.substring(df_r['r_last_name'],
+                                                                         1, 1)]
+        ]
+        
+        linked_ids = deterministic_linkage(df_l, df_r, "l_id", "r_id", mks, None)
+        
+        mk_df = matchkey_dataframe(mks)
+        
+        result = clerical_sample(linked_ids, mk_df, df_l, df_r, "l_id", "r_id", n_ids=3)
+        result_agg = result.groupby("matchkey").count()
+
+        intended_schema = StructType([
+            StructField("matchkey",IntegerType(),False),
+            StructField("count",LongType(),False)
+        ])
+
+        intended_data = [[1, 2],
+                         [2, 3]]
+
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+                
+        assert_df_equality(result_agg, intended_df)
+        
+#############################################################################
+
+class TestDeterministicLinkage(object):
+  def test_deterministic_linkage(self, spark):
+    df_l = spark.createDataFrame(
+        (pd.DataFrame({
+            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
+                     '14', '15', '16', '17', '18', '19', '20'],
+
+            "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
+                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+
+            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+        })))
+
+    df_r = spark.createDataFrame(
+        (pd.DataFrame({
+            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
+                    '14', '15', '16', '17', '18', '19', '20'],
+
+            "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
+                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+
+            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+        })))
+
+    mks = [
+        [df_l['first_name'] == df_r['first_name'],
+         df_l['last_name'] == df_r['last_name']],
+
+        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
+            df_l['last_name'] == df_r['last_name']],
+
+        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
+            F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
+    ]
+
+    result_df = deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks, out_dir=None)
+
+    
+    intended_schema = StructType([
+        StructField("l_id",StringType(),True),
+        StructField("r_id",StringType(),True),
+        StructField("matchkey",IntegerType(),False),
+    ])
+
+    intended_data = [
+      ['10', '10', 1],
+      ['11', '11', 1],
+      ['12', '12', 1],
+      ['13', '13', 1],
+      ['14', '14', 1],
+      ['15', '15', 1],
+      ['16', '16', 1],
+      ['17', '17', 1],
+      ['18', '18', 1],
+      ['19', '19', 1],
+      ['20', '20', 1],
+      ['6', '6', 1],
+      ['7', '7', 1],
+      ['8', '8', 1],
+      ['9', '9', 1],
+      ['1', '1', 2],
+      ['2', '2', 2],
+      ['3', '3', 2],
+      ['4', '4', 2],
+      ['5', '5', 2]
+  ]
+
+  intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+  assert_df_equality(result_df, intended_df, ignore_row_order=True,ignore_column_order=True)
+  
 ###################################################################
 
 
@@ -569,47 +638,42 @@ class Test_alphaname(object):
 
 ###############################################################
 
-# test currently fails, as metaphone is not working?
+ class Test_metaphone(object):
 
-# class Test_metaphone(object):
-#
-#    # Test 1
-#    def test_expected(self,spark):
-#
-#        test_schema = StructType([
-#          StructField("ID", IntegerType(), True),
-#          StructField("Forename", StringType(), True),
-#        ])
-#        test_data = [
-#          [1, "David"],
-#          [2, "Idrissa"],
-#          [3, "Edward"],
-#          [4, "Gordon"],
-#          [5, "Emma"],
-#        ]
-#
-#        test_df = spark.createDataFrame(test_data, test_schema)
-#        result_df = metaphone(test_df,'Forename','metaname')
-#
-#        intended_schema = StructType([
-#          StructField("ID", IntegerType(), True),
-#          StructField("Forename", StringType(), True),
-#          StructField("metaname", StringType(), True),
-#        ])
-#
-#        intended_data = [
-#          [1, "David", "TFT"],
-#          [2, "Idrissa","ITRS"],
-#          [3, "Edward","ETWRT"],
-#          [4, "Gordon","KRTN"],
-#          [5, "Emma","EM"],
-#        ]
-#
-#        intended_df = spark.createDataFrame(intended_data, intended_schema)
-#
-#
-#
-#        assert_df_equality(intended_df,result_df)
+    def test_expected(self,spark):
+
+        test_schema = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Forename", StringType(), True),
+        ])
+        test_data = [
+          [1, "David"],
+          [2, "Idrissa"],
+          [3, "Edward"],
+          [4, "Gordon"],
+          [5, "Emma"],
+        ]
+
+        test_df = spark.createDataFrame(test_data, test_schema)
+        result_df = metaphone(test_df,'Forename','metaname')
+
+        intended_schema = StructType([
+          StructField("ID", IntegerType(), True),
+          StructField("Forename", StringType(), True),
+          StructField("metaname", StringType(), True),
+        ])
+
+        intended_data = [
+          [1, "David", "TFT"],
+          [2, "Idrissa","ITRS"],
+          [3, "Edward","ETWRT"],
+          [4, "Gordon","KRTN"],
+          [5, "Emma","EM"],
+        ]
+
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 
 ###############################################################
