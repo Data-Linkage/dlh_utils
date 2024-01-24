@@ -609,7 +609,7 @@ def describe_metrics(df, output_mode='pandas'):
 
     Returns
     -------
-    decribe_df
+    describe_df
       A dataframe with columns detailing descriptive metrics on each variable
 
     Raises
@@ -641,7 +641,7 @@ def describe_metrics(df, output_mode='pandas'):
                       .alias(c) for c in df.columns))
                .withColumn('summary', F.lit('null')))
 
-    decribe_df = da.union_all(distinct_df, null_df).persist()
+    describe_df = da.union_all(distinct_df, null_df).persist()
 
     count = df.count()
 
@@ -649,19 +649,19 @@ def describe_metrics(df, output_mode='pandas'):
     types = dict(zip([x[0] for x in types],
                      [x[1] for x in types]))
 
-    decribe_df = decribe_df.toPandas()
-    decribe_df = decribe_df.transpose().reset_index()
-    decribe_df.columns = ['variable'] + list(decribe_df[decribe_df['index'] == 'summary']
+    describe_df = describe_df.toPandas()
+    describe_df = describe_df.transpose().reset_index()
+    describe_df.columns = ['variable'] + list(describe_df[describe_df['index'] == 'summary']
                                              .reset_index(drop=True).transpose()[0])[1:]
-    decribe_df = decribe_df[decribe_df['variable'] != 'summary']
-    decribe_df['count'] = count
-    decribe_df['not_null'] = decribe_df['count'] - decribe_df['null']
+    describe_df = describe_df[describe_df['variable'] != 'summary']
+    describe_df['count'] = count
+    describe_df['not_null'] = describe_df['count'] - describe_df['null']
     for variable in ['distinct', 'null', 'not_null']:
-        decribe_df['percent_'
-                   + variable] = (decribe_df[variable] / decribe_df['count']) * 100
-    decribe_df['type'] = [types[x] for x in decribe_df['variable']]
+        describe_df['percent_'
+                   + variable] = (describe_df[variable] / describe_df['count']) * 100
+    describe_df['type'] = [types[x] for x in describe_df['variable']]
 
-    decribe_df = decribe_df[[
+    describe_df = describe_df[[
         'variable',
         'type',
         'count',
@@ -672,11 +672,19 @@ def describe_metrics(df, output_mode='pandas'):
         'not_null',
         'percent_not_null'
     ]]
+    
+    describe_df["count"] = describe_df["count"].astype(int)
+    describe_df["distinct"] = describe_df["distinct"].astype(int)
+    describe_df["null"] = describe_df["null"].astype(int)
+    describe_df["not_null"] = describe_df["not_null"].astype(int)
+    describe_df["percent_null"] = describe_df["percent_null"].astype(float)
+    describe_df["percent_not_null"] = describe_df["percent_not_null"].astype(float)
+    describe_df["percent_distinct"] = describe_df["percent_distinct"].astype(float)
 
     if output_mode == 'spark':
-        decribe_df = pandas_to_spark(decribe_df)
+        describe_df = pandas_to_spark(describe_df)
 
-    return decribe_df
+    return describe_df
 
 ###############################################################################
 
@@ -724,7 +732,7 @@ def value_counts(df, limit=20, output_mode='pandas'):
         return (df.
                 groupBy(col)
                 .count()
-                .sort('count', ascending=False)
+                .sort(['count', col], ascending=[False, True])
                 .limit(limit)
                 .withColumnRenamed('count', col + '_count')
                 .toPandas())

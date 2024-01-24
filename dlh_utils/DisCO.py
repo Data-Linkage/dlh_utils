@@ -179,101 +179,79 @@ def date_year_quarter(df, date_column):
 
 ###############################################################################
 
-def check_variables(df, approved_string):
-    """
+def check_variables(df, approved_vars):
+  
+  """
+  Checks that all variable names are present in the database for export but also 
+  that the database does not have any extra variables not approved by the stakeholders.
+  
+  This function returns a python dataframe of which approved variables 
+  are not in the database for export and another dataframe of any variables 
+  in the database that shouldn't be there.
+  
+   Parameters
+  ----------
+  df: dataframe
+    Dataframe to which the function is applied.
+  approved_vars: a list of variables in string format
 
-    You will often receive a list of approved variables in a column in a
-    spreadsheet outside of DAP. You will need to check that all variable
-    names are present in the database for export but also that the database
-    does not have any extra variables not approved by the stakeholders.
+   Returns
+  -------
+  The function returns a tuple of two python dataframes:
+    a
+      The variable names that have been approved by the stakeholders 
+      that are not in the database for export.
+    x
+      The variable names that are in the database for export but have 
+      not been approved by the stakeholders.
+  
+  Example
+  -------
 
-    This can be achieved using list comphension but getting turning an excel
-    column of variables in to a python list can be time consuming.
+  > df.show()
+  +---+--------+------+--------+
+  | id|     dob|  name|postcode|
+  +---+--------+------+--------+
+  | a1|19990121|SPORTY| PO356TH|
+  | a2|19771109| SCARY|   E34TO|
+  | a3|19760424|  BABY| BH242ED|
+  | a4|19251217|GINGER| KN231SD|
+  | a5|19730724|  POSH| HK192YC|
+  +---+--------+------+--------+
+  
+  As the function returns a tuple, call in the function using tuple unpacking
+  
+  approved = ['approved1', 'approved2', 'id', 'name', 'postcode']
 
-    This function turns a cut and pasted excel column of variables into a
-    python list and then returns a python dataframe of which approved variables
-    are not in the database for export and another dataframe of any variables
-    in the database that shouldn't be there.
+  > missing,not_approved = hash_id(df,approved_vars = approved) 
 
-     Parameters
-    ----------
-    df: dataframe
-      Dataframe to which the function is applied.
-    approved_string: an excel column cut and pasted between 3 speech marks (str)
-      NB, the column bust be cut and paste between 3 speech marks
-      (not typed out or something) or it wont work.
-
-     Returns
-    -------
-    The function returns a tuple of two python dataframes:
-      a
-        The variable names that have been approved by the stakeholders
-        that are not in the database for export.
-      x
-        The variable names that are in the database for export but have
-        not been approved by the stakeholders.
-
-    Example
-    -------
-
-    > df.show()
-    +---+--------+------+--------+
-    | id|     dob|  name|postcode|
-    +---+--------+------+--------+
-    | a1|19990121|SPORTY| PO356TH|
-    | a2|19771109| SCARY|   E34TO|
-    | a3|19760424|  BABY| BH242ED|
-    | a4|19251217|GINGER| KN231SD|
-    | a5|19730724|  POSH| HK192YC|
-    +---+--------+------+--------+
-
-    As the function returns a tuple, call in the function using tuple unpacking
-
-    for approved_string, cut the excel column and paste it between 3 speech marks.
-    You can either assign it a variable outside the function and call it in or
-    paste it straight into the function. (NB, as this text is inside 3 speech marks
-    3 speech marks can't be put around the approved variables but this can be done
-    outside this doc string)
-
-    approved = approved1
-               approved2
-               id
-               name
-               postcode
-
-    > missing,not_approved = check_variables(df,approved_string = approved)
-    or
-    > missing,not_approved = check_variables(df,approved_string = approved1
-                                                                  approved2
-                                                                  id
-                                                                  name
-                                                                  postcode)
-    > missing
-
-          in_approved_not_in_df
-    0	approved1
-    1	approved2
-
-    > not_approved
-
-          in_df_not_in_approved
-    0	dob
-
-    """
-
-    a_list = approved_string.split('\n')
-    a_list = [a.lower() for a in a_list]
-
-    df_list = [c.lower() for c in df.columns]
-
-    a = pd.DataFrame({'in_approved_not_in_df':
-                      [a for a in a_list if a not in df_list]})
-
-    c = pd.DataFrame({'in_df_not_in_approved':
-                      [c for c in df_list if c not in a_list]})
-
-    return a,c
-
+  > missing  
+  	in_approved_not_in_df
+  0	approved1
+  1	approved2
+  
+  > not_approved
+  	in_df_not_in_approved
+  0	dob
+  
+  """
+  
+  a_list = [a.lower() for a in approved_vars]
+  
+  df_list = [c.lower() for c in df.columns]
+  
+  a = pd.DataFrame({'in_approved_not_in_df'
+                    :
+                    [a for a in a_list if a not in df_list]})
+  
+  x = pd.DataFrame({'in_df_not_in_approved'
+                    :
+                    [x for x in df_list if x not in a_list]})
+  
+  return a,x
+  
+###--- END  
+  
 ###############################################################################
 
 

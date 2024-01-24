@@ -487,7 +487,7 @@ def explode(df, column, on=' ', retain=False, drop_duplicates=True, flag=None):
                       F.explode(F.split(F.col(column), on))
                       .alias(column))
               .unionByName((df
-                           .where((F.col(column).rlike(on) is False)
+                           .where(~(F.col(column).rlike(on))
                                   | (F.col(column).rlike(on).isNull()))))
               )
 

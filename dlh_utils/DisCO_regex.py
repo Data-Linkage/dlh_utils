@@ -174,6 +174,7 @@ def identifying_strings(df, required_identifiers):
   
   return new_df, regex_used
 
+
 search_for = ['NIN', 
               'UK Vehicle Reg',
               'UK phone no',
