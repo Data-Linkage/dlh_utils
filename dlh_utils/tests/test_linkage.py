@@ -310,77 +310,77 @@ class TestClericalSample(object):
 #############################################################################
 
 class TestDeterministicLinkage(object):
-  def test_deterministic_linkage(self, spark):
-    df_l = spark.createDataFrame(
-        (pd.DataFrame({
-            "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
-                     '14', '15', '16', '17', '18', '19', '20'],
+    def test_deterministic_linkage(self, spark):
+        df_l = spark.createDataFrame(
+            (pd.DataFrame({
+                "l_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
+                         '14', '15', '16', '17', '18', '19', '20'],
 
-            "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
-                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+                "first_name": ['aa', 'ba', 'ab', 'bb', 'aa', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-        })))
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-    df_r = spark.createDataFrame(
-        (pd.DataFrame({
-            "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
-                    '14', '15', '16', '17', '18', '19', '20'],
+        df_r = spark.createDataFrame(
+            (pd.DataFrame({
+                "r_id": ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',\
+                        '14', '15', '16', '17', '18', '19', '20'],
 
-            "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
-                           'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
+                "first_name": ['ax', 'bx', 'ad', 'bd', 'ar', 'ax', 'cr', 'cd', 'dc', 'dx',
+                               'ag', 'rd', 'rf', 'rg', 'rr', 'dar', 'dav', 'dam', 'dax', 'dev'],
 
-            "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
-                          'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
-        })))
+                "last_name": ['fr', 'gr', 'fa', 'ga', 'gx', 'mx', 'ra', 'ga', 'fg', 'gx', 'mr',
+                              'pr', 'ar', 'to', 'lm', 'pr', 'pf', 'se', 'xr', 'xf']
+            })))
 
-    mks = [
-        [df_l['first_name'] == df_r['first_name'],
-         df_l['last_name'] == df_r['last_name']],
+        mks = [
+            [df_l['first_name'] == df_r['first_name'],
+             df_l['last_name'] == df_r['last_name']],
 
-        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-            df_l['last_name'] == df_r['last_name']],
+            [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
+                df_l['last_name'] == df_r['last_name']],
 
-        [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
-            F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
-    ]
+            [F.substring(df_l['first_name'], 1, 1) == F.substring(df_r['first_name'], 1, 1),
+                F.substring(df_l['last_name'], 1, 1) == F.substring(df_r['last_name'], 1, 1)]
+        ]
 
-    result_df = deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks, out_dir=None)
+        result_df = deterministic_linkage(df_l, df_r, 'l_id', 'r_id', mks, out_dir=None)
 
-    
-    intended_schema = StructType([
-        StructField("l_id",StringType(),True),
-        StructField("r_id",StringType(),True),
-        StructField("matchkey",IntegerType(),False),
-    ])
 
-    intended_data = [
-      ['10', '10', 1],
-      ['11', '11', 1],
-      ['12', '12', 1],
-      ['13', '13', 1],
-      ['14', '14', 1],
-      ['15', '15', 1],
-      ['16', '16', 1],
-      ['17', '17', 1],
-      ['18', '18', 1],
-      ['19', '19', 1],
-      ['20', '20', 1],
-      ['6', '6', 1],
-      ['7', '7', 1],
-      ['8', '8', 1],
-      ['9', '9', 1],
-      ['1', '1', 2],
-      ['2', '2', 2],
-      ['3', '3', 2],
-      ['4', '4', 2],
-      ['5', '5', 2]
-  ]
+        intended_schema = StructType([
+            StructField("l_id",StringType(),True),
+            StructField("r_id",StringType(),True),
+            StructField("matchkey",IntegerType(),False)
+        ])
 
-  intended_df = spark.createDataFrame(intended_data, intended_schema)
+        intended_data = [
+          ['10', '10', 1],
+          ['11', '11', 1],
+          ['12', '12', 1],
+          ['13', '13', 1],
+          ['14', '14', 1],
+          ['15', '15', 1],
+          ['16', '16', 1],
+          ['17', '17', 1],
+          ['18', '18', 1],
+          ['19', '19', 1],
+          ['20', '20', 1],
+          ['6', '6', 1],
+          ['7', '7', 1],
+          ['8', '8', 1],
+          ['9', '9', 1],
+          ['1', '1', 2],
+          ['2', '2', 2],
+          ['3', '3', 2],
+          ['4', '4', 2],
+          ['5', '5', 2]
+        ]
 
-  assert_df_equality(result_df, intended_df, ignore_row_order=True,ignore_column_order=True)
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        assert_df_equality(result_df, intended_df, ignore_row_order=True,ignore_column_order=True)
   
 ###################################################################
 
@@ -504,60 +504,6 @@ class TestMatchkeyDataframe(object):
 ###############################################################
 
 
-'''
-class TestDeterministicLinkage:
-    def test_expected(self,spark):
-        """
-        Tests 1:1 linkage if two dataframes on two matchkeys.
-
-        In this case the first matchkey should only match Betty with Betty and the second
-        sould only match Evans with Evans. Other matching pairs between the datasets are not
-        unique (for example, Alan is unique in right_df but there are two Alans in left_df)
-        so in a 1:1 match these will be ignored.
-
-        Parameters
-        ----------
-        spark : pyspark session
-          Usually passed in by pytest.
-
-        Returns
-        -------
-        Nothing
-
-        Raises
-        ------
-        DataFramesNotEqualError if the linkage results are not as expected.
-        """
-
-        right_df = spark.createDataFrame(
-            (
-                pd.DataFrame(
-                    {
-                        "firstname": ["Alan", "Betty", "Claire", "Claire", "Elin"],
-                        "lastname": ["Jones", "Jones", "Smith", "Jones", "Evans"],
-                        "numeric": [1, 2, 2, 4, 5],
-                        "id1": [1, 2, 3, 4, 5]
-                    }
-                )
-            )
-        )
-
-        left_df = spark.createDataFrame(
-            (
-                pd.DataFrame(
-                    {
-                        "firstname": ["Alan", "Alan", "Betty", "Barry", "Claire", "David", "Emma"],
-                        "lastname": ["Jones", "Smith", "James", "Jones", "Smith", "Jones", "Evans"],
-                        "numeric": [1, 2, 2, 3, 3, 3, 3],
-                        "id2": [11, 12, 13, 14, 15, 16, 17]
-                    }
-                )
-            )
-        )
-'''
-###############################################################
-
-
 class Test_alphaname(object):
 
     # Test 1
@@ -638,7 +584,7 @@ class Test_alphaname(object):
 
 ###############################################################
 
- class Test_metaphone(object):
+class TestMetaphone(object):
 
     def test_expected(self,spark):
 
