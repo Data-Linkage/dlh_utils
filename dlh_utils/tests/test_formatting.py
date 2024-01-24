@@ -33,6 +33,34 @@ class TestExportToExcel:
                 b = df.loc[rownum, c]
                 assert a == b
 
+    def test_list_of_columns_single_dataframe(self):
+        """
+        The simplest case: exporting one dataframe to a single-sheet workbook
+        without any formatting.
+        """
+        df = pd.DataFrame(
+            {
+                "firstname": ["Alan", "Claire", "Josh", "Bob"],
+                "lastname": ["Jones", "Llewelyn", "Jackson", "Evans"],
+                "numeric_A": [1.98, -2.1, 0, 4.3],
+                "numeric_B": [-500, 221, 1, 0],
+            }
+        )
+        wb = dlh_utils.formatting.export_to_excel(
+          {"Sheet1": df}, 
+          columns = ["firstname", "numeric_A"],
+          local_path="/tmp/pytest.xlsx"
+        )
+
+        assert len(wb.worksheets) == 1
+        for i, c in enumerate(["firstname", "numeric_A"]):
+            assert (wb["Sheet1"].cell(1, i + 1).value) == c
+        for rownum in range(df.shape[0]):
+            for i, c in enumerate(["firstname", "numeric_A"]):
+                a = wb["Sheet1"].cell(rownum + 2, i + 1).value
+                b = df.loc[rownum, c]
+                assert a == b
+
     def test_default_two_dataframes(self):
         """
         Exporting two dataframes to a workbook, each on its own worksheet
@@ -143,7 +171,7 @@ class TestExportToExcel:
 
 class TestApplyStyles:
 
-    def test_default_single_style(self):
+    def test_default_single_style_1(self):
         """
         Applying a built-in function (style_on_cutoff) to a single column
         using its default settings.
@@ -173,6 +201,7 @@ class TestApplyStyles:
         assert style_applied[0][1][0] == dlh_utils.formatting.style_on_cutoff
         # Style was applied to numeric_A only
         assert style_applied[0][1][1] == "numeric_A"
+
 
     def test_default_two_styles(self):
         """
