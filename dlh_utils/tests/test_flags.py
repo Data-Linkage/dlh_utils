@@ -5,9 +5,25 @@ import pandas as pd
 import pytest
 from chispa import assert_df_equality
 from dlh_utils.flags import flag, flag_check
+from pyspark.sql import SparkSession
 
 pytestmark = pytest.mark.usefixtures("spark")
 
+@pytest.fixture(scope="session")
+def spark(request):
+    """fixture for creating a spark context
+    Args:
+        request: pytest.FixtureRequest object
+    """
+    spark = (
+        SparkSession.builder.appName("dataframe_testing")
+        .config("spark.executor.memory", "5g")
+        .config("spark.yarn.excecutor.memoryOverhead", "2g")
+        .getOrCreate()
+    )
+    request.addfinalizer(lambda: spark.stop())
+    return spark
+  
 ###################################################################
 
 
@@ -570,7 +586,11 @@ class TestFlagCheck1:
         )
 
         result_df = flag_check(
-            test_df, prefix="FLAG_", flags=None, mode="pass", summary=False
+          test_df, 
+          prefix="FLAG_", 
+          flags=None, 
+          mode="pass", 
+          summary=False,
         )
 
         intended_df = spark.createDataFrame(
