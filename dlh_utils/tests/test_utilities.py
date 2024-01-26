@@ -10,8 +10,10 @@ from pandas.util.testing import assert_frame_equal
 import numpy as np
 import pytest
 from chispa import assert_df_equality
-from dlh_utils.utilities import describe_metrics, value_counts, regex_match, pandas_to_spark
+from dlh_utils.utilities import describe_metrics, value_counts, \
+  regex_match, pandas_to_spark, search_files
 import datetime as dt
+import os
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -154,4 +156,8 @@ class TestPandasToSpark(object):
 
         assert_df_equality(result_df, intended_df, ignore_row_order=True)
         
-    
+class TestSearchFiles(object):
+    def test_expected(self, spark):
+        path = os.path.dirname(os.path.realpath(__file__))
+        result = search_files(path, "import")
+        assert sorted(list(result.keys())) == sorted(['test_formatting.py', 'test_linkage.py', 'test_profiling.py', 'test_standardisation.py', 'test_dataframes.py', 'test_flags.py', 'test_utilities.py', 'conftest.py'])
