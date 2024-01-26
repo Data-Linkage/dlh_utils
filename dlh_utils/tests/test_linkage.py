@@ -4,15 +4,15 @@ Pytesting on Linkage functions.
 
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType, DoubleType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType, DoubleType, FloatType
 import pandas as pd
 import pytest
 from chispa import assert_df_equality
 from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables,\
     assert_unique_matches,matchkey_counts,matchkey_dataframe,alpha_name, std_lev_score,\
     soundex,jaro,jaro_winkler, difflib_sequence_matcher, blocking, mk_dropna, \
-    assert_unique, deterministic_linkage, clerical_sample, metaphone
-    
+    assert_unique, deterministic_linkage, clerical_sample, metaphone, cluster_number
+from dlh_utils.sessions import getOrCreateSparkSession
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -23,12 +23,7 @@ def spark(request):
     Args:
         request: pytest.FixtureRequest object
     """
-    spark = (
-        SparkSession.builder.appName("dataframe_testing")
-        .config("spark.executor.memory", "5g")
-        .config("spark.yarn.excecutor.memoryOverhead", "2g")
-        .getOrCreate()
-    )
+    spark = getOrCreateSparkSession(appName="dlh_utils unit tests", size="small")
     request.addfinalizer(lambda: spark.stop())
     return spark
 
@@ -863,15 +858,29 @@ class TestDifflibSequenceMatcher(object):
       ]
 
       test_df = spark.createDataFrame(test_data, test_schema)
-      result = test_df.withColumn(
+      result_df = test_df.withColumn(
         "difflib", 
         difflib_sequence_matcher(
           F.col("string1"), F.col("string2")
         )
       )
-      # Current fuction does not work so automatically fail
-      # until we determine what the output should be
-      assert False
+      
+      intended_schema = StructType([
+          StructField("string1", StringType(), True),
+          StructField("string2", StringType(), True),
+          StructField("difflib", FloatType(), True)
+      ])
+      
+      intended_data = [
+        ["David", "Emily", 0.2],
+        ["Idrissa", "Emily", 0.16666667],
+        ["Edward", "Emily", 0.18181819],
+        ["Gordon", "Emily", 0.0],
+        ["Emma", "Emily", 0.44444445]
+      ]
+      
+      intended_df = spark.createDataFrame(intended_data, intended_schema)
+      assert_df_equality(intended_df,result_df)
 
 ###############################################################
 
@@ -949,3 +958,39 @@ class TestAssertUnique(object):
         pass
       assert_unique(df, ["colB"])
   
+class TestClusterNumber(object):
+  def test_expected(self, spark):
+    
+      test_schema = StructType([
+          StructField("id1", StringType(), True),
+          StructField("id2", StringType(), True)
+      ])
+
+      test_data = [
+        ["1a", "2b"],
+        ["3a", "3b"],
+        ["2a", "1b"],
+        ["3a", "7b"],
+        ["1a", "8b"],
+        ["2a", "9b"]
+      ]
+      df = spark.createDataFrame(test_data, test_schema)
+      result_df = cluster_number(df, "id1", "id2")
+      
+      intended_schema = StructType([
+          StructField("id1", StringType(), True),
+          StructField("id2", StringType(), True),
+          StructField("Cluster_Number", IntegerType(), True),
+      ])
+
+      intended_data = [
+        ["2a", "1b", 1],
+        ["2a", "9b", 1],
+        ["3a", "3b", 2],
+        ["3a", "7b", 2],
+        ["1a", "8b", 3],
+        ["1a", "2b", 3]
+      ]
+      intended_df = spark.createDataFrame(intended_data, intended_schema)
+      
+      assert_df_equality(intended_df, result_df, ignore_row_order=True)
