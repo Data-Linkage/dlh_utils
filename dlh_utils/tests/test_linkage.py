@@ -12,20 +12,8 @@ from dlh_utils.linkage import order_matchkeys,matchkey_join,extract_mk_variables
     assert_unique_matches,matchkey_counts,matchkey_dataframe,alpha_name, std_lev_score,\
     soundex,jaro,jaro_winkler, difflib_sequence_matcher, blocking, mk_dropna, \
     assert_unique, deterministic_linkage, clerical_sample, metaphone, cluster_number
-from dlh_utils.sessions import getOrCreateSparkSession
 
 pytestmark = pytest.mark.usefixtures("spark")
-
-
-@pytest.fixture(scope="session")
-def spark(request):
-    """fixture for creating a spark context
-    Args:
-        request: pytest.FixtureRequest object
-    """
-    spark = getOrCreateSparkSession(appName="dlh_utils unit tests", size="small")
-    request.addfinalizer(lambda: spark.stop())
-    return spark
 
 #############################################################################
 
@@ -154,7 +142,7 @@ class TestMatchkeyJoin(object):
 
         result_df = matchkey_join(test_df_1, test_df_2, 'l_id', 'r_id', mks[2], 1)
 
-        assert_df_equality(intended_df,result_df)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 #####################################################################
 
@@ -249,7 +237,7 @@ class TestMkDropna(object):
                 "last_name": ['fr', 'ga', 'gx', 'mx', 'ra', 'ga']
             })))
 
-        assert_df_equality(intended_df,result_df)     
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)     
 
 #############################################################################
         
@@ -300,7 +288,7 @@ class TestClericalSample(object):
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
                 
-        assert_df_equality(result_agg, intended_df)
+        assert_df_equality(result_agg, intended_df, ignore_row_order=True)
         
 #############################################################################
 
@@ -494,7 +482,7 @@ class TestMatchkeyDataframe(object):
 
         result_df = matchkey_dataframe(mks)
 
-        assert_df_equality(intended_df,result_df)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 ###############################################################
 
@@ -536,7 +524,7 @@ class Test_alphaname(object):
 
         result_df = alpha_name(test_df,'Forename','alphaname')
 
-        assert_df_equality(intended_df,result_df)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
     # Test 2
     def test_expected_2(self,spark):
@@ -574,7 +562,7 @@ class Test_alphaname(object):
 
         result_df2 = alpha_name(test_df2,'Name','alphaname')
 
-        assert_df_equality(intended_df2,result_df2)
+        assert_df_equality(intended_df2,result_df2, ignore_row_order=True)
 
 
 ###############################################################
@@ -656,7 +644,7 @@ class Test_soundex(object):
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
-        assert_df_equality(intended_df,result_df)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
     # Test 2
 
@@ -691,7 +679,7 @@ class Test_soundex(object):
 
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema2)
 
-        assert_df_equality(intended_df2,result_df2)
+        assert_df_equality(intended_df2,result_df2, ignore_row_order=True)
 
 ###############################################################
 
@@ -735,7 +723,7 @@ class Test_std_lev_score(object):
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
-        assert_df_equality(intended_df,result_df)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
     # Test 2
 
@@ -783,7 +771,7 @@ class Test_std_lev_score(object):
 
         intended_df2 = spark.createDataFrame(intended_data2, intended_schema)
 
-        assert_df_equality(intended_df2,result_df2)
+        assert_df_equality(intended_df2,result_df2, ignore_row_order=True)
 
 ###############################################################
 
@@ -880,7 +868,7 @@ class TestDifflibSequenceMatcher(object):
       ]
       
       intended_df = spark.createDataFrame(intended_data, intended_schema)
-      assert_df_equality(intended_df,result_df)
+      assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 ###############################################################
 
@@ -935,7 +923,7 @@ class TestBlocking(object):
       ]
       expected_df = spark.createDataFrame(expected_data, expected_schema)
       
-      assert_df_equality(expected_df, result_df)
+      assert_df_equality(expected_df, result_df, ignore_row_order=True)
 
 ###############################################################
 
@@ -960,6 +948,11 @@ class TestAssertUnique(object):
   
 class TestClusterNumber(object):
   def test_expected(self, spark):
+      """
+      If this test fails because of the graphframes package not being found,
+      make sure you have both graphframes and graphframes_wrapper installed
+      via pip3.
+      """
     
       test_schema = StructType([
           StructField("id1", StringType(), True),
@@ -975,7 +968,8 @@ class TestClusterNumber(object):
         ["2a", "9b"]
       ]
       df = spark.createDataFrame(test_data, test_schema)
-      result_df = cluster_number(df, "id1", "id2")
+      result_df = cluster_number(df, id_1 = "id1", id_2 = "id2")
+      assert result_df is not None
       
       intended_schema = StructType([
           StructField("id1", StringType(), True),

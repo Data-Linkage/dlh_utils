@@ -1,9 +1,10 @@
 """Import required libraries"""
 import pytest
 from pyspark.sql import SparkSession
+from dlh_utils.sessions import getOrCreateSparkSession
 
 @pytest.fixture(scope="session")
-def spark():
+def spark(request):
     """Set up the Spark session by using a fixture decorator.
 
      This will be passed to all the tests by having spark as an
@@ -18,9 +19,6 @@ def spark():
          to be set up once and this will make the tests run faster
     """
 
-    spark_session = (SparkSession.builder.appName("dlh_utils_tests")
-            .config('spark.executor.memory', '5g')
-            .config('spark.yarn.excecutor.memoryOverhead', '2g')
-            .getOrCreate())
-
-    return spark_session
+    spark = getOrCreateSparkSession(appName="dlh_utils unit tests", size="small")
+    request.addfinalizer(lambda: spark.stop())
+    return spark
