@@ -8,7 +8,6 @@ from pyspark.sql.types import StructType,StructField,StringType,LongType,Integer
 import pandas as pd
 import numpy as np
 import pytest
-import unittest
 from chispa import assert_df_equality
 from pandas.util.testing import assert_frame_equal
 from dlh_utils.profiling import df_describe, value_counts
@@ -70,7 +69,7 @@ class TestValueCounts(object):
             (
                 pd.DataFrame(
                     {
-                        "Year_of_Birth": ['1944', '1997', '1957', None, '194'4, '1965', '1984', None],
+                        "Year_of_Birth": ['1944', '1997', '1957', None, '1944', '1965', '1984', None],
                     }
                 )
             )
@@ -81,6 +80,18 @@ class TestValueCounts(object):
           output_mode='pandas'
         )
         
+        result = (result[0].replace({'': None})
+                           .sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
+                                        na_position='last', 
+                                        ascending=True)\
+                              .reset_index(drop=True).replace({None: ''}),
+                  
+                  result[1].sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
+                                          na_position='last', 
+                                          ascending=False)\
+                              .reset_index(drop=True)
+                    )
+        
         expected =  (pd.DataFrame(
                   {
                       "Year_of_Birth": ['1944', '1957', '1965', '1984', '1997', '', '', '', '', ''],
@@ -89,7 +100,7 @@ class TestValueCounts(object):
                 ),
                     pd.DataFrame(
                   {
-                      "Year_of_Birth": ["1957", "1965", '1984', '1997', '1944', '', '', '', '', ''],
+                      "Year_of_Birth": ["1997", "1984", '1965', '1957', '1944', '', '', '', '', ''],
                       "Year_of_Birth_count": [1, 1, 1, 1, 2, 0, 0, 0, 0, 0],
                   }
                 )
@@ -98,20 +109,4 @@ class TestValueCounts(object):
         assert_frame_equal(result[0], expected[0], check_like=True)
         
         assert_frame_equal(result[1], expected[1], check_like=True)
-
-        
-      
-#############################################################################
-
-#
-#result[1].sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
-#                      na_position='last', 
-#                      ascending=False)\
-#        .reset_index(drop=True)
-#  
-#  
-#result[0].replace({'': None}).sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
-#                      na_position='last', 
-#                      ascending=True)\
-#        .reset_index(drop=True).replace({None: ''})
   
