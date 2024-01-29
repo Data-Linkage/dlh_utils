@@ -594,7 +594,6 @@ def cluster_number(df, id_1, id_2):
     spark = SparkSession.builder.getOrCreate()
     username = os.getenv("HADOOP_USER_NAME")
     checkpoint_path = f"/user/{username}/checkpoints"
-    checkpoint_path = "/tmp"
     spark.sparkContext.setCheckpointDir(checkpoint_path)
 
     # Stack all unique IDs datasets into one column called 'id'
