@@ -34,7 +34,7 @@ def spark(request):
 class TestDescribeMetrics(object):
 
     def test_expected(self,spark):
-      df = spark.createDataFrame(
+        df = spark.createDataFrame(
           (
               pd.DataFrame(
                   {
@@ -44,8 +44,8 @@ class TestDescribeMetrics(object):
               )
           )
       )
-      result_df = describe_metrics(df, output_mode='pandas')
-      intended_df = pd.DataFrame(
+        result_df = describe_metrics(df, output_mode='pandas')
+        intended_df = pd.DataFrame(
           {
               "variable": ["colA", "colB"],
               "type": ["string", "double"],
@@ -57,15 +57,15 @@ class TestDescribeMetrics(object):
               "not_null": [6, 7],
               "percent_not_null": [75, 87.5]
           }
-      )      
-      assert_frame_equal(result_df, intended_df)
+      )
+        assert_frame_equal(result_df, intended_df)
 
 #############################################################################
 
 class TestValueCounts(object):
 
     def test_expected(self,spark):
-      df = spark.createDataFrame(
+        df = spark.createDataFrame(
           (
               pd.DataFrame(
                   {
@@ -75,16 +75,16 @@ class TestValueCounts(object):
               )
           )
       )
-      result_df = value_counts(df, limit=6, output_mode='pandas')
-      intended_df = pd.DataFrame(
+        result_df = value_counts(df, limit=6, output_mode='pandas')
+        intended_df = pd.DataFrame(
           {
               "colA": ["C", None, "A", "B", "", ""],
               "colA_count": [3, 2, 2, 1, 0, 0],
               "colB": [3.0, 5.0, 1.0, 2.0, 6.0, np.NaN],
               "colB_count": [2, 2, 1, 1, 1, 1]
           }
-      )      
-      assert_frame_equal(result_df, intended_df)
+      )
+        assert_frame_equal(result_df, intended_df)
 
 
 #############################################################################
@@ -92,7 +92,7 @@ class TestValueCounts(object):
 class TestRegexMatch(object):
 
     def test_expected(self,spark):
-      df = spark.createDataFrame(
+        df = spark.createDataFrame(
           (
               pd.DataFrame(
                   {
@@ -107,11 +107,10 @@ class TestRegexMatch(object):
               )
           )
       )
-      regex = "^[a-z]*[0-9]+_"
-      result = regex_match(df, regex, limit=10000, cut_off=0.0)
-      assert result == ['colA', 'colC', 'colG']
-      result = regex_match(df, regex, limit=10000, cut_off=0.6)
-      assert result == ['colG']
+        regex = "^[a-z]*[0-9]+_"
+        result = regex_match(df, regex, limit=10000, cut_off=0.0)
+        assert result == ['colA', 'colC', 'colG']
+        result = regex_match(df, regex, limit=10000, cut_off=0.6)
+        assert result == ['colG']
 
 #############################################################################
-
