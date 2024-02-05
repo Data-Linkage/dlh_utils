@@ -1,3 +1,6 @@
+" Functions to help disclosure control code 
+  Authors: Hannah Goode & Nathan O'Connor "
+
 import pyspark
 from pyspark.sql import *
 from pyspark.sql.types import *
@@ -530,10 +533,10 @@ def postcode_level(df, column, postcode_level):
                        ""))
 
     if postcode_level == 'area':
-      df = df.withColumn('postcode_'+postcode_level,
-                         regexp_extract(column,
-                                         '^(?:(?![0-9]).)*',
-                                         idx = 0))
+        df = df.withColumn('postcode_'+postcode_level,
+                           regexp_extract(column,
+                                          '^(?:(?![0-9]).)*',
+                                          idx = 0))
 
     elif postcode_level == 'district':
         df = df.withColumn('postcode_'+postcode_level,
@@ -551,4 +554,3 @@ def postcode_level(df, column, postcode_level):
     return df
 
 ###############################################################################
-
