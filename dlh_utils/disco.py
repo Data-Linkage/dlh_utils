@@ -31,7 +31,7 @@ spark = (
 )
 
 #########################---- datasets START -----##########################
-
+'''
 data = [("a1", "QQ 123456 C", "SPORTY", "PO356TH"),
         ("a2", "07451224152", "SCARY", "KZ66 7YT"),
         ("a3", "19760424", "BABY", "BH242ED"),
@@ -65,7 +65,7 @@ schema = StructType([
 ])
 
 df = spark.createDataFrame(data=data, schema=schema)
-
+'''
 #########################---- datasets END -----##########################
 
 tup = zip(random.sample(range(1,50),3)
@@ -635,15 +635,15 @@ def identifying_strings(df, required_identifiers):
                       required_identifiers=search_for)
                     
     > identified.show()
-    +-----------+-----------+--------+----------+----------------+--------------+---------------+-------------------+
-    |         id|        dob|    name|  postcode|   id_identifier|dob_identifier|name_identifier|postcode_identifier|
-    +-----------+-----------+--------+----------+----------------+--------------+---------------+-------------------+
-    |         a8|07451224152|  BARNEY|  PO29 2YC|            null|   UK phone no|           null|               null|
-    |         a7|   19780306|FLANDERS|6878844321|            null|          null|           null|             NHS No|
-    |         a2|   19830914|   SCARY|  KZ66 ZYT|            null|          null|           null|     UK Vehicle Reg|
-    |         a1|QQ 123456 C|  SPORTY|   PO356TH|            null|           NIN|           null|               null|
-    |ABE46372837|   19631011| SKINNER|    SP63HW|UK Child Benefit|          null|           null|               null|
-    +-----------+-----------+--------+----------+----------------+--------------+---------------+-------------------+
+    +-----------+--------+----------------+--------------+---------------+-------------------+
+    |         id|    name|   id_identifier|dob_identifier|name_identifier|postcode_identifier|
+    +-----------+--------+----------------+--------------+---------------+-------------------+
+    |         a8|  BARNEY|            null|   UK phone no|           null|               null|
+    |         a7|FLANDERS|            null|          null|           null|             NHS No|
+    |         a2|   SCARY|            null|          null|           null|     UK Vehicle Reg|
+    |         a1|  SPORTY|            null|           NIN|           null|               null|
+    |ABE46372837| SKINNER|UK Child Benefit|          null|           null|               null|
+    +-----------+--------+----------------+--------------+---------------+-------------------+
   
     > spark.createDataFrame(regex_used).show()
     +----------------+--------------------+--------------+-----+
@@ -676,11 +676,11 @@ def identifying_strings(df, required_identifiers):
             new_df = new_df.union(filtered)
 
     for n in new_df.columns:
-          new_df = new_df.withColumn(n+'_identifier', lit(None))
-          for k in required_dict:
-            new_df = new_df.withColumn(n+'_identifier',
-                                       when(col(n).rlike(required_dict.get(k)), k)
-                                       .otherwise(col(n+'_identifier')))
+        new_df = new_df.withColumn(n+'_identifier', lit(None))
+        for k in required_dict:
+          new_df = new_df.withColumn(n+'_identifier',
+                                     when(col(n).rlike(required_dict.get(k)), k)
+                                     .otherwise(col(n+'_identifier')))
 
     new_df = new_df.distinct()
 
