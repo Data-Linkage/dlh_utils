@@ -1,16 +1,16 @@
 '''Functions to help disclosure control code 
   Authors: Hannah Goode & Nathan O'Connor'''
 
-import pandas as pd
-import numpy as np
 import os
 import random
+import pandas as pd
+import numpy as np
 
 import pyspark
-from pyspark.sql import *
-from pyspark.sql.types import *
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, FloatType
 import pyspark.sql.functions
-from pyspark.sql.functions import regexp_extract, col, lit, sha2
+from pyspark.sql.functions import regexp_extract, col, lit
 from pyspark.sql.functions import concat, substring, expr, length
 from pyspark.sql.functions import *
 from pyspark import SparkContext, SparkConf
@@ -678,9 +678,9 @@ def identifying_strings(df, required_identifiers):
     for n in new_df.columns:
         new_df = new_df.withColumn(n+'_identifier', lit(None))
         for k in required_dict:
-          new_df = new_df.withColumn(n+'_identifier',
-                                     when(col(n).rlike(required_dict.get(k)), k)
-                                     .otherwise(col(n+'_identifier')))
+            new_df = new_df.withColumn(n+'_identifier',
+                                       when(col(n).rlike(required_dict.get(k)), k)
+                                       .otherwise(col(n+'_identifier')))
 
     new_df = new_df.distinct()
 
@@ -690,7 +690,6 @@ def identifying_strings(df, required_identifiers):
                                     .isin(required_identifiers)]
 
     return new_df, regex_used
-
 
     search_for = ['NIN',
                   'UK Vehicle Reg',
