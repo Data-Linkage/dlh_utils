@@ -1,5 +1,5 @@
-" Functions to help disclosure control code 
-  Authors: Hannah Goode & Nathan O'Connor "
+'''Functions to help disclosure control code 
+  Authors: Hannah Goode & Nathan O'Connor''' 
 
 import pyspark
 from pyspark.sql import *
