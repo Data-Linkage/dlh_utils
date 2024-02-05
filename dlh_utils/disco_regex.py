@@ -175,11 +175,11 @@ def identifying_strings(df, required_identifiers):
     return new_df, regex_used
 
 
-  search_for = ['NIN',
-                'UK Vehicle Reg',
-                'UK phone no',
-                'NHS No',
-                'UK Child Benefit']
+    search_for = ['NIN',
+                  'UK Vehicle Reg',
+                  'UK phone no',
+                  'NHS No',
+                  'UK Child Benefit']
 
-  identified, regex_used = identifying_strings(df=df,
-                      required_identifiers=search_for)
+    identified, regex_used = identifying_strings(df=df,
+                                                 required_identifiers=search_for)
