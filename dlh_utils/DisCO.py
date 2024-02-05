@@ -2,7 +2,7 @@ import pyspark
 from pyspark.sql import *
 from pyspark.sql.types import *
 import pyspark.sql.functions
-from pyspark.sql.functions import regexp_extract, col, lit 
+from pyspark.sql.functions import regexp_extract, col, lit
 from pyspark.sql.functions import concat, substring, expr, length
 from pyspark.sql.functions import *
 from pyspark import SparkContext, SparkConf
@@ -47,7 +47,7 @@ df = spark.createDataFrame(data=data, schema=schema)
 # --- END
 
 tup = zip(random.sample(range(1,50),3)
-          
+
           + random.sample(range(300,700),350)
 
           + random.sample(range(950,1000),3))
@@ -180,24 +180,24 @@ def date_year_quarter(df, date_column):
 ###############################################################################
 
 def check_variables(df, approved_vars):
-  
-  """
-  Checks that all variable names are present in the database for export but also 
-  that the database does not have any extra variables not approved by the stakeholders.
-  
-  This function returns a python dataframe of which approved variables 
-  are not in the database for export and another dataframe of any variables 
-  in the database that shouldn't be there.
-  
-   Parameters
-  ----------
-  df: dataframe
-    Dataframe to which the function is applied.
-  approved_vars: a list of variables in string format
 
-   Returns
-  -------
-  The function returns a tuple of two python dataframes:
+    """
+    Checks that all variable names are present in the database for export but also 
+    that the database does not have any extra variables not approved by the stakeholders.
+  
+    This function returns a python dataframe of which approved variables 
+    are not in the database for export and another dataframe of any variables 
+    in the database that shouldn't be there.
+  
+    Parameters
+    ----------
+    df: dataframe
+      Dataframe to which the function is applied.
+    approved_vars: a list of variables in string format
+
+    Returns
+    -------
+    The function returns a tuple of two python dataframes:
     a
       The variable names that have been approved by the stakeholders 
       that are not in the database for export.
@@ -205,53 +205,53 @@ def check_variables(df, approved_vars):
       The variable names that are in the database for export but have 
       not been approved by the stakeholders.
   
-  Example
-  -------
+    Example
+    -------
 
-  > df.show()
-  +---+--------+------+--------+
-  | id|     dob|  name|postcode|
-  +---+--------+------+--------+
-  | a1|19990121|SPORTY| PO356TH|
-  | a2|19771109| SCARY|   E34TO|
-  | a3|19760424|  BABY| BH242ED|
-  | a4|19251217|GINGER| KN231SD|
-  | a5|19730724|  POSH| HK192YC|
-  +---+--------+------+--------+
-  
-  As the function returns a tuple, call in the function using tuple unpacking
-  
-  approved = ['approved1', 'approved2', 'id', 'name', 'postcode']
+    > df.show()
+    +---+--------+------+--------+
+    | id|     dob|  name|postcode|
+    +---+--------+------+--------+
+    | a1|19990121|SPORTY| PO356TH|
+    | a2|19771109| SCARY|   E34TO|
+    | a3|19760424|  BABY| BH242ED|
+    | a4|19251217|GINGER| KN231SD|
+    | a5|19730724|  POSH| HK192YC|
+    +---+--------+------+--------+
 
-  > missing,not_approved = hash_id(df,approved_vars = approved) 
+    As the function returns a tuple, call in the function using tuple unpacking
 
-  > missing  
-  	in_approved_not_in_df
-  0	approved1
-  1	approved2
-  
-  > not_approved
-  	in_df_not_in_approved
-  0	dob
-  
-  """
-  
-  a_list = [a.lower() for a in approved_vars]
-  
-  df_list = [c.lower() for c in df.columns]
-  
-  a = pd.DataFrame({'in_approved_not_in_df'
-                    :
-                    [a for a in a_list if a not in df_list]})
-  
-  x = pd.DataFrame({'in_df_not_in_approved'
-                    :
-                    [x for x in df_list if x not in a_list]})
-  
-  return a,x
-  
-###--- END  
-  
+    approved = ['approved1', 'approved2', 'id', 'name', 'postcode']
+
+    > missing,not_approved = hash_id(df,approved_vars = approved) 
+
+    > missing  
+  	  in_approved_not_in_df
+    0	approved1
+    1	approved2
+
+    > not_approved
+  	  in_df_not_in_approved
+    0	dob
+
+    """
+
+    a_list = [a.lower() for a in approved_vars]
+
+    df_list = [c.lower() for c in df.columns]
+
+    a = pd.DataFrame({'in_approved_not_in_df'
+                      :
+                      [a for a in a_list if a not in df_list]})
+
+    x = pd.DataFrame({'in_df_not_in_approved'
+                      :
+                      [x for x in df_list if x not in a_list]})
+
+    return a,x
+
+###--- END
+
 ###############################################################################
 
 
@@ -450,106 +450,105 @@ def numerical_percentiles(df, numeric_column, greater_or_less, percentile):
 ###############################################################################
 
 def postcode_level(df, column, postcode_level):
+
+    """
+    Deletes your postcode column from your dataframe and replaces it with your
+    chosen level of postcode. 
   
-  """
-  Deletes your postcode column from your dataframe and replaces it with your
-  chosen level of postcode. 
-  
-  Parameters
-  ----------
-  df: dataframe
-    Dataframe to which the function is applied.It must be a pyspark dataframe.
-  column: postcode column (str)
-    The name of the postcode column to change to a different level of geography.
-    Spaces and punctuation can be present and it is not case sensitive as the function 
-    has a work around for this.
-  postcode_level: choose either 'area', 'district' or 'sector'.
-    Type the postcode level as a string.
+    Parameters
+    ----------
+    df: dataframe
+      Dataframe to which the function is applied.It must be a pyspark dataframe.
+    column: postcode column (str)
+      The name of the postcode column to change to a different level of geography.
+      Spaces and punctuation can be present and it is not case sensitive as the function 
+      has a work around for this.
+    postcode_level: choose either 'area', 'district' or 'sector'.
+      Type the postcode level as a string.
 
-  Returns
-  -------
-  The function will return the original dataframe with the postcode column
-  replaced with its respective chosen georgraphy level.
+    Returns
+    -------
+    The function will return the original dataframe with the postcode column
+    replaced with its respective chosen georgraphy level.
 
-  Example
-  -------
+    Example
+    -------
 
-  > df.show()
-  +---+-----------+------+--------+------------+
-  | id|        dob|  name|postcode|        fans|
-  +---+-----------+------+--------+------------+
-  | a1|QQ 123456 C|SPORTY| PO356TH|           1|
-  | a2|07451224152| SCARY|KZ66 7YT|     1831687|
-  | a3|   19760424|  BABY|  B242ED|     1932435|
-  | a4|   19750127|GINGER| KN231SD|      969537|
-  | a5|   19730724|  POSH| HK192YC|987646314834|
-  +---+-----------+------+--------+------------+
+    > df.show()
+    +---+-----------+------+--------+------------+
+    | id|        dob|  name|postcode|        fans|
+    +---+-----------+------+--------+------------+
+    | a1|QQ 123456 C|SPORTY| PO356TH|           1|
+    | a2|07451224152| SCARY|KZ66 7YT|     1831687|
+    | a3|   19760424|  BABY|  B242ED|     1932435|
+    | a4|   19750127|GINGER| KN231SD|      969537|
+    | a5|   19730724|  POSH| HK192YC|987646314834|
+    +---+-----------+------+--------+------------+
         
-  > for i in ['area', 'district','sector']:
-      postcode_level(df=df,
-                     column='postcode',
-                     postcode_level=i).show(5) 
+    > for i in ['area', 'district','sector']:
+        postcode_level(df=df,
+                       column='postcode',
+                       postcode_level=i).show(5) 
   
-  Output
+    Output
 
-  +---+-----------+------+------------+-------------+
-  | id|        dob|  name|        fans|postcode_area|
-  +---+-----------+------+------------+-------------+
-  | a1|QQ 123456 C|SPORTY|           1|           PO|
-  | a2|07451224152| SCARY|     1831687|           KZ|
-  | a3|   19760424|  BABY|     1932435|            B|
-  | a4|   19750127|GINGER|      969537|           KN|
-  | a5|   19730724|  POSH|987646314834|           HK|
-  +---+-----------+------+------------+-------------+
+    +---+-----------+------+------------+-------------+
+    | id|        dob|  name|        fans|postcode_area|
+    +---+-----------+------+------------+-------------+
+    | a1|QQ 123456 C|SPORTY|           1|           PO|
+    | a2|07451224152| SCARY|     1831687|           KZ|
+    | a3|   19760424|  BABY|     1932435|            B|
+    | a4|   19750127|GINGER|      969537|           KN|
+    | a5|   19730724|  POSH|987646314834|           HK|
+    +---+-----------+------+------------+-------------+
 
-  +---+-----------+------+------------+-----------------+
-  | id|        dob|  name|        fans|postcode_district|
-  +---+-----------+------+------------+-----------------+
-  | a1|QQ 123456 C|SPORTY|           1|             PO35|
-  | a2|07451224152| SCARY|     1831687|             KZ66|
-  | a3|   19760424|  BABY|     1932435|              B24|
-  | a4|   19750127|GINGER|      969537|             KN23|
-  | a5|   19730724|  POSH|987646314834|             HK19|
-  +---+-----------+------+------------+-----------------+
+    +---+-----------+------+------------+-----------------+
+    | id|        dob|  name|        fans|postcode_district|
+    +---+-----------+------+------------+-----------------+
+    | a1|QQ 123456 C|SPORTY|           1|             PO35|
+    | a2|07451224152| SCARY|     1831687|             KZ66|
+    | a3|   19760424|  BABY|     1932435|              B24|
+    | a4|   19750127|GINGER|      969537|             KN23|
+    | a5|   19730724|  POSH|987646314834|             HK19|
+    +---+-----------+------+------------+-----------------+
 
-  +---+-----------+------+------------+---------------+
-  | id|        dob|  name|        fans|postcode_sector|
-  +---+-----------+------+------------+---------------+
-  | a1|QQ 123456 C|SPORTY|           1|          PO356|
-  | a2|07451224152| SCARY|     1831687|          KZ667|
-  | a3|   19760424|  BABY|     1932435|           B242|
-  | a4|   19750127|GINGER|      969537|          KN231|
-  | a5|   19730724|  POSH|987646314834|          HK192|
-  +---+-----------+------+------------+---------------+
+    +---+-----------+------+------------+---------------+
+    | id|        dob|  name|        fans|postcode_sector|
+    +---+-----------+------+------------+---------------+
+    | a1|QQ 123456 C|SPORTY|           1|          PO356|
+    | a2|07451224152| SCARY|     1831687|          KZ667|
+    | a3|   19760424|  BABY|     1932435|           B242|
+    | a4|   19750127|GINGER|      969537|          KN231|
+    | a5|   19730724|  POSH|987646314834|          HK192|
+    +---+-----------+------+------------+---------------+
     """
 
-  df = df.withColumn(column,
-                     regexp_replace(
+    df = df.withColumn(column,
+                       regexp_replace(
                        col(column),
                        '[^a-zA-Z0-9]',
                        ""))
-  
-  if postcode_level == 'area':
-    df = df.withColumn('postcode_'+postcode_level,
-                       regexp_extract(column,
-                                      '^(?:(?![0-9]).)*',
-                                      idx = 0))
 
-  elif postcode_level == 'district':
-    df = df.withColumn('postcode_'+postcode_level,
-                       expr(f'substring({column}, 1, length({column})-3)'))
+    if postcode_level == 'area':
+      df = df.withColumn('postcode_'+postcode_level,
+                         regexp_extract(column,
+                                         '^(?:(?![0-9]).)*',
+                                         idx = 0))
 
-  elif postcode_level == 'sector':
-    df = df.withColumn('postcode_'+postcode_level,
-                       expr(f'substring({column}, 1, length({column})-2)'))
-    
-  else:
-    None
+    elif postcode_level == 'district':
+        df = df.withColumn('postcode_'+postcode_level,
+                           expr(f'substring({column}, 1, length({column})-3)'))
 
-  df = df.drop(column)
-  
-  return df
+    elif postcode_level == 'sector':
+        df = df.withColumn('postcode_'+postcode_level,
+                           expr(f'substring({column}, 1, length({column})-2)'))
 
+    else:
+        None
+
+    df = df.drop(column)
+
+    return df
 
 ###############################################################################
 
