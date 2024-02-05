@@ -130,9 +130,9 @@ def date_year_quarter(df, date_column):
         )
     )
 
-  df = df.withColumn(date_column,
-                     regexp_replace(
-                       col(date_column),
+    df = df.withColumn(date_column,
+                       regexp_replace(
+                        col(date_column),
                        '[^0-9]',
                        ""))
 
