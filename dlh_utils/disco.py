@@ -1,5 +1,8 @@
 '''Functions to help disclosure control code 
-  Authors: Hannah Goode & Nathan O'Connor''' 
+  Authors: Hannah Goode & Nathan O'Connor'''
+
+import pandas as pd
+import random
 
 import pyspark
 from pyspark.sql import *
@@ -10,11 +13,6 @@ from pyspark.sql.functions import concat, substring, expr, length
 from pyspark.sql.functions import *
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SQLContext
-
-import pandas as pd
-import numpy as np
-import random
-
 
 spark = (
     SparkSession.builder.appName("small-session")
