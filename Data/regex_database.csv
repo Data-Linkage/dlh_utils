@@ -1,0 +1,12 @@
+Identifier,Regex,Origin,Notes
+NHS No,^\d{10}$,de_utils,
+NIN,^\s*[a-zA-Z]{2}(?:\s*\d\s*){6}[a-dA-D]{1}?\s*$,Stack Overflow,
+UK phone no,"^(?:0|\+?44)(?:\d\s?){9,10}$",RegExLib.com,
+UK Child Benefit,^[A-Z]{3}\d{8}$,RegExLib.com,
+UK Passport,"[0-9]{10}[a-z]{3}[0-9]{7}[U,M,F]{1}[0-9]{9}",RegExLib.com,
+UK VAT,^\d{9}$,de-utils,
+UK Vehicle Reg,^([A-Z]{3}\s?(\d{3}|\d{2}|d{1})\s?[A-Z])|([A-Z]\s?(\d{3}|\d{2}|\d{1})\s?[A-Z]{3})|(([A-HK-PRSVWY][A-HJ-PR-Y])\s?([0][2-9]|[1-9][0-9])\s?[A-HJ-PR-Z]{3})$,RegExLib.com,
+UPRN,^[0-9]{12}$,Stack Overflow,
+email_1,"^[^\.\s][\w\-\.{2,}]+@([\w-]+\.)+[\w-]{2,}$",https://regex101.com/r/O9oCj8/1,Check for an e-mail
+filepath_1,/^(?:[\w]\:|\/)(\/[a-z_\-\s0-9\.]+)+\.(txt|gif|pdf|doc|docx|xls|xlsx|js)$,https://regex101.com/r/ZaU81J/1,Check for a file path
+free_text_1,[a-zA-Z0-9\s],,Check if it's a free text field. Any number of words having any number of spaces.
