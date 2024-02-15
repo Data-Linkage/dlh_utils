@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 import pyspark
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Window
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, FloatType
 import pyspark.sql.functions
 from pyspark.sql.functions import regexp_extract, col, lit
@@ -16,19 +16,8 @@ from pyspark.sql.functions import *
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SQLContext
 
-spark = (
-    SparkSession.builder.appName("small-session")
-    .config("spark.executor.memory", "1g")
-    .config("spark.executor.cores", 1)
-    .config("spark.dynamicAllocation.enabled", "true")
-    .config("spark.dynamicAllocation.maxExecutors", 3)
-    .config("spark.sql.shuffle.partitions", 12)
-    .config("spark.shuffle.service.enabled", "true")
-    .config("spark.ui.showConsoleProgress", "false")
-    .config("spark.sql.repl.eagerEval.enabled", "true")
-    .enableHiveSupport()
-    .getOrCreate()
-)
+pd.set_option("display.max_rows", None)
+pd.set_option('display.max_colwidth', None)
 
 #########################---- datasets START -----##########################
 '''
@@ -68,6 +57,7 @@ df = spark.createDataFrame(data=data, schema=schema)
 '''
 #########################---- datasets END -----##########################
 
+'''
 tup = zip(random.sample(range(1,50),3)
 
           + random.sample(range(300,700),350)
@@ -81,8 +71,22 @@ df_nums = spark.createDataFrame(data=tup,
 df_nums = df_nums.withColumn('id',
                              concat(lit('id'),
                                     row_number().over(Window.orderBy(lit(1)))))
+'''
+#########################---- regex table -----##########################
 
-# --- END
+regex_data = [['NHS No','^\d{10}$','de_utils', ''],
+              ['NIN','^\s*[a-zA-Z]{2}(?:\s*\d\s*){6}[a-dA-D]{1}?\s*$','Stack Overflow', ''],
+              ['UK phone no','"^(?:0|\+?44)(?:\d\s?){9,10}$"','RegExLib.com', ''],
+              ['UK Child Benefit','^[A-Z]{3}\d{8}$','RegExLib.com', ''],
+              ['UK Passport','"[0-9]{10}[a-z]{3}[0-9]{7}[U,M,F]{1}[0-9]{9}"','RegExLib.com', ''],
+              ['UK VAT','^\d{9}$','de-utils', ''],
+              ['UK Vehicle Reg','^([A-Z]{3}\s?(\d{3}|\d{2}|d{1})\s?[A-Z])|([A-Z]\s?(\d{3}|\d{2}|\d{1})\s?[A-Z]{3})|(([A-HK-PRSVWY][A-HJ-PR-Y])\s?([0][2-9]|[1-9][0-9])\s?[A-HJ-PR-Z]{3})$','RegExLib.com', ''],
+              ['UPRN','^[0-9]{12}$','Stack Overflow'],
+              ['email_1','"^[^\.\s][\w\-\.{2,}]+@([\w-]+\.)+[\w-]{2,}$"','https://regex101.com/r/O9oCj8/1','Check for an e-mail'],
+              ['filepath_1','/^(?:[\w]\:|\/)(\/[a-z_\-\s0-9\.]+)+\.(txt|gif|pdf|doc|docx|xls|xlsx|js)$','https://regex101.com/r/ZaU81J/1,Check for a file path'],
+              ['free_text_1','[a-zA-Z0-9\s]','',"Check if it's a free text field. Any number of words having any number of spaces"]]
+
+regex_cols = ['Identifier','Regex','Origin','Notes']
 
 ###############################################################################
 
@@ -658,7 +662,7 @@ def identifying_strings(df, required_identifiers):
   
     """
 
-    identifier_dataset = pd.read_csv('Data/regex_database.csv')
+    identifier_dataset = pd.DataFrame(regex_data, columns=regex_cols)
 
     regex_dict = dict(zip(identifier_dataset.Identifier,
                         identifier_dataset.Regex))
@@ -683,19 +687,8 @@ def identifying_strings(df, required_identifiers):
                                        .otherwise(col(n+'_identifier')))
 
     new_df = new_df.distinct()
-
-    pd.set_option("display.max_rows", None)
-    pd.set_option('display.max_colwidth', None)
+  
     regex_used = identifier_dataset[identifier_dataset['Identifier']
                                     .isin(required_identifiers)]
 
     return new_df, regex_used
-
-    search_for = ['NIN',
-                  'UK Vehicle Reg',
-                  'UK phone no',
-                  'NHS No',
-                  'UK Child Benefit']
-
-    identified, regex_used = identifying_strings(df=df,
-                                                 required_identifiers=search_for)
