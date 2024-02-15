@@ -116,12 +116,12 @@ class TestRegexMatch(object):
 #############################################################################
 
 class TestChunkList(object):
-  
-  def test_expected(self, spark):
-    data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    result = chunk_list(data, 4)
-    assert result == [
-      [0, 1, 2, 3],
-      [4, 5, 6, 7],
-      [8, 9, 10]
-    ]
+
+    def test_expected(self, spark):
+        data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        result = chunk_list(data, 4)
+        assert result == [
+          [0, 1, 2, 3],
+          [4, 5, 6, 7],
+          [8, 9, 10]
+        ]

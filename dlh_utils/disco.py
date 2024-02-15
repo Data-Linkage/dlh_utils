@@ -687,7 +687,7 @@ def identifying_strings(df, required_identifiers):
                                        .otherwise(col(n+'_identifier')))
 
     new_df = new_df.distinct()
-  
+
     regex_used = identifier_dataset[identifier_dataset['Identifier']
                                     .isin(required_identifiers)]
 
