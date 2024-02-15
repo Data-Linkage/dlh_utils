@@ -10,7 +10,7 @@ from pandas.util.testing import assert_frame_equal
 import numpy as np
 import pytest
 from chispa import assert_df_equality
-from dlh_utils.utilities import describe_metrics, value_counts, regex_match
+from dlh_utils.utilities import describe_metrics, value_counts, regex_match, chunk_list
 
 pytestmark = pytest.mark.usefixtures("spark")
 
@@ -114,3 +114,14 @@ class TestRegexMatch(object):
         assert result == ['colG']
 
 #############################################################################
+
+class TestChunkList(object):
+  
+  def test_expected(self, spark):
+    data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    result = chunk_list(data, 4)
+    assert result == [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10]
+    ]
