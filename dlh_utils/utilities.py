@@ -674,7 +674,7 @@ def describe_metrics(df, output_mode='pandas'):
         'not_null',
         'percent_not_null'
     ]]
-    
+
     describe_df["count"] = describe_df["count"].astype(int)
     describe_df["distinct"] = describe_df["distinct"].astype(int)
     describe_df["null"] = describe_df["null"].astype(int)
