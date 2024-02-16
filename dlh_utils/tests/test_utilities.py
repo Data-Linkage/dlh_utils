@@ -4,7 +4,8 @@ Pytesting on Linkage functions.
 
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,LongType,FloatType,IntegerType, DoubleType, TimestampType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,FloatType,\
+IntegerType, DoubleType, TimestampType
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 import numpy as np
@@ -121,7 +122,7 @@ class TestPandasToSpark(object):
         pandas_df["colFloat"] = pandas_df["colFloat"].astype("float32")
         pandas_df["colBigFloat"] = pandas_df["colBigFloat"].astype("float64")
         result_df = pandas_to_spark(pandas_df)
-      
+
         intended_schema = StructType(
             [
                 StructField("colDate", TimestampType(), True),
@@ -160,4 +161,3 @@ class TestChunkList(object):
           [4, 5, 6, 7],
           [8, 9, 10]
         ]
-

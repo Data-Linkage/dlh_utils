@@ -291,7 +291,7 @@ class TestFlagSummary1:
             )
         )
 
- 
+
         result = flag_summary(df, flags='FLAG_nameisNotNull', pandas=True)
 
         expected = pd.DataFrame(

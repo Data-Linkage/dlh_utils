@@ -282,9 +282,9 @@ class TestCutOff(object):
         intended_df_3 = spark.createDataFrame(
             (pd.DataFrame({"strings": ["4", "5"], "ints": [4, 5]}))
         )
- 
+
         result_df3 = cut_off(test_df, threshold_column="ints", val=3, mode=">")
-        assert_df_equality(intended_df_3, result_df3, ignore_row_order=True)      
+        assert_df_equality(intended_df_3, result_df3, ignore_row_order=True) 
 
         intended_df_4 = spark.createDataFrame(
             (pd.DataFrame({"strings": ["1", "2", "3"], "ints": [1, 2, 3]}))
@@ -298,7 +298,7 @@ class TestCutOff(object):
         )
 
         result_df5 = cut_off(test_df, threshold_column="ints", val=3, mode="<=")
-        assert_df_equality(intended_df_5, result_df5, ignore_row_order=True)  
+        assert_df_equality(intended_df_5, result_df5, ignore_row_order=True)
 
 
 ####################################################################
@@ -978,4 +978,3 @@ class TestDateDiff(object):
 
         assert_df_equality(intended_df_3, result_df3, ignore_row_order=True,
                            ignore_column_order=True)
-

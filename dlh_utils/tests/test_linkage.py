@@ -238,7 +238,7 @@ class TestMkDropna(object):
                 "last_name": ['fr', 'ga', 'gx', 'mx', 'ra', 'ga']
             })))
 
-        assert_df_equality(intended_df,result_df, ignore_row_order=True)  
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 #############################################################################
 
@@ -273,7 +273,7 @@ class TestClericalSample(object):
         ]
 
         linked_ids = deterministic_linkage(df_l, df_r, "l_id", "r_id", mks, None)
-        
+
         mk_df = matchkey_dataframe(mks)
 
         result = clerical_sample(linked_ids, mk_df, df_l, df_r, "l_id", "r_id", n_ids=3)
@@ -288,7 +288,7 @@ class TestClericalSample(object):
                          [2, 3]]
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
-     
+
         assert_df_equality(result_agg, intended_df, ignore_row_order=True)
 
 #############################################################################
@@ -798,7 +798,7 @@ class TestJaro(object):
         ) == sorted(
           [0.875, 0.6333333253860474, 0.6000000238418579, 0.46666666865348816, 0.0]
         )
-  
+
 ###############################################################
 
 class TestJaroWinkler(object):
@@ -833,81 +833,81 @@ class TestJaroWinkler(object):
 
 class TestDifflibSequenceMatcher(object):
     def test_expected(self,spark):
-      test_schema = StructType([
+        test_schema = StructType([
           StructField("string1", StringType(), True),
           StructField("string2", StringType(), True)
-      ])
+        ])
 
-      test_data = [
-        ["David", "Emily"],
-        ["Idrissa", "Emily"],
-        ["Edward", "Emily"],
-        ["Gordon", "Emily"],
-        ["Emma", "Emily"]
-      ]
+        test_data = [
+          ["David", "Emily"],
+          ["Idrissa", "Emily"],
+          ["Edward", "Emily"],
+          ["Gordon", "Emily"],
+          ["Emma", "Emily"]
+        ]
 
-      test_df = spark.createDataFrame(test_data, test_schema)
-      result_df = test_df.withColumn(
-        "difflib", 
-        difflib_sequence_matcher(
-          F.col("string1"), F.col("string2")
+        test_df = spark.createDataFrame(test_data, test_schema)
+        result_df = test_df.withColumn(
+          "difflib",
+          difflib_sequence_matcher(
+            F.col("string1"), F.col("string2")
+          )
         )
-      )
-      
-      intended_schema = StructType([
+
+        intended_schema = StructType([
           StructField("string1", StringType(), True),
           StructField("string2", StringType(), True),
           StructField("difflib", FloatType(), True)
-      ])
-      
-      intended_data = [
-        ["David", "Emily", 0.2],
-        ["Idrissa", "Emily", 0.16666667],
-        ["Edward", "Emily", 0.18181819],
-        ["Gordon", "Emily", 0.0],
-        ["Emma", "Emily", 0.44444445]
-      ]
-      
-      intended_df = spark.createDataFrame(intended_data, intended_schema)
-      assert_df_equality(intended_df,result_df, ignore_row_order=True)
+        ])
+
+        intended_data = [
+          ["David", "Emily", 0.2],
+          ["Idrissa", "Emily", 0.16666667],
+          ["Edward", "Emily", 0.18181819],
+          ["Gordon", "Emily", 0.0],
+          ["Emma", "Emily", 0.44444445]
+        ]
+
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)
 
 ###############################################################
 
 class TestBlocking(object):
-  def test_expected(self, spark):
-      test_schema = StructType([
+    def test_expected(self, spark):
+        test_schema = StructType([
           StructField("ID_1", IntegerType(), True),
           StructField("age_df1", IntegerType(), True),
           StructField("sex_df1", StringType(), True),
           StructField("pc_df1", StringType(), True)
-      ])
+        ])
 
-      test_data = [
-        [1, 1, "Male", "gu1111"],
-        [2, 1, "Female", "gu1211"],
-        [3, 56, "Male", "gu2111"],
-      ]
-      df1 = spark.createDataFrame(test_data, test_schema)
-      
-      test_schema = StructType([
+        test_data = [
+          [1, 1, "Male", "gu1111"],
+          [2, 1, "Female", "gu1211"],
+          [3, 56, "Male", "gu2111"],
+        ]
+        df1 = spark.createDataFrame(test_data, test_schema)
+
+        test_schema = StructType([
           StructField("ID_2", IntegerType(), True),
           StructField("age_df2", IntegerType(), True),
           StructField("sex_df2", StringType(), True),
           StructField("pc_df2", StringType(), True)
-      ])
+        ])
 
-      test_data = [
-        [6, 2, "Female", "gu1211"],
-        [5, 56, "Male", "gu1411"],
-        [4, 7, "Female", "gu1111"],
-      ]
-      df2 = spark.createDataFrame(test_data, test_schema)
-      
-      id_vars = ['ID_1', 'ID_2']
-      blocks = {'pc_df1': 'pc_df2'}
-      result_df = blocking(df1, df2, blocks, id_vars)    
-      
-      expected_schema = StructType([
+        test_data = [
+          [6, 2, "Female", "gu1211"],
+          [5, 56, "Male", "gu1411"],
+          [4, 7, "Female", "gu1111"],
+        ]
+        df2 = spark.createDataFrame(test_data, test_schema)
+
+        id_vars = ['ID_1', 'ID_2']
+        blocks = {'pc_df1': 'pc_df2'}
+        result_df = blocking(df1, df2, blocks, id_vars)
+
+        expected_schema = StructType([
           StructField("ID_1", IntegerType(), True),
           StructField("age_df1", IntegerType(), True),
           StructField("sex_df1", StringType(), True),
@@ -916,76 +916,76 @@ class TestBlocking(object):
           StructField("age_df2", IntegerType(), True),
           StructField("sex_df2", StringType(), True),
           StructField("pc_df2", StringType(), True)
-      ])
+        ])
 
-      expected_data = [
-        [1, 1, "Male", "gu1111", 4, 7, "Female", "gu1111"],
-        [2, 1, "Female", "gu1211", 6, 2, "Female", "gu1211"]
-      ]
-      expected_df = spark.createDataFrame(expected_data, expected_schema)
-      
-      assert_df_equality(expected_df, result_df, ignore_row_order=True)
+        expected_data = [
+          [1, 1, "Male", "gu1111", 4, 7, "Female", "gu1111"],
+          [2, 1, "Female", "gu1211", 6, 2, "Female", "gu1211"]
+        ]
+        expected_df = spark.createDataFrame(expected_data, expected_schema)
+
+        assert_df_equality(expected_df, result_df, ignore_row_order=True)
 
 ###############################################################
 
 class TestAssertUnique(object):
-  
-  def test_expected(self, spark):
-      test_schema = StructType([
+
+    def test_expected(self, spark):
+        test_schema = StructType([
           StructField("colA", IntegerType(), True),
           StructField("colB", IntegerType(), True)
-      ])
+        ])
 
-      test_data = [
-        [1, 1],
-        [1, 2]
-      ]
-      df = spark.createDataFrame(test_data, test_schema)
-      try:
-        assert_unique(df, "colA")
-      except AssertionError:
-        pass
-      assert_unique(df, ["colB"])
-  
+        test_data = [
+          [1, 1],
+          [1, 2]
+        ]
+        df = spark.createDataFrame(test_data, test_schema)
+        try:
+          assert_unique(df, "colA")
+        except AssertionError:
+          pass
+        assert_unique(df, ["colB"])
+
 class TestClusterNumber(object):
-  def test_expected(self, spark):
-      """
-      If this test fails because of the graphframes package not being found,
-      make sure you have both graphframes and graphframes_wrapper installed
-      via pip3.
-      """
-    
-      test_schema = StructType([
+    def test_expected(self, spark):
+        """
+        If this test fails because of the graphframes package not being found,
+        make sure you have both graphframes and graphframes_wrapper installed
+        via pip3.
+        """
+
+        test_schema = StructType([
           StructField("id1", StringType(), True),
           StructField("id2", StringType(), True)
-      ])
+        ])
 
-      test_data = [
-        ["1a", "2b"],
-        ["3a", "3b"],
-        ["2a", "1b"],
-        ["3a", "7b"],
-        ["1a", "8b"],
-        ["2a", "9b"]
-      ]
-      df = spark.createDataFrame(test_data, test_schema)
-      result_df = cluster_number(df, id_1 = "id1", id_2 = "id2")
-      assert result_df is not None
-      
-      intended_schema = StructType([
+        test_data = [
+          ["1a", "2b"],
+          ["3a", "3b"],
+          ["2a", "1b"],
+          ["3a", "7b"],
+          ["1a", "8b"],
+          ["2a", "9b"]
+        ]
+        df = spark.createDataFrame(test_data, test_schema)
+        result_df = cluster_number(df, id_1 = "id1", id_2 = "id2")
+        assert result_df is not None
+
+        intended_schema = StructType([
           StructField("id1", StringType(), True),
           StructField("id2", StringType(), True),
           StructField("Cluster_Number", IntegerType(), True),
-      ])
+        ])
 
-      intended_data = [
-        ["2a", "1b", 1],
-        ["2a", "9b", 1],
-        ["3a", "3b", 2],
-        ["3a", "7b", 2],
-        ["1a", "8b", 3],
-        ["1a", "2b", 3]
-      ]
-      intended_df = spark.createDataFrame(intended_data, intended_schema)
-      
-      assert_df_equality(intended_df, result_df, ignore_row_order=True)
+        intended_data = [
+          ["2a", "1b", 1],
+          ["2a", "9b", 1],
+          ["3a", "3b", 2],
+          ["3a", "7b", 2],
+          ["1a", "8b", 3],
+          ["1a", "2b", 3]
+        ]
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        assert_df_equality(intended_df, result_df, ignore_row_order=True)

@@ -30,9 +30,9 @@ class TestDfDescribe(object):
             )
         )
         result = df_describe(
-          df, 
-          output_mode='pandas', 
-          approx_distinct=False, 
+          df,
+          output_mode='pandas',
+          approx_distinct=False,
           rsd=0.05
         )
         expected =  pd.DataFrame(
@@ -76,23 +76,23 @@ class TestValueCounts(object):
             )
         )
         result = value_counts(
-          df, 
+          df,
           limit=10,
           output_mode='pandas'
         )
-        
+
         result = (result[0].replace({'': None})
-                           .sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
-                                        na_position='last', 
+                           .sort_values(['Year_of_Birth', 'Year_of_Birth_count'],
+                                        na_position='last',
                                         ascending=True)\
                               .reset_index(drop=True).replace({None: ''}),
-                  
-                  result[1].sort_values(['Year_of_Birth', 'Year_of_Birth_count'], 
-                                          na_position='last', 
+
+                  result[1].sort_values(['Year_of_Birth', 'Year_of_Birth_count'],
+                                          na_position='last',
                                           ascending=False)\
                               .reset_index(drop=True)
                     )
-        
+
         expected =  (pd.DataFrame(
                   {
                       "Year_of_Birth": ['1944', '1957', '1965', '1984', '1997', '', '', '', '', ''],
@@ -108,6 +108,6 @@ class TestValueCounts(object):
             )
 
         assert_frame_equal(result[0], expected[0], check_like=True)
-        
+
         assert_frame_equal(result[1], expected[1], check_like=True)
   

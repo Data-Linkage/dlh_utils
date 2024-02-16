@@ -179,9 +179,9 @@ class TestStandardiseWhiteSpace(object):
         result_df2 = standardise_white_space(test_df, subset="before2", fill="_")
         assert_df_equality(intended_df2, result_df2,
                            ignore_row_order=True, ignore_column_order=True)
-        
+
     def test_expected_wsl_none(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -217,8 +217,8 @@ class TestStandardiseWhiteSpace(object):
                     }
                 )
             )
-        ) 
-        
+        )
+
         intended_df3 = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -255,7 +255,7 @@ class TestStandardiseWhiteSpace(object):
                 )
             )
         )
-        
+
         result_df3 = standardise_white_space(test_df, subset="before2", wsl = 'none')
         assert_df_equality(intended_df3, result_df3,
                            ignore_row_order=True, ignore_column_order=True)
@@ -264,7 +264,7 @@ class TestStandardiseWhiteSpace(object):
 
 class TestAlignForenames(object):
     def test_expected(self, spark):
-      
+
         test_df = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -276,7 +276,7 @@ class TestAlignForenames(object):
                 )
             )
         )
-        
+
         intended_df = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -288,10 +288,10 @@ class TestAlignForenames(object):
                 )
             )
         )
-        
+
         result_df = align_forenames(test_df, 'first_name', 'middle_name', 'id', sep=' ')
         assert_df_equality(intended_df, result_df,
-                           ignore_row_order=True, ignore_column_order=True)      
+                           ignore_row_order=True, ignore_column_order=True)
 
 
 ##############################################################################
@@ -417,7 +417,7 @@ class TestStandardiseCase(object):
         result_df2 = standardise_case(test_df, subset="upper", val="lower")
         assert_df_equality(intended_df2, result_df2,
                            ignore_row_order=True, ignore_column_order=True)
-        
+
         intended_df3 = spark.createDataFrame(
             (
                 pd.DataFrame(
@@ -432,7 +432,7 @@ class TestStandardiseCase(object):
 
         result_df3 = standardise_case(test_df, subset="lower", val="title")
         assert_df_equality(intended_df3, result_df3,
-                           ignore_row_order=True, ignore_column_order=True)        
+                           ignore_row_order=True, ignore_column_order=True)    
 
 
 ##############################################################################
@@ -512,7 +512,7 @@ class TestStandardiseDate(object):
 
         assert_df_equality(intended_df3, result_df3,
                            ignore_row_order=True, ignore_column_order=True)
-        
+
         intended_df4 = spark.createDataFrame(
           (
               pd.DataFrame(
@@ -524,17 +524,17 @@ class TestStandardiseDate(object):
                   }
               )
           )
-        )       
-        
+        )
+
         result_df4 = standardise_date(
             test_df,
             col_name="before",
             in_date_format="dd-MM-yyyy",
             out_date_format="dd/MM/yyyy"
         )
-        
+
         assert_df_equality(intended_df4, result_df4,
-                         ignore_row_order=True, ignore_column_order=True)        
+                         ignore_row_order=True, ignore_column_order=True)
 
 ##############################################################################
 
@@ -727,7 +727,7 @@ class TestAlignForenames(object):
 
 
 class TestAddLeadingZeros(object):
-  
+
     def test_expected(self, spark):
         test_df = spark.createDataFrame(
             (
@@ -965,23 +965,23 @@ class TestFillNulls(object):
 
 class TestAgeAt(object):
     def test_expected(self, spark):
-        
+
         test_schema = StructType([
             StructField("ID", LongType(), True),
             StructField("Forename", StringType(), True),
             StructField("Surname", StringType(), True),
             StructField("DOB", StringType(), True)
         ])
-        
+
         test_data = [
           [1, "Homer", "Simpson", "1983-05-12"],
           [2, "Marge", "Simpson", "1993-03-19"],
           [3, "Bart", "Simpson", "2012-04-01"],
           [4, "Lisa", "Simpson", "2014-05-09"]
         ]
-        
-        test_df = spark.createDataFrame(test_data, test_schema)  
-        
+
+        test_df = spark.createDataFrame(test_data, test_schema)
+
         expected_schema = StructType([
             StructField("ID", LongType(), True),
             StructField("Forename", StringType(), True),
@@ -996,15 +996,15 @@ class TestAgeAt(object):
           [3, "Bart", "Simpson", "2012-04-01", 10],
           [4, "Lisa", "Simpson", "2014-05-09", 8]
         ]
-      
-        intended_df = spark.createDataFrame(expected_data, expected_schema)        
-        
+
+        intended_df = spark.createDataFrame(expected_data, expected_schema)      
+
         dates = ['2022-11-03']
         result_df = age_at(test_df,'DoB','yyyy-MM-dd',*dates)
         assert_df_equality(intended_df, result_df,
-                           ignore_row_order=True, ignore_column_order=True)        
-        
-        
+                           ignore_row_order=True, ignore_column_order=True)
+
+
 ##############################################################################
 
 
