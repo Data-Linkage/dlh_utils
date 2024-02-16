@@ -47,7 +47,7 @@ class TestExportToExcel:
             }
         )
         wb = dlh_utils.formatting.export_to_excel(
-          {"Sheet1": df}, 
+          {"Sheet1": df},
           columns = ["firstname", "numeric_A"],
           local_path="/tmp/pytest.xlsx"
         )

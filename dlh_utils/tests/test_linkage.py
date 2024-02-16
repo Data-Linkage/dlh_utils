@@ -4,7 +4,8 @@ Pytesting on Linkage functions.
 
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType, DoubleType, FloatType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType,\
+DoubleType, FloatType
 import pandas as pd
 import pytest
 from chispa import assert_df_equality
@@ -196,7 +197,7 @@ class TestExtractMkVariables():
         assert result_list == intended_list
 
 #############################################################################
-        
+
 class TestMkDropna(object):
     def test_expected(self, spark):
 
@@ -237,10 +238,10 @@ class TestMkDropna(object):
                 "last_name": ['fr', 'ga', 'gx', 'mx', 'ra', 'ga']
             })))
 
-        assert_df_equality(intended_df,result_df, ignore_row_order=True)     
+        assert_df_equality(intended_df,result_df, ignore_row_order=True)  
 
 #############################################################################
-        
+
 class TestClericalSample(object):
     def test_expected(self, spark):
         df_l = spark.createDataFrame(
@@ -270,11 +271,11 @@ class TestClericalSample(object):
                 F.substring(df_l['l_last_name'], 1, 1) == F.substring(df_r['r_last_name'],
                                                                          1, 1)]
         ]
-        
+
         linked_ids = deterministic_linkage(df_l, df_r, "l_id", "r_id", mks, None)
         
         mk_df = matchkey_dataframe(mks)
-        
+
         result = clerical_sample(linked_ids, mk_df, df_l, df_r, "l_id", "r_id", n_ids=3)
         result_agg = result.groupby("matchkey").count()
 
@@ -287,9 +288,9 @@ class TestClericalSample(object):
                          [2, 3]]
 
         intended_df = spark.createDataFrame(intended_data, intended_schema)
-                
+     
         assert_df_equality(result_agg, intended_df, ignore_row_order=True)
-        
+
 #############################################################################
 
 class TestDeterministicLinkage(object):
@@ -364,7 +365,7 @@ class TestDeterministicLinkage(object):
         intended_df = spark.createDataFrame(intended_data, intended_schema)
 
         assert_df_equality(result_df, intended_df, ignore_row_order=True,ignore_column_order=True)
-  
+
 ###################################################################
 
 
@@ -777,56 +778,56 @@ class Test_std_lev_score(object):
 
 class TestJaro(object):
     def test_expected(self,spark):
-      test_schema = StructType([
+        test_schema = StructType([
           StructField("string1", StringType(), True),
           StructField("string2", StringType(), True)
       ])
 
-      test_data = [
-        ["Hello", "HHheello"],
-        ["Hello", " h e l l o"],
-        ["Hello", "olleH"],
-        ["Hello", "H1234"],
-        ["Hello", "1234"]
-      ]
+        test_data = [
+          ["Hello", "HHheello"],
+          ["Hello", " h e l l o"],
+          ["Hello", "olleH"],
+          ["Hello", "H1234"],
+          ["Hello", "1234"]
+        ]
 
-      test_df = spark.createDataFrame(test_data, test_schema)
-      result = test_df.withColumn("jaro", jaro(test_df["string1"], test_df["string2"]))
-      assert sorted(
-        result.toPandas().loc[:, "jaro"].tolist()
-      ) == sorted(
-        [0.875, 0.6333333253860474, 0.6000000238418579, 0.46666666865348816, 0.0]
-      )
-      
+        test_df = spark.createDataFrame(test_data, test_schema)
+        result = test_df.withColumn("jaro", jaro(test_df["string1"], test_df["string2"]))
+        assert sorted(
+          result.toPandas().loc[:, "jaro"].tolist()
+        ) == sorted(
+          [0.875, 0.6333333253860474, 0.6000000238418579, 0.46666666865348816, 0.0]
+        )
+  
 ###############################################################
 
 class TestJaroWinkler(object):
     def test_expected(self,spark):
-      test_schema = StructType([
+        test_schema = StructType([
           StructField("string1", StringType(), True),
           StructField("string2", StringType(), True)
-      ])
+        ])
 
-      test_data = [
-        ["Hello", "HHheello"],
-        ["Hello", " h e l l o"],
-        ["Hello", "olleH"],
-        ["Hello", "H1234"],
-        ["Hello", "1234"]
-      ]
-
-      test_df = spark.createDataFrame(test_data, test_schema)
-      result = test_df.withColumn("jaro_winkler", jaro_winkler(test_df["string1"], test_df["string2"]))
-      assert sorted(
-        result.toPandas().loc[:, "jaro_winkler"].tolist()
-      ) == sorted(
-        [0.887499988079071,
-         0.6333333253860474,
-         0.6000000238418579,
-         0.46666666865348816,
-         0.0
+        test_data = [
+          ["Hello", "HHheello"],
+          ["Hello", " h e l l o"],
+          ["Hello", "olleH"],
+          ["Hello", "H1234"],
+          ["Hello", "1234"]
         ]
-      )
+
+        test_df = spark.createDataFrame(test_data, test_schema)
+        result = test_df.withColumn("jaro_winkler", jaro_winkler(test_df["string1"], test_df["string2"]))
+        assert sorted(
+          result.toPandas().loc[:, "jaro_winkler"].tolist()
+        ) == sorted(
+          [0.887499988079071,
+           0.6333333253860474,
+           0.6000000238418579,
+           0.46666666865348816,
+           0.0
+          ]
+        )
 
 ###############################################################
 

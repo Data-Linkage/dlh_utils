@@ -4,13 +4,12 @@ Pytesting on Flags functions.
 import pandas as pd
 import pytest
 from chispa import assert_df_equality
-from dlh_utils.flags import flag, flag_check
 from pyspark.sql import SparkSession
 from pandas.util.testing import assert_frame_equal
-
+from dlh_utils.flags import flag, flag_check
 
 pytestmark = pytest.mark.usefixtures("spark")
-  
+
 ###################################################################
 
 
@@ -251,10 +250,10 @@ class TestFlagSummary1:
                 )
             )
         )
-        
-        
+
+
         result = flag_summary(df, flags='FLAG_nameisNotNull', pandas=False)
-        
+
         expected = spark.createDataFrame(
             (pd.DataFrame(
                    {"flag": ['FLAG_nameisNotNull'],
@@ -291,10 +290,10 @@ class TestFlagSummary1:
                 )
             )
         )
-        
-        
+
+ 
         result = flag_summary(df, flags='FLAG_nameisNotNull', pandas=True)
-        
+
         expected = pd.DataFrame(
                    {"flag": ['FLAG_nameisNotNull'],
                     "true": [6],
@@ -370,10 +369,10 @@ class TestFlagCheck1:
         )
 
         result_df = flag_check(
-          test_df, 
-          prefix="FLAG_", 
-          flags=None, 
-          mode="pass", 
+          test_df,
+          prefix="FLAG_",
+          flags=None,
+          mode="pass",
           summary=False,
         )
 

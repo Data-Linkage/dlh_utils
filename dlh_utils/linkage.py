@@ -435,9 +435,9 @@ def difflib_sequence_matcher(string1, string2):
     +---+---------+----------+----------------+
 
     """
-    
+
     if string1 is None or string2 is None:
-      return None
+        return None
 
     return SequenceMatcher(a=string1, b=string2).ratio()
 
