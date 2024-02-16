@@ -270,8 +270,7 @@ def flag_summary(df, flags=None, pandas=False):
 
         flags_out.append((df
                           .select(col)
-                         .where(F.col(col) is True)
-
+                          .where(F.col(col) == F.lit(True))
                           .count()
                           ))
 
@@ -418,16 +417,16 @@ def flag_check(df, prefix='FLAG_', flags=None, mode='master', summary=False):
                     summary_df)
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') is False)),
-                    (df.where(F.col('Fail') is True)),
+            return ((df.where(F.col('FAIL') == F.lit(False))),
+                    (df.where(F.col('FAIL') == F.lit(True))),
                     summary_df)
 
         if mode == 'pass':
-            return (df.where(F.col('Fail') is False),
+            return (df.where(F.col('FAIL') == F.lit(False)),
                     summary_df)
 
         if mode == 'fail':
-            return (df.where(F.col('Fail') is True),
+            return (df.where(F.col('FAIL') == F.lit(True)),
                     summary_df)
 
     else:
@@ -435,11 +434,11 @@ def flag_check(df, prefix='FLAG_', flags=None, mode='master', summary=False):
             return df
 
         if mode == 'split':
-            return ((df.where(F.col('Fail') is False)),
-                    (df.where(F.col('Fail') is True)))
+            return ((df.where(F.col('FAIL') == F.lit(False))),
+                    (df.where(F.col('FAIL') == F.lit(True))))
 
         if mode == 'pass':
-            return df.where(F.col('Fail') is False)
+            return df.where(F.col('FAIL') == F.lit(False))
 
         if mode == 'fail':
-            return df.where(F.col('Fail') is True)
+            return df.where(F.col('FAIL') == F.lit(True))

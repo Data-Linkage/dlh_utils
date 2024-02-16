@@ -15,22 +15,6 @@ from dlh_utils.dataframes import explode,drop_columns,select,cut_off,\
 
 pytestmark = pytest.mark.usefixtures("spark")
 
-
-@pytest.fixture(scope="session")
-def spark(request):
-    """fixture for creating a spark context
-    Args:
-        request: pytest.FixtureRequest object
-    """
-    spark = (
-        SparkSession.builder.appName("dataframe_testing")
-        .config("spark.executor.memory", "5g")
-        .config("spark.yarn.excecutor.memoryOverhead", "2g")
-        .getOrCreate()
-    )
-    request.addfinalizer(lambda: spark.stop())
-    return spark
-
 #############################################################################
 
 
@@ -294,8 +278,29 @@ class TestCutOff(object):
 
         result_df_2 = cut_off(test_df_2, "col1", "1997-01-15", ">=")
         assert_df_equality(intended_df_2, result_df_2, ignore_row_order=True)
+        
+        intended_df_3 = spark.createDataFrame(
+            (pd.DataFrame({"strings": ["4", "5"], "ints": [4, 5]}))
+        )
+        
+        result_df3 = cut_off(test_df, threshold_column="ints", val=3, mode=">")
+        assert_df_equality(intended_df_3, result_df3, ignore_row_order=True)        
 
-
+        intended_df_4 = spark.createDataFrame(
+            (pd.DataFrame({"strings": ["1", "2", "3"], "ints": [1, 2, 3]}))
+        )
+        
+        result_df4 = cut_off(test_df, threshold_column="ints", val=4, mode="<")
+        assert_df_equality(intended_df_4, result_df4, ignore_row_order=True) 
+        
+        intended_df_5 = spark.createDataFrame(
+            (pd.DataFrame({"strings": ["1", "2", "3"], "ints": [1, 2, 3]}))
+        )
+        
+        result_df5 = cut_off(test_df, threshold_column="ints", val=3, mode="<=")
+        assert_df_equality(intended_df_5, result_df5, ignore_row_order=True)         
+        
+        
 ####################################################################
 
 
@@ -935,3 +940,42 @@ class TestDateDiff(object):
 
         assert_df_equality(intended_df, result_df, ignore_row_order=True,
                            ignore_column_order=True)
+        
+        intended_df_2 = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "dob": ['1983-05-12', '1983-03-19', '2012-04-01',
+                                '2012-04-01', '2014-05-09','2021-01-12'],
+                        "today": ['2023-05-02','2023-05-02','2023-05-02',
+                                  '2023-05-02','2023-05-02','2023-05-02'],
+                        "Difference": [470.97, 472.71, 130.58, 130.58, 105.81, 27.1],
+                    }
+                )
+            )
+        )
+
+        result_df2 = date_diff(test_df, 'dob','today',in_date_format='yyyy-MM-dd',units='months')
+
+        assert_df_equality(intended_df_2, result_df2, ignore_row_order=True,
+                           ignore_column_order=True)
+
+        intended_df_3 = spark.createDataFrame(
+            (
+                pd.DataFrame(
+                    {
+                        "dob": ['1983-05-12', '1983-03-19', '2012-04-01',
+                                '2012-04-01', '2014-05-09','2021-01-12'],
+                        "today": ['2023-05-02','2023-05-02','2023-05-02',
+                                  '2023-05-02','2023-05-02','2023-05-02'],
+                        "Difference": [40.0, 40.15, 11.09, 11.09, 8.99, 2.3],
+                    }
+                )
+            )
+        )
+
+        result_df3 = date_diff(test_df, 'dob','today',in_date_format='yyyy-MM-dd',units='years')
+
+        assert_df_equality(intended_df_3, result_df3, ignore_row_order=True,
+                           ignore_column_order=True)
+        

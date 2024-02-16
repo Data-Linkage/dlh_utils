@@ -4,30 +4,18 @@ Pytesting on Linkage functions.
 
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F
-from pyspark.sql.types import StructType,StructField,StringType,LongType,IntegerType, DoubleType
+from pyspark.sql.types import StructType,StructField,StringType,LongType,FloatType,IntegerType, DoubleType, TimestampType
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 import numpy as np
 import pytest
 from chispa import assert_df_equality
-from dlh_utils.utilities import describe_metrics, value_counts, regex_match, chunk_list
+from dlh_utils.utilities import describe_metrics, value_counts, \
+regex_match, pandas_to_spark, search_files, chunk_list
+import datetime as dt
+import os
 
 pytestmark = pytest.mark.usefixtures("spark")
-
-@pytest.fixture(scope="session")
-def spark(request):
-    """fixture for creating a spark context
-    Args:
-        request: pytest.FixtureRequest object
-    """
-    spark = (
-        SparkSession.builder.appName("dataframe_testing")
-        .config("spark.executor.memory", "5g")
-        .config("spark.yarn.excecutor.memoryOverhead", "2g")
-        .getOrCreate()
-    )
-    request.addfinalizer(lambda: spark.stop())
-    return spark
 
 #############################################################################
 
@@ -115,8 +103,55 @@ class TestRegexMatch(object):
 
 #############################################################################
 
-class TestChunkList(object):
+class TestPandasToSpark(object):
+    def test_expected(self,spark):
+        pandas_df = pd.DataFrame(
+            {
+                "colDate": ["19000101"],
+                "colInt": [1],
+                "colBigInt": [1],
+                "colFloat": [1.0],
+                "colBigFloat": [1.0],
+                "colString": ["hello"]
+            }
+        )
+        pandas_df["colDate"] = pandas_df["colDate"].astype("datetime64[ns]")
+        pandas_df["colInt"] = pandas_df["colInt"].astype("int32")
+        pandas_df["colBigInt"] = pandas_df["colInt"].astype("int64")
+        pandas_df["colFloat"] = pandas_df["colFloat"].astype("float32")
+        pandas_df["colBigFloat"] = pandas_df["colBigFloat"].astype("float64")
+        result_df = pandas_to_spark(pandas_df)
+      
+        intended_schema = StructType(
+            [
+                StructField("colDate", TimestampType(), True),
+                StructField("colInt", IntegerType(), True),
+                StructField("colBigInt", LongType(), True),
+                StructField("colFloat", FloatType(), True),
+                StructField("colBigFloat", DoubleType(), True),
+                StructField("colString", StringType(), True),
+            ]
+        )
+        date_val = dt.datetime(1900, 1, 1, 0, 0)
+        intended_data = [
+            [date_val, 1, 1, 1.0, 1.0, "hello"],
+        ]
 
+        intended_df = spark.createDataFrame(intended_data, intended_schema)
+
+        assert_df_equality(result_df, intended_df, ignore_row_order=True)
+
+#############################################################################
+
+class TestSearchFiles(object):
+    def test_expected(self, spark):
+        path = os.path.dirname(os.path.realpath(__file__))
+        result = search_files(path, "import")
+        assert sorted(list(result.keys())) == sorted(['test_formatting.py', 'test_linkage.py', 'test_profiling.py', 'test_standardisation.py', 'test_dataframes.py', 'test_flags.py', 'test_utilities.py', 'conftest.py'])
+
+#############################################################################
+
+class TestChunkList(object):
     def test_expected(self, spark):
         data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         result = chunk_list(data, 4)
@@ -125,3 +160,4 @@ class TestChunkList(object):
           [4, 5, 6, 7],
           [8, 9, 10]
         ]
+

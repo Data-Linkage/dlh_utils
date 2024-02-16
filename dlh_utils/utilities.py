@@ -582,6 +582,8 @@ def search_files(path, string):
                 diction[file] = count_list
         except IsADirectoryError:
             continue
+        except UnicodeDecodeError:
+            continue
 
     return diction
 
