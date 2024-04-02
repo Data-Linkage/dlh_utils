@@ -71,4 +71,4 @@ Thanks to all those in the Data Linkage Hub, Data Engineering and Methodology at
 
 ## Any questions?
 
-If you need any additional help, or have any feedback on the package, please contact Jenna Hart (Jenna.Hart@ons.gov.uk) or the Data Linkage Hub at Linkage.Hub@ons.gov.uk . 
+If you need any additional help, or have any feedback on the package, please contact the Data Linkage Hub at Linkage.Hub@ons.gov.uk . 
