@@ -288,7 +288,7 @@ def numerical_outliers(df, numeric_column):
     prerequisites
     -------------
     The dataframe needs to be a Pyspark database.
-    The column to calculate outliers bust have only numeric characters and a maximum
+    The column to calculate outliers must have only numeric characters and a maximum
     of one decimal point. However, the numeric_column type can be a string, integer
     float, long or bigint as the function will turn it all to a float.
     Make sure numeric_column is not truncated.
@@ -302,7 +302,7 @@ def numerical_outliers(df, numeric_column):
 
     Returns
     -------
-    It will return the original dataframe filted to only include records that are
+    It will return the original dataframe filtered to only include records that are
     outliers on the desired variable.
 
 
@@ -585,10 +585,10 @@ def identifying_strings(df, required_identifiers):
   
     Returns your dataframes with a corresponding identifying column for 
     each column in the dataframe. In the corresponding identifying column, 
-    It will say if a regex expression was found and which regex expression 
+    it will say if a regex expression was found and which regex expression 
     was used to find it.
   
-    It also prodives a database of the regex expressions you have chosen 
+    It also provides a database of the regex expressions you have chosen 
     for you to document as the regex expressions may change over time.
   
     Parameters
@@ -596,7 +596,7 @@ def identifying_strings(df, required_identifiers):
     df: dataframe
       Dataframe to which the function is applied.
     required_identifiers: regex expressions you want to search for
-      unput the regex expressions that you want to search for as a 
+      input the regex expressions that you want to search for as a 
       list of strings
   
     
@@ -606,7 +606,7 @@ def identifying_strings(df, required_identifiers):
       found identifying strings
         Returns your dataframes with a corresponding identifying column for 
         each column in the dataframe. In the corresponding identifying column, 
-        It will say if a regex expression was found and which regex expression 
+        it will say if a regex expression was found and which regex expression 
         was used to find it.
       regex database
         A database of the regex expressions you have used in this function 
