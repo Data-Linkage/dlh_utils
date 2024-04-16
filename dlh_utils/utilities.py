@@ -32,7 +32,7 @@ def list_files(file_path, walk=False, regex=None, full_path=True):
     regex : str
       use regex rexpression to find certain words within the listed files
     full_path : boolean
-      show full file path is full_path = True
+      show full file path if full_path = True
       show just files if full_path = False
 
     Returns
