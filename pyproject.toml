@@ -2,7 +2,7 @@
 name = "dlh_utils"
 version = "0.4.1"
 description = "A PySpark package used to expedite and standardise the data linkage process"
-authors = ["Anthony Edwards <anthonygedwards93@gmail.com>", "Jenna Hart", "David Cobbledick", "Madalina Iova", "Dean Jathoonia"]
+authors = ["Office for National Statistics Data Linkage Hub & colleagues <linkage.hub@ons.gov.uk>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "dlh_utils"}]
