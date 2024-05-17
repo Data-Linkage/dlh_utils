@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "dlh_utils"
+version = "0.3.1"
+description = "A PySpark package used to expedite and standardise the data linkage process"
+license = "MIT"
+readme = "README.md"
+packages = [{include = "dlh_utils"}]
+homepage = "https://github.com/Data-Linkage/dlh_utils"
+repository = "https://github.com/Data-Linkage/dlh_utils"
+
+[tool.poetry.dependencies]
+python = ">=3.6.8"
+graphframes = "^0.6"
+graphframes-jars = "^0.5"
+jellyfish = "^0.9"
+pandas = ">=0.20.3"
+importlib_metadata =  "^4.8.3"
+
+[tool.poetry.group.dev.dependencies]
+pyspark = "^2.4.0"
+py4j = "^0.10.7"
+pytest = "^7.0"
+chispa = "^0.9.2"
+black = "^22.8.0"
